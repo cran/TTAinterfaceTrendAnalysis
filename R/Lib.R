@@ -1,22 +1,6 @@
 Lib <- 
 function() {
-
-# Charge toutes les librairies necessaires au bon fonctionnement de l'interface
-
-library(tcltk)
-addTclPath("C:/tcllib")
-tclRequire("BWidget")
-library(relimp)
-library(Hmisc)
-library(pastecs, pos=4)
-library(reshape, pos=4)
-library(wq, pos=4)
-library(stats, pos=4)
-library(e1071, pos=4)
-library(nlme, pos=4)
-library(timeSeries, pos=4)
-library(fBasics, pos=4)
-
+       
 # si la librairie n'est pas présente, l'interface le télécharge automatiquement sur le site du CRAN
 
  if(!require("pastecs")){
@@ -51,5 +35,23 @@ library(fBasics, pos=4)
     require("tcltk") }
   if(!require("relimp")){
     install.packages("relimp",repos="http://cran.fr.r-project.org")
-    require("relimp") }
+    require("relimp") } 
+    
+    
+# Charge toutes les librairies necessaires au bon fonctionnement de l'interface
+
+library(tcltk)
+tclRequire("BWidget")
+library(relimp)
+library(Hmisc)
+library(pastecs, pos=4)
+library(reshape, pos=4)
+library(wq, pos=4)
+library(stats, pos=4)
+library(e1071, pos=4)
+library(nlme, pos=4)
+library(timeSeries, pos=4)
+library(fBasics, pos=4)
+
+
 }

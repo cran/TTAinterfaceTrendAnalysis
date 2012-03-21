@@ -1,7 +1,7 @@
-\name{Env}
+\name{Envir}
 \alias{Envir}
 \title{
-An environment to stock data and objects
+A temporary environment to stock data and objects
 }
 \description{
 The function create an environment where the data, arguments 
@@ -15,12 +15,3 @@ Envir()
 Objects passed through the environment 'Envir' are called in the
  other function as Envir$objects
 }
-
-
-\author{
-David Devreker
-}
-
-
-\examples{
-Envir <- new.env() }

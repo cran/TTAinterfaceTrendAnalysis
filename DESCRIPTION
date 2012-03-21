@@ -1,10 +1,11 @@
 Package: TTAinterfaceTrendAnalysis
 Type: Package
-Title: Graphical interface to proceed temporel trend analysis
-Version: 1.0
-Date: 2012-01-09
-Authors@R: c(person("David", "Devreker", role = c("aut", "cre"), email
-        = "david_devreker@yahoo.fr" ))
+Title: Temporal Trend Analysis Graphical Interface
+Version: 1.01
+Date: 2012-03-21
+Authors@R: c(person("David", "Devreker", role = c("aut"), email =
+        "David.Devreker@ifremer.fr" ), person(" Alain", "Lefebvre",
+        role = c("aut", "cre"), email = "Alain.Lefebvre@ifremer.fr" ) )
 Description: This interface was created to develop a standard procedure
         of temporal trend analysis in the framework of the OSPAR
         convention.  It is based on 5 successive steps : chossing and
@@ -14,10 +15,10 @@ Description: This interface was created to develop a standard procedure
         Statistical analysis call other package function such as
         Kendall tests (wq package) or cusum function (Pastec package).
 License: GPL (>= 2)
-Depends: R (>= 2.14.0), Hmisc, pastecs, reshape, Kendall, wq, stats,
-        e1071 , nlme, timeSeries, fBasics, relimp, tcltk
-Packaged: 2012-03-07 14:13:29 UTC; ddevreke
-Author: David Devreker [aut, cre]
-Maintainer: David Devreker <david_devreker@yahoo.fr>
+Depends: R (>= 2.14.0), Hmisc, pastecs, reshape, wq, stats, e1071 ,
+        nlme, timeSeries, fBasics, relimp, tcltk, utils , base
+Packaged: 2012-03-21 15:44:39 UTC; ddevreke
+Author: David Devreker [aut], Alain Lefebvre [aut, cre]
+Maintainer: Alain Lefebvre <Alain.Lefebvre@ifremer.fr>
 Repository: CRAN
-Date/Publication: 2012-03-07 17:49:10
+Date/Publication: 2012-03-22 08:38:30
