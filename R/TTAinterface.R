@@ -1,5 +1,4 @@
-TTAinterface <-
-function() {
+TTAinterface <- function() {
                  
 Lib()
 
@@ -100,14 +99,14 @@ Lib()
                       selection <- as.numeric(val)+1                                                             # puis sont transformees (+1 car la premiere valeur de la liste = 0)
                       for (i in min(selection):max(selection)) { tkinsert(liste2,"end",Env$variables[i]) }       # insertion des valeurs selectionnees dans la liste 2
                       Env$variables.selectionnees.temp <- c(Env$variables.selectionnees.temp, selection) }       # les valeurs finales selectionnees sont stockees
-                else { tkmessageBox(message="No station selected !",type="ok",icon="error", title="!Warning!") }})
+                else { tkmessageBox(message="No station selected !",type="ok",icon="info", title="!Warning!") }})
      bouton2 <- tkbutton(Envir$Select,text="<-",width=5,height=2,command=function() {                            # bouton de deselection
                 if (tclvalue(tkcurselection(liste2))!="") {
                       val <- unlist(strsplit(tclvalue(tkcurselection(liste2)), "\\ "))
                       selection <- as.numeric(val)+1
                       for (i in 1:length(selection)) { tkdelete(liste2, min(selection)-1) }
                       for (i in 1:length(selection)) { Env$variables.selectionnees.temp <- Env$variables.selectionnees.temp[-min(selection)]  }}
-                else { tkmessageBox(message="No station selected !",type="ok",icon="error", title="!Warning!") } })
+                else { tkmessageBox(message="No station selected !",type="ok",icon="info", title="!Warning!") } })
 
      tkgrid(tklabel(Envir$Select, text="Select your station(s)"), row=0, column=0,rowspan=2)                     # titres des listes
      tkgrid(tklabel(Envir$Select, text="Selected station(s)"), row=0, column=2,rowspan=2)
@@ -144,7 +143,7 @@ Lib()
                    tkdelete(liste4, 0)                                                          # supprime la valeur precedemment presente dans la liste 2
                    tkinsert(liste4,"end",Env2$variables[i]) }                                   #     et la remplace par la nouvelle valeur
                    Env2$variables.selectionnees.temp <- c(selection2) }
-                else { tkmessageBox(message="No variable selected !",type="ok",icon="error", title="!Warning!") }})
+                else { tkmessageBox(message="No variable selected !",type="ok",icon="info", title="!Warning!") }})
 
      tkgrid(tklabel(Envir$Select, text="Select a parameter"), row=11, column=0,rowspan=2)            # titre des listes
      tkgrid(tklabel(Envir$Select, text="Selected parameter"), row=11, column=2,rowspan=2)            #       "

@@ -60,13 +60,13 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
   else { }                                                                           
   
   if (any(colnames(Envir$Data) == "S")) {                                                    # effectue la commande si une colonne 'S' existe
-      if (max(sal) >= max(Ts$S, na.rm=TRUE) & min(sal) <= min(Ts$S, na.rm=TRUE)) { }         # si toutes les salinites sont selectionnees (de min à max) alors toutes les salinites, NA inclus, seront pris en compte.
+      if (max(sal) >= round(max(Ts$S, na.rm=TRUE),0) & min(sal) <= round(min(Ts$S, na.rm=TRUE),0) ) { }         # si toutes les salinites sont selectionnees (de min à max) alors toutes les salinites, NA inclus, seront pris en compte.
       else { Sal <- na.omit(Ts$S[(Ts$S >= min(sal)) &  (Ts$S <= max(sal))])                  # selection des donnees comprises entre les salinites indiquees, NA exclues
              Ts <- subset(Ts, S %in% Sal, drop = TRUE) } }                                   # nouveau tableau avec les salinites selectionnees
   else{ }
       
   if (any(colnames(Envir$Data) == "DEPTH")) {                                                    # effectue la commande si une colonne 'DEPTH' existe
-      if (max(depth) >= max(Ts$DEPTH, na.rm=TRUE) & min(depth) <= min(Ts$DEPTH, na.rm=TRUE))     # si toutes les profondeurs sont selectionnees (de min à max) alors toutes les profondeurs, NA inclus, seront pris en compte.
+      if (max(depth) >= round(max(Ts$DEPTH, na.rm=TRUE),0) & min(depth) <= round(min(Ts$DEPTH, na.rm=TRUE),0) )     # si toutes les profondeurs sont selectionnees (de min à max) alors toutes les profondeurs, NA inclus, seront pris en compte.
       { }                                                                          
       else { Depth <- na.omit(Ts$DEPTH[(Ts$DEPTH >= min(depth)) &  (Ts$DEPTH <= max(depth))])    # selection des donnees comprises entre les profondeurs indiquees, NA exclues                                                     
       Ts <- subset(Ts, DEPTH %in% Depth, drop = TRUE) }  }                                       # nouveau tableau avec les profondeurs selectionnees
@@ -253,7 +253,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
            nutrient <- TS$param[TS$YEARS==i & TS$MONTHS==j]                     #      on recupere les valeurs du parametre à traiter
            sal <- TS$S[TS$YEARS==i & TS$MONTHS==j]                              #      on recupere les salinites a traiter
  
-           if (sum(nutrient, na.rm=TRUE)== 0 | sum(sal, na.rm=TRUE)== 0 | max(sal, na.rm=TRUE)<npsu ) { 
+           if ( sum(nutrient*sal, na.rm=TRUE)== 0 | max(sal, na.rm=TRUE)<npsu ) { 
            NormNutri$Normalized[NormNutri$YEARS==i & NormNutri$MONTHS==j] <- NA }                                                                                                                     # si toute les conditions sont rempli (parametres present et salinites inferieures a la salinite de normalisation) :
            else { reg <- lm(nutrient~sal)                                                                                          #           on effectue la regression entre salinite et nutriment par annee
            NormNutri$Normalized[NormNutri$YEARS==i & NormNutri$MONTHS==j] <- (npsu * (reg$coefficients[2]))+(reg$coefficients[1])  #           on calcule la valeur normalisee
@@ -264,6 +264,9 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
              if( !is.na(reg$coefficients[2]) ) { abline(lm(nutrient~sal)) }                                                        # ajoute la droite de regression si elle est réalisable
              else{ }
             dev.off() }}}        
+           
+           save.mixingreg.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/",start,"-",end,"/",param, "/", Envir$File.Name,"_Normalized_",param,"_at_",npsu,".csv", sep="")
+           write.csv2(NormNutri, row.names=FALSE, file=save.mixingreg.path)
  
            if (sum(NormNutri$Normalized, na.rm=TRUE)== 0 | max(TS$S, na.rm=TRUE)<npsu ) {                                          # message d'avertissement si les conditions ne sont pas rempli
            return(tkmessageBox(message=paste("No parameters available or all the salinities in your database are under the 'selected psu'"

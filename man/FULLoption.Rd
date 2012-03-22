@@ -1,12 +1,12 @@
 \name{FULLoption}
 \alias{FULLoption}
 \title{
-option
+Main function
 }
 \description{
-This is the core function of the interface. It receive argument from the
- interface (see the function 'TTAinterface') and build time series, perform
- diagnostics and analysis.
+This is the core function of the interface. It receive arguments from the
+ interface (see the function <TTAinterface>) and build regularized time series
+ , perform diagnostics and analyses.
 }
 \usage{
 FULLoption(param, depth = NULL, sal = NULL, site = NULL, rawdata = "NO"
@@ -148,8 +148,8 @@ Perform a test to evaluate the presence and the magnitude of a temporal trend on
  Can be "MK" for Seasonal Mann-Kendall test (the default), "SMK" for the same test with detail for
  each time step, "LOESS" that fit a polynomial surface determined by one or more numerical predictors, 
  using local fitting; a MK is perform on this fitting.
- 
 }
+ 
 }
 
 \value{
@@ -206,20 +206,4 @@ David Devreker
 \code{\link{seasonTrend}}
 \code{\link{seaKen}}
 \code{\link{loess}}
-}
-
-\examples{
-## Peform a Seasonal Mann-Kendall with detail on each months and selection of 
-## local trend on chlorophyll concentration of three different mixed sampling site. 
-## Outliers are removed and data are aggregated by mean
-
-function (Chl, site = c("N", "B", "W"), rawdata = "NO", 
-    select = "NO", resume.reg = "NO", test.normality = "NO", 
-    plotB = "NO", plotZ = "NO", datashow = "NO", help.timestep = "NO", 
-    auto.timestep = "NO", time.step = "Mensual", help.aggreg = "NO", 
-    auto.aggreg = "NO", aggreg = "Mean", mix = "YES", outliers.re = "YES", 
-    na.replace = "NO", start = NULL, end = NULL, months = c(1:12), 
-    norm = "NO", npsu = 30, autocorr = "NO", spectrum = "NO", 
-    anomaly = "NO", zsmooth = "NO", local.trend = "YES", test = "SMK")    
-    
 }
