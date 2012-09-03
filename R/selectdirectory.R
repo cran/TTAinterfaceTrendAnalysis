@@ -2,7 +2,7 @@ selectdirectory <-
 function ( )  {
 
  Envir$save.WD <- tclvalue(tkchooseDirectory(mustexist=TRUE,title="Choose a save directory, then click OK."))
-        if(Envir$save.WD == "") { Envir$save.WD <- Envir$default.save.WD }
+        if(Envir$save.WD == "") { Envir$save.WD <- Envir$default.save.WD }  
     
 ##### copier ici a partir de 'Save.directory <- function...' jusqu'a 'open <- tkbutton...'  #####   
    

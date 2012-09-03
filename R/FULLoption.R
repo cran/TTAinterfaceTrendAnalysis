@@ -30,31 +30,31 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
 {  
 #____________________________________________________________________________________________________________stat descriptive sur les donnees de base
  {                                                                                              
-  if (rawdata == "YES") {
-  # capture la sortie de summary(Data)                                                                        
+  if (rawdata == "YES") {                                                                            # appel la fonction si rawdata = YES
+  # capture la sortie de summary(Envir$Data)                                                                        
       sumdata <- capture.output(summary(Envir$Data))
-  # insert le resultat de la capture dans la fenetre de texte 'txt2'                                                            
-      tkinsert(Envir$txt2, "end", paste("-Desciptive statistics on raw data-", "\n")) 
+  # insert le resultat de la capture dans la fenetre de texte 'Envir$txt2'                                                            
+      tkinsert(Envir$txt2, "end", paste("-Desciptive statistics on raw data-", "\n"))                # mise en page
       tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
       tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
       sumdata <- paste(sumdata,collapse="\n")
       tkinsert(Envir$txt2,"end",paste(sumdata, "\n\n"))                                                                  
  
   # fait appraitre le resultat dans une frame directement affichee à l'ecran                                             
-      Stat1 <- NULL
-      md <- as.matrix(summary(Envir$Data))
-      ncol(md)
-      for (i in 1:ncol(md)) {
-           mb <- md[, i]
-           Stat1 <- cbind(Stat1, mb) }
-      Summary_RawData <- data.frame(Stat1)
-      names(Summary_RawData) <- names(Envir$Data)                                                  
-      return(showData(Summary_RawData))                                                      ## showData = package 'relimp' ##
+      Stat1 <- NULL                                                                                  # tableau vide a remplir
+      md <- as.matrix(summary(Envir$Data))                                                           # cree une matrice avec le resultat de summary
+      ncol(md)                                                                                       
+      for (i in 1:ncol(md)) {                                                                        # remplit le tableau vide avec... 
+           mb <- md[, i]                                                                             # ...le contenu de la matrice
+           Stat1 <- cbind(Stat1, mb) }                                                               
+      Summary_RawData <- data.frame(Stat1)                                                           # transforme le tableau en dataframe
+      names(Summary_RawData) <- names(Envir$Data)                                                    # nome les colonnes
+      return(showData(Summary_RawData))                                                              # affiche le tableau
       }
   else{}   
  }
 #________________________________________________________________________________________preparation du tableau de donnees par station(s) et parametre    
- {    
+ {                                                          
   if (any(colnames(Envir$Data) == "STATIONS")) {                                             # effectue la commande si une colonne 'STATIONS' existe
       Ts <- subset(Envir$Data,STATIONS %in% site, drop =TRUE) }                              # nouveau tableau avec les stations selectionnees
   else { }                                                                           
@@ -64,7 +64,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       else { Sal <- na.omit(Ts$S[(Ts$S >= min(sal)) &  (Ts$S <= max(sal))])                  # selection des donnees comprises entre les salinites indiquees, NA exclues
              Ts <- subset(Ts, S %in% Sal, drop = TRUE) } }                                   # nouveau tableau avec les salinites selectionnees
   else{ }
-      
+     
   if (any(colnames(Envir$Data) == "DEPTH")) {                                                    # effectue la commande si une colonne 'DEPTH' existe
       if (max(depth) >= round(max(Ts$DEPTH, na.rm=TRUE),0) & min(depth) <= round(min(Ts$DEPTH, na.rm=TRUE),0) )     # si toutes les profondeurs sont selectionnees (de min à max) alors toutes les profondeurs, NA inclus, seront pris en compte.
       { }                                                                          
@@ -94,6 +94,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
   else {
       TS <- TS[order(TS$DATES), ]
       TS <- TS[order(TS$STATIONS), ]}                                       # trie dans l'ordre les mesures par stations si les stations ne sont pas mixees
+  TSS <- TS
   ecarts <- TS$DATES[2:nrow(TS)]-TS$DATES[1:(nrow(TS)-1)]                   # calcul l'ecart en jour entre deux mesures successives
   xx <- as.numeric(ecarts)
   TS$time <- c(1, round(cumsum(xx)))                                        # somme cumulee des ecarts et integration au tableau (TS$time) : donne une échelle temporelle a la serie de donnees
@@ -144,6 +145,9 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
 #_________________________________________________________________________Aide pour trouver le bon time.step (option : help.timestep et auto.timestep)
  {
   # Calcul de l'ecart moyen, en jours, entre 2 mesures successives (les mesures prise le meme jour sont considerees comme 1 seule) 
+  
+  TSS <- TSS[!is.na(TSS$param), ]                                                # reprend le tableau TS sans les valeurs manquantes
+  ecarts <- TSS$DATES[2:nrow(TSS)]-TSS$DATES[1:(nrow(TSS)-1)]                    # calcule les ecarts reels entre chaque mesure presente
   Ecarts <- ecarts[ecarts!=0]                             
   Mean.time <- data.frame(mean(Ecarts))
   mt <- as.numeric(Mean.time)
@@ -546,8 +550,9 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
   v[v=="NaN"] <- NA
 
   if (na.replace=="YES") {
+     wx <- v[-1, ]
    
-     if (length(v[is.na(v)]) > length(v[!is.na(v)])/20) {                          # affiche un message de warning
+     if (length(wx[is.na(wx)]) > ((ncol(wx)*nrow(wx))/20)) {                          # affiche un message de warning
          tkinsert(Envir$txt, "end", paste("-!Warning message!-", "\n"))
          tktag.add(Envir$txt, "titre2", "end -2 lines linestart","end -2 lines lineend") 
          tktag.configure(Envir$txt, "titre2", foreground="red", font=tkfont.create(family="courier",size=9,weight="bold")) 
