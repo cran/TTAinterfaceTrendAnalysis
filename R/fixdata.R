@@ -8,7 +8,7 @@ function ( )
      write.table(Envir$Data, file = save.fixdata.path, append = FALSE, quote = TRUE, sep = ";"
                  , eol = "\n", na = "NA", dec = ".", row.names = FALSE
                  , col.names = TRUE, qmethod = c("escape")
-                 , fileEncoding = "")
+                 , fileEncoding = "")          
                  
 ##### copier ici a partir de 'Save.directory <- function...' jusqu'a 'open <- tkbutton...'  #####
                  
