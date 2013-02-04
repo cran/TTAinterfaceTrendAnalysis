@@ -37,8 +37,34 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       tkinsert(Envir$txt2, "end", paste("-Desciptive statistics on raw data-", "\n"))                # mise en page
       tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
       tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
-      sumdata <- paste(sumdata,collapse="\n")
-      tkinsert(Envir$txt2,"end",paste(sumdata, "\n\n"))                                                                  
+      sumdata <- paste(sumdata, collapse="\n")
+      tkinsert(Envir$txt2,"end",paste(sumdata, "\n\n"))
+      
+      ll <- ncol(Envir$Data)                                                                         # comptage de la quantite de donnee pas colonne
+      res1 <- length(Envir$Data[1][!is.na(Envir$Data[1])])
+      for (i in 2:ll) { res2 <- length(Envir$Data[i][!is.na(Envir$Data[i])])
+      res1 <- data.frame(cbind(res1,res2)) } 
+      nn <- names(Envir$Data)
+      names(res1) <- nn
+      DataQ <- capture.output(res1)
+      DataQ <- paste(DataQ, collapse="\n")
+      
+      A <- tapply(as.numeric(format(as.Date(Envir$Data$DATES, format="%d/%m/%Y"), format = "%Y")), list(Envir$Data$STATIONS), max, na.rm=TRUE)  # nombre d'annee par stations
+      B <- tapply(as.numeric(format(as.Date(Envir$Data$DATES, format="%d/%m/%Y"), format = "%Y")), list(Envir$Data$STATIONS), min, na.rm=TRUE)
+      C <- A-B
+      Res.Per <- data.frame(cbind(B,A,C))
+      names(Res.Per) <- c("Min.","Max.","Length")
+      DataP <- capture.output(Res.Per)
+      DataP <- paste(DataP, collapse="\n")
+
+      tkinsert(Envir$txt2,"end", paste("Data quantity: " ,"\n"))
+      tksee (Envir$txt2,"end")
+      tkinsert(Envir$txt2,"end", DataQ)
+      tkinsert(Envir$txt2,"end","\n\n")
+      tkinsert(Envir$txt2,"end", paste("Years sampled by stations: " ,"\n"))
+      tkinsert(Envir$txt2,"end", DataP)
+      tkinsert(Envir$txt2,"end","\n\n")
+                                                               
  
   # fait appraitre le resultat dans une frame directement affichee à l'ecran                                             
       Stat1 <- NULL                                                                                  # tableau vide a remplir
@@ -57,7 +83,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
  {                                                          
   if (any(colnames(Envir$Data) == "STATIONS")) {                                             # effectue la commande si une colonne 'STATIONS' existe
       Ts <- subset(Envir$Data,STATIONS %in% site, drop =TRUE) }                              # nouveau tableau avec les stations selectionnees
-  else { }                                                                           
+  else { tkmessageBox(message=paste("No STATIONS column in your dataset")
+         ,icon = "warning", type = "ok", title="!Warning!") }                                                                           
   
   if (any(colnames(Envir$Data) == "S")) {                                                    # effectue la commande si une colonne 'S' existe
       if (max(sal) >= round(max(Ts$S, na.rm=TRUE),0) & min(sal) <= round(min(Ts$S, na.rm=TRUE),0) ) { }         # si toutes les salinites sont selectionnees (de min à max) alors toutes les salinites, NA inclus, seront pris en compte.
@@ -85,9 +112,14 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       TS$param <- Ts[,names(Ts)==param]                                                       
       names(TS) <- c("STATIONS", "DATES", "param") }                                           
  }
+#________________________________________________________________________________________________________Pour eviter des NOTES lors du check 
+ {
+ YEARS=DayYears=NULL
+ }
 #________________________________________________________________________________________________________Calcul du temps moyen entre 2 donnees en jour
  {
-  TS$DATES <- as.Date(TS$DATES, format="%d/%m/%Y")                          # les dates sont formatees
+  if (is.numeric(TS$DATES) == TRUE) { }
+  else{ TS$DATES <- as.Date(TS$DATES, format="%d/%m/%Y") }                  # les dates sont formatees
   TS <- TS[!is.na(TS$DATES), ]                                              # selection des cas ou les dates sont bien presentes
   if (mix == "YES"){                                                        # trie dans l'ordre toutes les mesures si les stations sont mixees
       TS <- TS[order(TS$DATES), ] }
@@ -102,10 +134,13 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
  }
 #_____________________________________________________________________________________________Extraction des dates hors semaines (besoin du time step)
  {
+  if (is.numeric(TS$DATES) == TRUE) { TS$YEARS <- TS$DATES }
+  else {  
   TS$YEARS <- as.numeric(format(TS$DATES, format = "%Y"))                   # extraction des annees
   TS$MONTHS <- as.numeric(format(TS$DATES, format = "%m"))                  # extraction des mois
   TS$days <- as.numeric (format(TS$DATES, format = "%d"))                   # extraction des jours
-  TS$week.month <- TS$days
+  TS$DY <- as.numeric(format(TS$DATES, format="%j"))                               # extraction des jours/annee
+  TS$week.month <- TS$days }
  
   if (is.null(start)) {                                                     # selection de l'annee de début de la série a analyser
       start <- min(TS$YEARS) } else {}
@@ -115,17 +150,18 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
  }  
 #______________________________________ Etabli la liste des stations pour les inclure dans les resultats sous forme de texte (3 sites maxi ensuite '...') 
 {
- if (length(site)==1) liste.stations <- paste(strsplit(site, " ")[1])
- if (length(site)==2) liste.stations <- paste(strsplit(site, " ")[1], strsplit(site, " ")[2], sep=", ")
- if (length(site)==3) liste.stations <- paste(strsplit(site, " ")[1], strsplit(site, " ")[2], strsplit(site, " ")[3], sep=", ")
- if (length(site)>3) { for (i in 1 : 3) { liste.stations <- paste(strsplit(site, " ")[1], strsplit(site, " ")[2], strsplit(site, " ")[3], sep=", ") }
+ if (length(site)==1) liste.stations <- site[1]
+ if (length(site)==2) liste.stations <- paste(site[1], site[2], sep=", ")
+ if (length(site)==3) liste.stations <- paste(site[1], site[2], site[3], sep=", ")
+ if (length(site)>3) { for (i in 1 : 3) { liste.stations <- paste(site[1], site[2], site[3], sep=", ") }
                        liste.stations <- paste(liste.stations, "...", sep=", ") }
 }
 #_________________________________Statistiques descriptives sur les donnees de base (option : select), prend en compte la selection des annees et mois
 # meme principe que pour 'rawdata'
  {
   if (select == "YES"){
-    TS <- subset(TS, MONTHS %in% months, drop = TRUE) 
+    if (is.numeric(TS$DATES) == TRUE) { } else {
+    TS <- subset(TS, MONTHS %in% months, drop = TRUE) }
     Desciptive.Statistics <- summary(TS$param)
     sumdata2 <- capture.output(Desciptive.Statistics)  
     tkinsert(Envir$txt2, "end", paste("-Desciptive statistics on selected site and parameter-"
@@ -134,8 +170,10 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
     tktag.add(Envir$txt2, "titre", "end -4 lines linestart","end -4 lines lineend")
     tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
     sumdata2 <- paste(sumdata2,collapse="\n")
-    tkinsert(Envir$txt2,"end",paste(sumdata2, "\n\n\n")) 
-   
+    tkinsert(Envir$txt2,"end",paste(sumdata2, "\n\n"))
+    tkinsert(Envir$txt2,"end", paste("Data quantity (",param,") : ", length(TS$param[!is.na(TS$param)]), "\n\n", sep=""))
+    tksee (Envir$txt2,"end")
+       
     Desciptive.Statistics <- as.matrix(Desciptive.Statistics)
     Desciptive.Statistics <- as.data.frame(Desciptive.Statistics)
     names(Desciptive.Statistics) <- param
@@ -159,23 +197,26 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       return() } 
   
   if (time.step != "NULL") {                                          # affiche la proposition mais effectue l'aggregation avec la méthode choisi par l'utilisateur
-                                                                      # si l'ecart moyen est inferieur à 10 jours
-      if (mt<=10) {
-          T <- "Use semi-fortnightly time step"}
-      else { if (mt>10 & mt<=23) {                                    # si l'ecart moyen est entre 10 jours et 23 jours
-                 T <- "Use fortnightly time step" }
-             else { if (mt>23 & mt<60) {                              # si l'ecart moyen est entre 23 jours et 60 jours
-                        T <- "Use monthly time step" }
+    
+    if (mt<=5) {                                                       # si l'ecart moyen est inferieur à 5 jours
+        T <- "Use daily frequency" }                                                                
+     else { if (mt>5 & mt<=10) {                                      # si l'ecart moyen est entre 5 et 10 jours
+          T <- "Use semi-fortnightly frequency"}
+      else { if (mt>10 & mt<=24) {                                    # si l'ecart moyen est entre 10 jours et 24 jours
+                 T <- "Use fortnightly frequency" }
+             else { if (mt>24 & mt<=60) {                              # si l'ecart moyen est entre 24 jours et 60 jours
+                        T <- "Use monthly frequency" }
                     else { if (mt>60) {                               # si l'ecart moyen est superieur à 60 jours
-                               T <- "Use yearly time step" }
-                           else { return(print("No solution! Should be a problem somewhere...")) }}}}           
+                               T <- "Use yearly frequency" }
+                           else { return(print("No solution! Should be a problem somewhere...")) }}}}}           
       time.step <- time.step                                               
       tkinsert(Envir$txt, "end", paste("-Time step choice-" , "\n"))
       tktag.add(Envir$txt, "titre", "end -2 lines linestart","end -2 lines lineend")
       tktag.configure(Envir$txt, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
       tkinsert(Envir$txt, "end", paste("Parameter: ", param , "   Site(s): ", liste.stations, sep="" , "\n"))  
-      tkinsert(Envir$txt, "end", paste("-> Time step manually selected", "\n"))
-      tkinsert(Envir$txt, "end", paste("Advice: ", T, "\n\n")) }
+      tkinsert(Envir$txt, "end", paste("-> Time step manually selected ", "(", time.step, ")", sep="" , "\n"))
+      tkinsert(Envir$txt, "end", paste("Advice: ", T, "\n\n")) 
+      tksee (Envir$txt,"end") }
                        
   # affiche uniquement la proposition                     
   else { if (help.timestep == "YES") {                                                                           
@@ -185,47 +226,59 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
             names(Data.range) <- "T"
             Help.timestep <- rbind(Mean.time, Data.range)
  
-            if (mt<=10) {
-                T <- as.character("-> Use semi-fortnightly time step             ") }
-            else { if (mt>10 & mt<=23) {
-                       T <- as.character("-> Use fortnightly time step       ") }
-                   else { if (mt>23 & mt<60) {
-                              T <- as.character("-> Use monthly time step       ") }
+       if (mt<=5) {
+           T <- as.character("-> Use daily frequency             ") }
+           else { if (mt>5 & mt<=10) {
+                T <- as.character("-> Use semi-fortnightly frequency             ") }
+            else { if (mt>10 & mt<=24) {
+                       T <- as.character("-> Use fortnightly frequency       ") }
+                   else { if (mt>24 & mt<=60) {
+                              T <- as.character("-> Use monthly frequency       ") }
                           else { if (mt>60) {
-                                     T <- as.character("-> Use yearly time step           ") }
-                                 else {return(print("No solution! Should be a problem somewhere..."))}}}}
-                                 
-            Help.timestep <- data.frame(rbind(as.matrix(Help.timestep), T))
-            names(Help.timestep) <- "Advice                  "
-            return(showData(Help.timestep, rowname.bar=NULL)) }
+                                     T <- as.character("-> Use yearly frequency           ") }
+                                 else {return(print("No solution! Should be a problem somewhere..."))}}}}}
+            
+            tt <- paste("Mean time between two measurements:", "\n",
+            "  ", as.character(round(mt, 2))," days", "\n",
+            "Time range (min - max):", "\n",
+            "  ", as.character(range(Ecarts))[1]," - ", as.character(range(Ecarts))[2], " days", "\n\n",
+            "Advice ", T , sep="")
+
+            tkmessageBox(title = "Frequency Choice Guidance", message = tt, icon = "info", type = "ok")
+            return()   }
  
   # Selection auto du time step (option : auto.timestep) 
   else { if (auto.timestep == "YES")  {
-             if (mt<=10) {
-                  Time.step <- "Semi-fortnight time step automatically use"
+          if (mt<=5) {
+             Time.step <- "Daily frequency automatically use"
+             time.step <- "Daily" }
+          else { if (mt>5 & mt<=10) {
+                  Time.step <- "Semi-fortnight frequency automatically use"
                   time.step <- "Semi-fortnight" }
-             else { if (mt>10 & mt<=23) {
-                        Time.step <- "Fortnight time step automatically use" 
+             else { if (mt>10 & mt<=24) {
+                        Time.step <- "Fortnight frequency automatically use" 
                         time.step <- "Fortnight" }
-                    else { if (mt>23 & mt<60) {
-                               Time.step <- "Mensual time step automatically use"
+                    else { if (mt>24 & mt<=60) {
+                               Time.step <- "Mensual frequency automatically use"
                                time.step <- "Mensual" }
                            else { if (mt>60) {
-                                      Time.step <- "Annual time step automatically use"
+                                      Time.step <- "Annual frequency automatically use"
                                       time.step <- "Annual" }
-                                  else {return(print("No solution! Should be a problem somewhere..."))}}}}                
+                                  else {return(print("No solution! Should be a problem somewhere..."))}}}}}                
 
          tkinsert(Envir$txt, "end", paste("-Time step choice-", "\n"))
          tktag.add(Envir$txt, "titre", "end -2 lines linestart","end -2 lines lineend")                
          tktag.configure(Envir$txt, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
          tkinsert(Envir$txt, "end", paste("Parameter: ", param , "   Site(s): ", liste.stations, sep="" , "\n"))
-         tkinsert(Envir$txt, "end", paste(Time.step, "\n\n"))             
+         tkinsert(Envir$txt, "end", paste(Time.step, "\n\n"))
+         tksee (Envir$txt,"end")             
  }
   else {}  
  } } } 
  }
 #_____________________________________________________________________________________________________Extraction des semaines en fonction du time.step
  {
+  if (is.numeric(TS$DATES) == TRUE) { } else { 
   if (time.step == "Fortnight") {                                                                                                                                                     
       TS$week.month[TS$days <= 15] <- 1                    # extraction du numero de semaines du mois (échelle hebdo = 2 quinzaines/mois)  
       TS$week.month[TS$days > 15] <- 2 }                                                                                                                                           
@@ -235,12 +288,12 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       TS$week.month[TS$days > 15 & TS$days <= 23] <- 3                                                                                                                             
       TS$week.month[TS$days > 23] <- 4 }                                                                                                                                           
   TS$days <- NULL                                          # suppression de la colonne days pour plus de clarete (plus besoin)
- }
+ } }
 #____________________________Valeurs normalisees en fonction de la salinite (npsu), pour les sels nutritifs. Effectue sur les donnees non regularisees
  {  
   if (norm == "YES") {
      if (any(colnames(Envir$Data) == "S")) { 
-      if (local.trend == "YES") { return(tkmessageBox(message="Choose a Kendall family test", icon = "warning", type = "ok", title="Warning")) }
+      if (local.trend == "YES") { return(tkmessageBox(message="Work only for Seasonal and Global Trend", icon = "warning", type = "ok", title="Warning")) }
       TS <- subset(TS, MONTHS %in% months, drop = TRUE)                         # selection des mois a traiter
       dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", sep= ""), recursive = TRUE)  # création du répertoir de sauvegarde
       
@@ -278,13 +331,13 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                , icon = "warning", type = "ok", title="!Warning!")) }
       
       z <- ts(NormNutri$Normalized, start = a, deltat=1/(length(months)))
-      plot(z, xlab = "Years (at selected period)", ylab= "Normalized concentration", main=paste("Trend of", param,"at salinity", npsu  # affiche la figure
-            , "\n", "and station(s): ", liste.stations))
+      plot(z, xlab = "Years (at selected period)", ylab= "Normalized concentration", main=paste("Trend of", param,"at salinity", npsu))  # affiche la figure
+      title(main=paste("\n\n\n", "at station(s): ", liste.stations), cex.main=0.8)
       minor.tick(nx=3, ny=2, tick.ratio=0.4)
               save.normnutri.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/",start,"-",end,"/",param,"/", Envir$File.Name, "_NormalNutri_",param,".png", sep = "")
               png(save.normnutri.path)
-              plot(z, xlab = "Years (at selected period)", ylab= "Normalized concentration", main=paste("Trend of", param,"at salinity", npsu
-                    , "\n", "and station(s): ", liste.stations))
+              plot(z, xlab = "Years (at selected period)", ylab= "Normalized concentration", main=paste("Trend of", param,"at salinity", npsu))
+              title(main=paste("\n\n\n", "at station(s): ", liste.stations), cex.main=0.8)
               minor.tick(nx=3, ny=2, tick.ratio=0.4)
               dev.off()
       tkinsert(Envir$txt2,"end", paste("-Global trend of",param,"at salinity", npsu,"-", "\n"))
@@ -296,7 +349,10 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       write.csv2(sK, row.names=FALSE, file=save.normtrend.path) 
       tkinsert(Envir$txt2,"end", paste("Trend (sen.slope): ", round(sK$sen.slope, 4), "  original units per year", "\n"
                                  , "%Trend (sen.slope.pct): ", round(sK$sen.slope.pct, 4), "  percent of mean quantity per year", "\n"  
-                                 , "p.value: ", round(sK$p.value, 4),"\n\n\n", sep=""))  
+                                 , "p.value: ", round(sK$p.value, 4), "\n\n\n", sep=""))
+      if (sK$p.value <= 0.05) { tktag.add(Envir$txt2, "titre5", "end -4 lines linestart","end -4 lines lineend") 
+      tktag.configure(Envir$txt2, "titre5", font=tkfont.create(family="courier",size=9,weight="bold"))} else {}
+      tksee (Envir$txt2,"end")  
       return(showData(capture.output(sK), rowname.bar = NULL, colname.bar = NULL, title="Global Trend (Mann Kendall Test) results"))
  }
   else{ return(tkmessageBox(message="No salinity data available", icon = "warning", type = "ok", title="Warning")) } }
@@ -310,17 +366,18 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
 #_____________________________________________________________Extraction des outliers (option : outliers.re), pas necessaire pour un test Mann-Kendall
  {
   if (plotB == "YES") {
-      TS <- subset(TS, MONTHS %in% months, drop = TRUE)
+      if (is.numeric(TS$DATES) == TRUE) { } else {
+      TS <- subset(TS, MONTHS %in% months, drop = TRUE) }
       dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", sep= ""), recursive = TRUE)
       save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", Envir$File.Name,"_Boxplot_",param,".png", sep = "")
       png(save.boxplot.path)
       boxplot(TS$param~TS$YEARS, xlab="Time", ylab=paste(param, "concentration")        # enregistre la figure
-              , main=paste("Boxplot of",param,"concentration","(o = outliers)"
-              ,"\n", "at station(s): ", liste.stations)) 
+              , main=paste("Boxplot of",param,"concentration","(o = outliers)"))
+      title(main=paste("\n\n\n", "at station(s): ", liste.stations), cex.main=0.8) 
       dev.off()
       boxplot(TS$param~TS$YEARS, xlab="Time", ylab=paste(param, "concentration")        # affiche la boite à moustache par annees
-              , main=paste("Boxplot of",param,"concentration","(o = outliers)"
-              ,"\n", "at station(s): ", liste.stations))
+              , main=paste("Boxplot of",param,"concentration","(o = outliers)"))
+      title(main=paste("\n\n\n", "at station(s): ", liste.stations), cex.main=0.8)
       return() }    
   else{}
 
@@ -360,6 +417,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
  }
 #____________________________________________________________________________________________Supprime la colonne TS$DATES dans TS pour plus de clarete 
  {
+  DATES <- TS$DATES
   TS$DATES <- NULL                                                                               
  }
 #_________________________________________________________________________Ajout d'un tableau temporel fictif pour combler les mois/semaines manquantes
@@ -368,18 +426,29 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
 
   yy <- (min(TS$YEARS):max(TS$YEARS))                                             # suite de toutes les annees comprise entre l'annee de debut et de fin de la serie
   mm <- rep(1, length(yy))                                                        # remplis la nouvelle colonne mois avec des 1
-  ww <- rep(1, length(yy))                                                        # remplis la nouvelle colonne semaine avec des 1
-  aa <- rep(NA, length(yy))                                                       # ...
-  bb <- rep(NA, length(yy))
-  cc <- rep(NA, length(yy))
-
-  fic2 <- data.frame(aa,bb,cc,yy,mm,ww)                                           # nouveau tableau fictif
-  names(fic2) = c("STATIONS", "param", "time", "YEARS", "MONTHS", "week.month")                  
+  aa <- rep(NA, length(yy))
+  if (is.numeric(DATES) == TRUE) {
+  fic2 <- data.frame(aa,aa,aa,yy)                                                 # nouveau tableau fictif
+  names(fic2) = c("STATIONS", "param", "time", "YEARS") } else {                  # ...
+  
+  fic2 <- data.frame(aa,aa,aa,yy,mm,aa,aa)                                           # nouveau tableau fictif
+  names(fic2) = c("STATIONS", "param", "time", "YEARS", "MONTHS", "week.month", "DY")  }                
 
   TS <- rbind(fic2, TS)                                                           # fusion des tableaux
+  
+  if (is.numeric(DATES) ==TRUE) { } else {
+  if (time.step == "Daily") {
+    ddd <- c(1:366)
+    www <- rep(NA, 366)
+    
+  fic3 <- data.frame(www,www,www,www,www,www,ddd)
+  names(fic3) = c("STATIONS", "param", "time", "YEARS", "MONTHS", "week.month", "DY")
+
+  TS <- rbind(fic3, TS) } }
  
  # Tableau des mois et semaines (meme principe, mais 24 semaines pour semi-hebdomadaire et 48 pour les autres)
  
+  if (is.numeric(DATES) ==TRUE) { } else {
   if (time.step == "Fortnight") {
 
       w <- rep(1:2, 12)
@@ -397,15 +466,26 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       b <- rep(NA, 48)
       c <- rep(NA, 48) }
  
-  fic1 <- data.frame(a,b,c,y,m,w)
-  names(fic1) = c("STATIONS", "param", "time", "YEARS", "MONTHS", "week.month")
+  fic1 <- data.frame(a,b,c,y,m,w,a)
+  names(fic1) = c("STATIONS", "param", "time", "YEARS", "MONTHS", "week.month", "DY")
 
-  TS <- rbind(fic1, TS)
+  TS <- rbind(fic1, TS)  }
  }
 #________________________________________________________________ Tableaux croises avec toutes les methodes d'aggregation (temporelle et mathematique)
  {
 
-  if (time.step == "Fortnight") {
+ if(time.step == "Daily") {
+    if (mix =="YES") {
+        Mean <- tapply(TS$param, list(TS$YEARS, TS$DY), mean, na.rm=TRUE)
+        Quantile <- tapply(TS$param, list(TS$YEARS, TS$DY), quantile, probs = (0.9), na.rm=TRUE)
+        Median <- tapply(TS$param, list(TS$YEARS, TS$DY), median, na.rm=TRUE)
+        Max <- tapply(TS$param, list(TS$YEARS, TS$DY), max, na.rm=TRUE) }
+    else { 
+        Mean <- tapply(TS$param, list(TS$YEARS, TS$DY, TS$STATIONS), mean, na.rm=TRUE)
+        Quantile <- tapply(TS$param, list(TS$YEARS, TS$DY, TS$STATIONS), quantile, probs = (0.9), na.rm=TRUE)
+        Median <- tapply(TS$param, list(TS$YEARS, TS$DY, TS$STATIONS), median, na.rm=TRUE)
+        Max <- tapply(TS$param, list(TS$YEARS, TS$DY, TS$STATIONS), max, na.rm=TRUE)} }
+  else { if (time.step == "Fortnight") {
       if (mix =="YES") {
           Mean <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), mean, na.rm=TRUE)
           Quantile <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), quantile, probs = (0.9), na.rm=TRUE)
@@ -416,7 +496,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
           Quantile <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS, TS$STATIONS), quantile, probs = (0.9), na.rm=TRUE)
           Median <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS, TS$STATIONS), median, na.rm=TRUE)
           Max <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS, TS$STATIONS), max, na.rm=TRUE)} }
-  else { if (time.step=="Mensual") {
+     else { if (time.step=="Mensual") {
              if (mix == "YES") {
                  Mean <- tapply(TS$param, list(TS$YEARS, TS$MONTHS), mean, na.rm=TRUE)
                  Quantile <- tapply(TS$param, list(TS$YEARS, TS$MONTHS), quantile, probs = (0.9), na.rm=TRUE)
@@ -461,18 +541,18 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                       Median <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS, TS$STATIONS), median, na.rm=TRUE)
                                       Max <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS, TS$STATIONS), max, na.rm=TRUE)}}     
                               else {return(print("You have to choose a time step to aggregate your data!"))}                                
-  }}}}
+  }}}}}
  }
 #__________________________________________Choix de la methode d'aggregation avec les p.values du test Wilcoxon (options : help.aggreg et auto.aggreg)
  {
   if (help.aggreg == "YES" | auto.aggreg== "YES") {
  
-      a <- data.frame(rep(NA, (max(TS$YEARS)+1-min(TS$YEARS[TS$YEARS > 0]))*365.25))        # tableau vide avec nombre de jour total de la série regularisée 
+      a <- data.frame(rep(NA, (max(TS$YEARS, na.rm=TRUE)+1-min(TS$YEARS[TS$YEARS > 0], na.rm=TRUE))*365.25))        # tableau vide avec nombre de jour total de la série regularisée 
       a <- data.frame(a, 1:nrow(a))                                                         # numerotation des lignes
       aa <- data.frame(TS$param[!is.na(TS$time)])                                           # on recupere les données parametres  
       aa <- data.frame(aa, TS$time[!is.na(TS$time)])                                        #     et l'on y accole les donnees temporelle
       regraw <- merge(a, aa, by.x = 2, by.y = 2, all = TRUE)                                # on fusionne les donnees brute (aa) et la serie temporelle
-      zraw <- ts(regraw[, 3], start=min(TS$YEARS[TS$YEARS > 0]), frequency=366)             #     reguliere pour obtenir une serie regularisee (echelle de la journee) avec des NA
+      zraw <- ts(regraw[, 3], start=min(TS$YEARS[TS$YEARS > 0], na.rm=TRUE), frequency=366) #     reguliere pour obtenir une serie regularisee (echelle de la journee) avec des NA
    
       v1 <- as.data.frame(Mean)                                                             # on recupere le tableau croise
       v2 <- as.data.frame(Quantile)
@@ -516,9 +596,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
  # Proposition de la methode d'aggregation (option : help.aggreg)
  
   if (help.aggreg=="YES") {
-      Method.of.aggregation <- data.frame(subset(r$choice, r$p.values==max(r$p.values)))
-      names(Method.of.aggregation) <- "Method of aggregation choice"
-      return(showData(Method.of.aggregation, rowname.bar = NULL)) }
+      tkmessageBox(title = "Method of Aggregation Guidance", message = as.character(subset(r$choice, r$p.values==max(r$p.values))), icon = "info", type = "ok")
+      return() }
   else{ }
  
  # Choix automatique de la methode d'aggregation (option :auto.aggreg)
@@ -541,6 +620,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
   tktag.add(Envir$txt, "titre", "end -2 lines linestart","end -2 lines lineend")
   tkinsert(Envir$txt, "end", paste("Parameter: ", param , "   Site(s): ", liste.stations, sep="" , "\n")) 
   tkinsert(Envir$txt,"end", paste(Aggreg, "\n\n"))
+  tksee (Envir$txt,"end")
            
  }} 
 #_____________________________________________________________________________________________Remplacement des valeurs manquantes, option (na.replace) 
@@ -552,13 +632,14 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
   if (na.replace=="YES") {
      wx <- v[-1, ]
    
-     if (length(wx[is.na(wx)]) > ((ncol(wx)*nrow(wx))/20)) {                          # affiche un message de warning
+     if (length(wx[is.na(wx)]) > ((length(wx))/20)) {                          # affiche un message de warning
          tkinsert(Envir$txt, "end", paste("-!Warning message!-", "\n"))
          tktag.add(Envir$txt, "titre2", "end -2 lines linestart","end -2 lines lineend") 
          tktag.configure(Envir$txt, "titre2", foreground="red", font=tkfont.create(family="courier",size=9,weight="bold")) 
          tkinsert(Envir$txt, "end", paste("Missing values represent more that 1/20 of the regularised data,", "\n"))
-         tkinsert(Envir$txt, "end", paste("replacing them is not a good idea.", "\n\n")) 
-         tkmessageBox(message=paste("Missing values represent more that 1/20 of the regularised data,", "\n", "replacing them is not a good idea.", sep=""), icon = "warning", type = "ok", title="!Warning!") }
+         tkinsert(Envir$txt, "end", paste("replacing them is not a good idea.", "\n\n"))
+         tksee (Envir$txt,"end") 
+         tkmessageBox(message=paste("Missing values represent more that 5% of the regularised data,", "\n", "replacing them is not a good idea.", sep=""), icon = "warning", type = "ok", title="!Warning!") }
      else{} 
      
      cc <- matrix(NA, nrow(v), ncol(v))                                            # matrice vide à remplir
@@ -601,7 +682,50 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
  {
   TimeSerie <- reshape(v, direction = "long", varying = list(1: ncol(v)), times = colnames(v))        # Transpose le tableau croise en tableau colonne
  
-  if (time.step=="Annual"){
+  if (time.step == "Daily"){
+  
+  TimeSerie$DayYears <- do.call("rbind", strsplit(TimeSerie$time,"\\.")) [,1]
+  TimeSerie$DayYears <- as.numeric(TimeSerie$DayYears)
+          
+  if (mix == "NO") {
+  TimeSerie$STATIONS <- do.call("rbind", strsplit(TimeSerie$time,"\\.")) [,2]}
+  else {}
+   
+  TimeSerie$time <- NULL
+  names(TimeSerie)[c(1)] <- c("param")
+  names(TimeSerie)[c(2)] <- c("YEARS")
+  Y <- as.numeric(row.names(v))
+  TimeSerie$YEARS <- c(Y)
+   
+  if (mix == "YES") {
+  TimeSerie <- TimeSerie[order(TimeSerie$YEARS, TimeSerie$DayYears), ]}
+  else {
+  TimeSerie <- TimeSerie[order(TimeSerie$STATIONS, TimeSerie$YEARS, TimeSerie$DayYears), ]}
+
+  TimeSerie <- TimeSerie[TimeSerie$YEARS!=(-1000), ]
+  row.names(TimeSerie) <- 1:(nrow(TimeSerie))
+  TimeSerie$time <- 1:(nrow(TimeSerie))
+  
+  Ja <- as.matrix(rep(1, 31))
+  Fe <- as.matrix(rep(2, 29))
+  Ma <- as.matrix(rep(3, 31))
+  Av <- as.matrix(rep(4, 30))
+  My <- as.matrix(rep(5, 31))
+  Ju <- as.matrix(rep(6, 30))
+  Jl <- as.matrix(rep(7, 31))
+  Ao <- as.matrix(rep(8, 31))
+  Se <- as.matrix(rep(9, 30))
+  Oc <- as.matrix(rep(10, 31))
+  No <- as.matrix(rep(11, 30))
+  De <- as.matrix(rep(12, 31))
+  Mois <- rbind(Ja,Fe,Ma,Av,My,Ju,Jl,Ao,Se,Oc,No,De)
+
+  TimeSerie$MONTHS <- rep(Mois, max(TimeSerie$YEARS)+1-min(TimeSerie$YEARS)) 
+  if (mix == "YES") {
+  TimeSerie <- subset(TimeSerie, select=c(param, YEARS, MONTHS, DayYears, time)) }
+  else { TimeSerie <- subset(TimeSerie, select=c(STATIONS, param, YEARS, MONTHS, DayYears, time)) } }
+  
+ else { if (time.step=="Annual"){
 
    if (mix == "NO") {
    TimeSerie$STATIONS <- do.call("rbind", strsplit(TimeSerie$time,"\\.")) [,1]}
@@ -715,7 +839,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                          }
                                 }
                       }
-           }
+     }      }
  } 
 #_________________________________________________________________________________________________________________________Selection des mois a traiter  
  {
@@ -758,12 +882,12 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
          dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)
          save.figure.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_TimeSeries_",param,".png", sep = "")
          png(save.figure.path)
-         plot(z, ylab=paste(param, "concentration"), xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"
-               , "at station(s): ", liste.stations))
+         plot(z, ylab=paste(param, "concentration"), xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"))
+         title(main=paste("\n\n", "at station(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
          minor.tick(nx=5, ny=2, tick.ratio=0.4)  
          dev.off() 
-         plot(z, ylab=paste(param, "concentration"), xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"
-               , "at station(s): ", liste.stations))} 
+         plot(z, ylab=paste(param, "concentration"), xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"))
+         title(main=paste("\n\n", "at station(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)} 
        else{ } }
   else{ tkmessageBox(message=paste("Cannot build a time series if stations are dissociate", "\n\n", "only Table and Summary are available", "\n\n", "OK to continue", sep=""), icon = "warning", type = "ok", title="!Warning!")  }
  }            
@@ -804,7 +928,9 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
     tktag.add(Envir$txt2, "titre", "end -6 lines linestart","end -6 lines lineend")
     tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
     summary <- paste(summary,collapse="\n")
-    tkinsert(Envir$txt2,"end",paste(summary, "\n\n")) 
+    tkinsert(Envir$txt2,"end",paste(summary, "\n\n"))
+    tkinsert(Envir$txt2,"end", paste("Data quantity (",param,") : ", length(Regularised.data$param[!is.na(Regularised.data$param)]), "\n\n", sep=""))
+    tksee (Envir$txt2,"end") 
     
     summary <- as.matrix(summary(Regularised.data$param))
     summary <- as.data.frame(summary)
@@ -819,10 +945,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       shap <- shapiro.test(z)                                                                  
       shap.p <- shap$p.value                                                             # extrait la valeur de p du test Shapiro et la compare au niveau de significativite
       shap.stat <- round(shap$statistic, digits = 4)  
-      if (shap.p <= 0.05) {
-          Normality.test <- data.frame(c("Normality of the distribution is rejected")) 
-          names(Normality.test) <- "Results                "
-          showData(Normality.test, rowname.bar=NULL) 
+      if (shap.p <= 0.05) {  
           tkinsert(Envir$txt2, "end", paste("-Shapiro-Wilk normality test result-", "\n"))
           tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
           tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
@@ -830,10 +953,15 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                       , "Outliers.removed: ", outliers.re, "   NA.replaced: ", na.replace, "\n"
                                       , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n"))                   
           tkinsert(Envir$txt2, "end", paste("Normality of the distribution is rejected","\n"))
-          return(tkinsert(Envir$txt2, "end", paste("W =", shap.stat, "p-value =",shap.p, "\n\n"))) }
-       else{ Normality.test <- data.frame(c("Normality of the distribution cannot be rejected"))
-          names(Normality.test) <- "Results                     "
-          showData(Normality.test, rowname.bar=NULL)
+          tkinsert(Envir$txt2, "end", paste("W =", shap.stat, "  p-value =",shap.p, "\n\n"))
+          tksee (Envir$txt2,"end") 
+          
+          tkmessageBox (title="Shapiro-Wilk normailty test result",
+                  icon = "info" ,
+                  message = "Normality of the distribution is rejected",
+                  detail = paste("W =", shap.stat, "p-value =",round(shap.p, 4)) ,
+                  type = "ok")     }
+       else{ 
           tkinsert(Envir$txt2, "end", paste("-Shapiro-Wilk normality test result-", "\n"))
           tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
           tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
@@ -841,7 +969,14 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                       , "Outliers.removed: ", outliers.re, "   NA.replaced: ", na.replace, "\n"
                                       , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n"))                  
           tkinsert(Envir$txt2, "end", paste("Normality of the distribution cannot be rejected","\n\n"))
-          return(tkinsert(Envir$txt2, "end", paste("W =", shap.stat, "p-value =",shap.p, "\n\n"))) }}
+          tkinsert(Envir$txt2, "end", paste("W =", shap.stat, "  p-value =",shap.p, "\n\n"))
+          tksee (Envir$txt2,"end") 
+          
+          tkmessageBox (title="Shapiro-Wilk normailty test result",
+                  icon = "info" ,
+                  message = "Normality of the distribution cannot be rejected",
+                  detail = paste("W =", shap.stat, "p-value =",round(shap.p, 4)) ,
+                  type = "ok")   }}
   else{ } 
  }
 #___________________________________________________Affichage du diagramme d'autocorrelation et du spectre de Fourier (options : autocorr et spectrum)
@@ -852,8 +987,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
              dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE) 
              save.autocor.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_AutoCorr_",param,".png", sep = "")
              png(save.autocor.path)
-             acf(z, lag.max = ((nrow(TimeSerie))/2), na.action = na.pass, main=paste("Regularised Time Series of",param,"\n"
-                   , "at station(s): ", liste.stations))  
+             acf(z, lag.max = ((nrow(TimeSerie))/2), na.action = na.pass, main=paste("Regularised Time Series of",param,"\n"))
+             title(main=paste("\n\n\n\n\n", "at station(s): ", liste.stations), cex.main=0.8, outer=TRUE)  
              dev.off() 
           }
       else{ return(tkmessageBox(message="Cannot perform autocorelation if stations are dissociate", icon = "warning", type = "ok", title="!Warning!")) } }
@@ -868,8 +1003,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                  dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE) 
                  save.spectrum.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Spectrum_",param,".png", sep = "")
                  png(save.spectrum.path)
-                 spectrum(z, spans=c(3,5), main=paste("Regularised Time Series of",param,"\n"
-                      , "at station(s): ", liste.stations))  
+                 spectrum(z, spans=c(3,5), main=paste("Regularised Time Series of",param, "\n\n"))
+                 title(main=paste("\n\n\n\n\n\n", "at station(s): ", liste.stations), cex.main=0.8, outer=TRUE)  
                  dev.off() 
               }
           else { return(tkmessageBox(message="Cannot perform spetrum alnaysis : missing values in time series", icon = "warning", type = "ok", title="!Warning!"))} }
@@ -888,13 +1023,13 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                    cc <- cbind(cc, c) }                                                                    # superpose les données obetnues pour chaque mois
               x <- (min(Regularised.data$YEARS):max(Regularised.data$YEARS))
               y <- (1:length(months))
-              filled.contour(x,y,cc, nlevels=64, col=timPalette(64) , xlab="YEARS", ylab="MONTHS", main=paste("Time series anomaly of"
-                             , param, "\n", "at station(s)", liste.stations)) 
+              filled.contour(x,y,cc, nlevels=64, col=timPalette(64) , xlab="YEARS", ylab="MONTHS", main=paste("Time series anomaly of", param, "\n\n"))
+              title(main=paste("\n\n\n\n\n\n", "at station(s): ", liste.stations), cex.main=0.8, outer=TRUE) 
               dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)               
               save.colorplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_ColorPlot_",param,".png", sep = "")
               png(save.colorplot.path) 
-              filled.contour(x,y,cc, nlevels=64, col=timPalette(64) , xlab="YEARS", ylab="MONTHS", main=paste("Time series anomaly of"
-                             , param, "\n", "at station(s)", liste.stations))
+              filled.contour(x,y,cc, nlevels=64, col=timPalette(64) , xlab="YEARS", ylab="MONTHS", main=paste("Time series anomaly of", param, "\n\n"))
+              title(main=paste("\n\n\n\n\n\n", "at station(s): ", liste.stations), cex.main=0.8, outer=TRUE)
               dev.off() }
               
           else { 
@@ -906,15 +1041,15 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                    cc <- cbind(cc, c) }                            
               x <- (min(Regularised.data$YEARS):max(Regularised.data$YEARS))
               y <- (1:length(levels(as.factor(Regularised.data$week.year))))                                     
-              filled.contour(x,y,cc, nlevels=64, col=timPalette(64) , xlab="YEARS", ylab="WEEKS", main=paste("Time series anomaly of"
-                             , param, "\n", "at station(s)", liste.stations)) 
+              filled.contour(x,y,cc, nlevels=64, col=timPalette(64) , xlab="YEARS", ylab="WEEKS", main=paste("\n\n","Time series anomaly of" , param, "\n\n"))
+              title(main=paste("\n\n\n\n\n\n", "at station(s): ", liste.stations), cex.main=0.8, outer=TRUE) 
               dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)               
               save.colorplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_ColorPlot_",param,".png", sep = "")
               png(save.colorplot.path)
-              filled.contour(x,y,cc, nlevels=64, col=timPalette(64) , xlab="YEARS", ylab="WEEKS", main=paste("Time series anomaly of"
-                             , param, "\n", "at station(s)", liste.stations))
+              filled.contour(x,y,cc, nlevels=64, col=timPalette(64) , xlab="YEARS", ylab="WEEKS", main=paste("\n\n","Time series anomaly of" , param, "\n\n"))
+              title(main=paste("\n\n\n\n\n\n", "at station(s): ", liste.stations), cex.main=0.8, outer=TRUE)
               dev.off() } 
-              else { return(tkmessageBox(message="Cannot perform anomaly color.plot with monomens or yearly time step", icon = "warning", type = "ok", title="!Warning!")) } } } 
+              else { return(tkmessageBox(message="Cannot perform anomaly color.plot with monomens, yearly or daily time step", icon = "warning", type = "ok", title="!Warning!")) } } } 
       else { return(tkmessageBox(message="Cannot perform spectrum if stations are dissociate", icon = "warning", type = "ok", title="!Warning!")) } }
   else{}
  }
@@ -948,6 +1083,15 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
       lc.mk <- list()
       lc.mk2 <- list()
       dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)
+    
+    # Limite de detection des test Kendall (periodes de plus de 1 an minimum)
+    LimitD <- ww[2:length(ww)]-ww[1:N]
+    if (time.step == "Daily") { if (LimitD<=F) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {} }
+    else { if (time.step == "Annual") { if (LimitD<=F) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {} }
+           else{ if (time.step == "Mensual") { if (LimitD<=F) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {} } 
+                 else{ if (time.step == "Semi-fortnight") { if (LimitD<=F) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {} } 
+                       else{ if (time.step == "Fortnight") { if (LimitD<=F) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {} } 
+                             else{ if (time.step == "Mono-mensual") { if (LimitD<=F) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {} } }}}}}
       
     # Suivi du test de detection de la tendance effectue sur chaque portion de la serie temporelle idenitfiee avec cusum (option : test)
   
@@ -960,7 +1104,9 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
             else { if (time.step == "Fortnight") {  for (i in 1:N) {
             periods[i] <- list(ts(Regularised.data$param[(ww[i]):(ww[i+1])], start = c((Regularised.data$YEARS[nrow=ww[i]]),(Regularised.data$week.year[nrow=ww[i]])) , deltat = freq)) }}
                 else { if (time.step == "Mono-mensual") { for (i in 1:N) {
-                    periods[i] <- list(ts(Regularised.data$param[(ww[i]):(ww[i+1])], start = c(Regularised.data$MONTHS[nrow=ww[i]]) , deltat = freq)) }}}}}}
+                    periods[i] <- list(ts(Regularised.data$param[(ww[i]):(ww[i+1])], start = c(Regularised.data$MONTHS[nrow=ww[i]]) , deltat = freq)) }}
+                       else { if (time.step == "Daily") { for (i in 1:N) {
+                          periods[i] <- list(ts(Regularised.data$param[(ww[i]):(ww[i+1])], start = c((Regularised.data$YEARS[nrow=ww[i]]), (Regularised.data$DayYears[nrow=ww[i]])) , deltat = freq)) }}}}}}}
  
  
     if (test == "MK") { tkinsert(Envir$txt2,"end", paste("-Local trend results (global)-", "\n"))
@@ -968,7 +1114,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                         tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
                         tkinsert(Envir$txt2, "end", paste( "Parameter: ", param , "   Site(s): ", liste.stations, "\n"
                                                     , "Outliers.removed: ", outliers.re, "   NA.replaced: ", na.replace, "\n"
-                                                    , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n")) 
+                                                    , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n"))
+                        tksee (Envir$txt2,"end")                             
                         for (i in 1:N) { lc.mk[i] <- lapply(periods[[i]], seaKen)
                                          save.localMK.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Local_Global Trend_",param,"_"
                                                                     , start(periods[[i]])[1], ",", start(periods[[i]])[2], "-", end(periods[[i]])[1], ",", end(periods[[i]])[2], ".csv", sep = "")
@@ -977,7 +1124,9 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                                   , "\n", "Trend (sen.slope): ", round(lc.mk[[i]]$sen.slope, 4), "  original units per year"
                                                   , "\n", "%Trend (sen.slope.pct): ", round(lc.mk[[i]]$sen.slope.pct, 4), "  percent of mean quantity per year", "\n"
                                                   , "p.value: ", round(lc.mk[[i]]$p.value, 4)
-                                                  , "\n", "Ref. value of the complete series: ",round(pos$k, 4), "   Mean trend compare to ref. value: ", round(pos$trends[i], 4),"\n\n", sep="")) }}
+                                                  , "\n", "Ref. value of the complete series: ",round(pos$k, 4), "   Mean trend compare to ref. value: ", round(pos$trends[i], 4),"\n\n", sep="")) 
+                                         if (lc.mk[[i]]$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -4 lines linestart","end -4 lines lineend") 
+                                                                           tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier",size=9,weight="bold"))} else {} }}
        else { if (test == "SMK") { tkinsert(Envir$txt2,"end", paste("-Local trend results (seasonal)-", "\n"))
                                    tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
                                    tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
@@ -987,6 +1136,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                                                , "trend (Theil-Sen slope) = original units per year", "\n"
                                                                , "%trend = percent of mean quantity per year", "\n"
                                                                , "missing = proportion of missing slopes", "\n\n", sep=""))
+                                   tksee (Envir$txt2,"end")                            
                                    for (i in 1:N) { lc.mk[i] <- lapply(periods[[i]], seasonTrend)
                                                     lc.mk2[i] <- lapply(periods[[i]], seasonTrend, type = c("slope.pct"))
                                                     smk <- cbind(lc.mk[[i]][-5], lc.mk2[[i]][1])
@@ -994,16 +1144,23 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                                     save.localSMK.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Local_Seasonal Trend_",param,"_"
                                                                                , start(periods[[i]])[1], ",", start(periods[[i]])[2],"-", end(periods[[i]])[1], ",", end(periods[[i]])[2], ".csv", sep = "")
                                                     write.csv2(smk, row.names=FALSE, file=save.localSMK.path) 
-                                                    Lc.Mk <- paste(capture.output(smk), collapse="\n")
+                                                    Lc.Mk <- paste(capture.output(smk))
                                                     tkinsert(Envir$txt2,"end", paste("Period ", i, " :  ", start(periods[[i]])[1], ",", start(periods[[i]])[2], " - "
-                                                                              , end(periods[[i]])[1], "," , end(periods[[i]])[2], "\n"
-                                                                              , Lc.Mk
-                                                                              , "\n\n", "Ref. value of the complete series: ", round(pos$k, 4), "\n", "Mean trend compare to ref. value: ", round(pos$trends[i], 4), "\n\n", sep="")) }}
+                                                                              , end(periods[[i]])[1], "," , end(periods[[i]])[2], "\n"))
+                                                    tkinsert(Envir$txt2,"end", paste(Lc.Mk[1], "\n"))
+                                                    for (j in 1:F) { tkinsert(Envir$txt2,"end", paste(Lc.Mk[j+1], "\n")) 
+                                                       if (is.na(lc.mk[[i]]$p[j])) {} 
+                                                       else { if (lc.mk[[i]]$p[j] <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -2 lines linestart","end -2 lines lineend") 
+                                                       tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier", size=9, weight="bold")) } else {}   } }
+                                                                                                   
+                                                    tkinsert(Envir$txt2,"end", paste("\n", "Ref. value of the complete series: ", round(pos$k, 4), "\n", "Mean trend compare to ref. value: ", round(pos$trends[i], 4), "\n\n", sep="")) }}
            else { return(tkmessageBox(message="Choose a Kendall family test", icon = "warning", type = "ok", title="!Warning!")) }} }
  }                                    
 #___________________________________________________________________________Test de detection de la tendance effectue sur la serie temporelle complete
  {
   if (local.trend == "NO") {
+   if ( (start-end) == 0 ) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {}
+  
   # Seasonal Kendall 
   if (test == "MK") {
       dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)
@@ -1016,9 +1173,12 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                                  , "Outliers.removed: ", outliers.re, "   NA.replaced: ", na.replace, "\n"
                                  , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n"))
       mk <- seaKen(z)                                                                                                            ## 'wq' package ##
-      return(tkinsert(Envir$txt2,"end", paste("Trend (sen.slope): ", round(mk$sen.slope, 4), "  original units per year"
+      tkinsert(Envir$txt2,"end", paste("Trend (sen.slope): ", round(mk$sen.slope, 4), "  original units per year"
                                         , "\n", "%Trend (sen.slope.pct): ", round(mk$sen.slope.pct, 4), "  percent of mean quantity per year", "\n"
-                                        , "p.value: ", round(mk$p.value, 4),"\n\n", sep=""))) }
+                                        , "p.value: ", round(mk$p.value, 4), "\n\n", sep=""))                                      
+      if (mk$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -3 lines linestart","end -3 lines lineend") 
+      tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier",size=9,weight="bold"))} else {} 
+      tksee (Envir$txt2,"end") }
   # Seasonal Kendall with details    
   else { if (test == "SMK") {
        dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)
@@ -1034,25 +1194,32 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
        SMK <- cbind(smk[-5], smk2[1])
        names(SMK)[5]<- "%trend"      
        write.csv2(SMK, row.names=FALSE, file=save.smk.path)
-       SMK <- paste(capture.output(SMK), collapse="\n") 
-       return(tkinsert(Envir$txt2,"end", paste( "trend (Theil-Sen slope) = original units per year", "\n"
+       SMK2 <- paste(capture.output(SMK)) 
+       tkinsert(Envir$txt2,"end", paste( "trend (Theil-Sen slope) = original units per year", "\n"
                                          , "%trend = percent of mean quantity per year", "\n"
-                                         , "missing = proportion of missing slopes", "\n", SMK, "\n\n", sep=""))) }
-       
+                                         , "missing = proportion of missing slopes", "\n", sep=""))
+       tkinsert(Envir$txt2,"end", paste(SMK2[1], "\n"))
+       tksee (Envir$txt2,"end")   
+       for (i in 1:F) { tkinsert(Envir$txt2,"end", paste(SMK2[i+1], "\n")) 
+         if (is.na(smk$p[i])) {}
+         else{ if(smk$p[i]<= 0.05) { tktag.add(Envir$txt2, "titre3", "end -2 lines linestart","end -2 lines lineend") 
+         tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier", size=9, weight="bold")) } else {}   } }
+       tkinsert(Envir$txt2,"end", paste("\n\n", sep=""))  }
+ 
          else { if (test == "LOWESS") {
                    dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)  
                    Loess <- loess(param ~ time, Regularised.data, family="gaussian", span=0.25, control = loess.control(surface = "direct"), na.action=na.exclude)
                    tsLoess <- ts(predict(Loess), start=(min(Regularised.data$YEARS)), deltat=freq)
                    save.loessplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_LOESSplot_",param,".png", sep = "")
                    png(save.loessplot.path)
-                   plot(z, xlab="Years", ylab=paste(param, "concentration"), main=paste("Trend of", param, "based on LOESS"
-                         , "\n", "at station(s): ", liste.stations))
+                   plot(z, xlab="Years", ylab=paste(param, "concentration"), main=paste("Trend of", param, "based on LOESS", "\n"))
+                   title(main=paste("\n\n", "at station(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
                    lines(tsLoess, col="red")
                    legend("topright", inset = 0.01, c("Time Series", "LOESS")
                           , col = c("black", "red"), lwd = 1)
                    dev.off()
-                       plot(z, xlab="Years", ylab=paste(param, "concentration"), main=paste("Trend of", param, "based on LOESS"
-                             , "\n", "at station(s): ", liste.stations))
+                       plot(z, xlab="Years", ylab=paste(param, "concentration"), main=paste("Trend of", param, "based on LOESS", "\n"))
+                       title(main=paste("\n\n", "at station(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)      
                        lines(tsLoess, col="red")
                        legend("topright", inset = 0.01, c("Time Series", "LOESS")
                              , col = c("black", "red"), lwd = 1)                                                                                                                                                          
@@ -1066,9 +1233,12 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
                    tkinsert(Envir$txt2, "end", paste( "Parameter: ", param , "   Site(s): ", liste.stations, "\n"
                                                , "Outliers.removed: ", outliers.re, "   NA.replaced: ", na.replace, "\n"
                                                , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n"))                                                                            
-                   return(tkinsert(Envir$txt2,"end", paste("Trend (sen.slope): ", round(mk2$sen.slope, 4), "  original units per year", "\n"
+                   tkinsert(Envir$txt2,"end", paste("Trend (sen.slope): ", round(mk2$sen.slope, 4), "  original units per year", "\n"
                                                      , "%Trend (sen.slope.pct): ", round(mk2$sen.slope.pct, 4), "  percent of mean quantity per year", "\n"
-                                                     , "p.value: ", round(mk2$p.value, 4),"\n\n", sep=""))) }              
+                                                     , "p.value: ", round(mk2$p.value, 4), "\n\n", sep="")) 
+                   if (mk2$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -3 lines linestart","end -3 lines lineend") 
+                   tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier",size=9,weight="bold"))} else {} 
+                   tksee (Envir$txt2,"end") }              
                 }}      
       }     
       else{ if (test == "NO") { return() } }

@@ -1,35 +1,41 @@
 TTAinterface <- function() {
                  
-Lib()                                                                                                           # appel la fonction Lib.R
+Lib()                                                                                                          # appel la fonction Lib.R
 
 #_________________________________________________________________________________________________Creation de la fenetre principale (tt) et des onglets
- Envir$tt <- tktoplevel()                                                                                       # creation de la page principale
-     tktitle(Envir$tt) <- "Temporal Trend Analysis"                                                             # on donne un nom visible à cette page
-     tkwm.geometry(Envir$tt, "620x630")                                                                         # taille de la fenetre principale
-     Envir$onglets <- tkwidget(Envir$tt, "NoteBook")                                                            # on appel le widget onglet
-
+ Envir$tt <- tktoplevel()                                                                                      # creation de la page principale
+     tktitle(Envir$tt) <- "Temporal Trend Analysis interface"                                                  # on donne un nom visible à cette page
+     tkwm.geometry(Envir$tt, "1200x630")                                                                       # taille de la fenetre principale
+                                                                 
+     Envir$topframe <- tkwidget(Envir$tt,"labelframe", text= "",padx=0,pady=0)                                 # cadre de texte pour afficher les 2 boutons
+     tkconfigure(Envir$topframe, borderwidth=0)                                                                     
+     tkpack(Envir$topframe, fill='both',expand=1, side="left")
+     
+     Envir$onglets <- tkwidget(Envir$topframe, "NoteBook")                                                     # on appel le widget onglet
+     
      Envir$rawdata <- .Tk.newwin(tclvalue(tkinsert(Envir$onglets, "end", "1-Data_managment", "-text", "1-Data_managment")))               # creation de chaque onglet
      Envir$Select <- .Tk.newwin(tclvalue(tkinsert(Envir$onglets, "end", "2-Parameters_selection", "-text", "2-Parameters_selection")))
      Envir$datam <- .Tk.newwin(tclvalue(tkinsert(Envir$onglets, "end", "3-TimeSeries_building", "-text", "3-TimeSeries_building")))
      Envir$trend <- .Tk.newwin(tclvalue(tkinsert(Envir$onglets, "end", "4-Diagnostics/TrendAnalyses", "-text", "4-Diagnostics/TrendAnalyses")))
-     Envir$result <- .Tk.newwin(tclvalue(tkinsert(Envir$onglets, "end", "5-Results/Messages", "-text", "5-Results/Messages")))
-
+ 
 #_______________________________________________________________________________________________________________________________________Onglet Raw Data
 
- getfile <- function() {
+ getfile <- function(inipath) {
 
-     Envir$Name <- tclvalue(tkgetOpenFile(filetypes="{{CSV Files} {.csv}} {{All files} *}"))                   # le chemin du fichier est assigne a Name
-     if (Envir$Name=="") return;                                                                               # si on ne selectionne rien on revient a la paga d'origine
+     ExampleValue <- tclvalue(ExampleValue)
+     if (ExampleValue=="1"){ inipath = file.path(.path.package("TTAinterfaceTrendAnalysis"),"data","SRNDunkerque.csv", fsep=.Platform$file.sep )  }
+     else { inipath = "C:/" }
+
+     Envir$Name <- tclvalue(tkgetOpenFile(filetypes="{{CSV Files} {.csv}}", initialdir =inipath))              # le chemin du fichier est assigne a Name
+     if (Envir$Name=="") { return() };                                                                             # si on ne selectionne rien on revient a la paga d'origine                                                                           
      Envir$Data <- read.csv(Envir$Name, sep=";", na.strings="", dec=".", header=T)                             # les donnees sont enregistre dans Data
-
+     
      Envir$Name.split <- data.frame(strsplit(Envir$Name, "/"))                                                 # morcelle le chemin du fichier (Name)
 
-     Envir$Default.save.WD <- as.character(Envir$Name.split[-length(Envir$Name.split[, 1]), ])                 # supprime le nom du fichier et garde le chemin
-     Envir$default.save.WD <- paste(Envir$Default.save.WD[1], Envir$Default.save.WD[2],sep="/")
-     for (i in 3: (length(Envir$Name.split[, 1])-1)) { 
-          Envir$default.save.WD <- paste(Envir$default.save.WD, Envir$Default.save.WD[i], sep="/") }           # assemble le repertoire de sauvegarde par defaut
-     Envir$save.WD <- Envir$default.save.WD
-
+     Envir$Namelength <- nchar(Envir$Name)
+     Envir$FileLength <- nchar(as.character(Envir$Name.split[nrow(Envir$Name.split), ]))
+     Envir$save.WD <- substr(Envir$Name, 1, Envir$Namelength-Envir$FileLength-1)                               # on ne garde que le chemin du fichier
+     
      Envir$Name.split <- as.character(Envir$Name.split[length(Envir$Name.split[, 1]), ])                       # garde le dernier morceau (nom du fichier)
      Envir$File.Name <- data.frame(strsplit(Envir$Name.split, "\\."))                                          # on fait pareil pour retirer l'extension
      Envir$File.Name <- as.character(Envir$File.Name[1, ])
@@ -39,19 +45,25 @@ Lib()                                                                           
      tkgrid(save.select, column=1, row=3, sticky="w")                                                         
 
      fixdata1 <- function() { fixdata( ) }                                                                     # appel la fonction fixdata.R
-     fixdata.but <- tkbutton(Envir$rawdata, text="Fix Data", command=fixdata1, width=8)                        # bouton fixdata
-     tkconfigure(fixdata.but, foreground="red")
+     imgFixdata <- tclVar()                                                                                                
+     tcl("image","create","photo",imgFixdata,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgFixdata.gif",fsep=.Platform$file.sep))
+     fixdata.but <- tkbutton(Envir$rawdata, image=imgFixdata, text=" Fix Data ", compound="right", command=fixdata1)    # bouton fixdata
      tkgrid(fixdata.but, column=1, row=7, sticky="w")
 
      showdata <- function()  { showData(Envir$Data) }                                                          # appel la fonction showData
-     showdata <- tkbutton(Envir$rawdata,text="Show Data",command=showdata, width=10)                           # bouton showdata
+     imgShowdata <- tclVar()                                                                                                
+     tcl("image","create","photo",imgShowdata,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgShowdata.gif",fsep=.Platform$file.sep))
+     showdata <- tkbutton(Envir$rawdata, image=imgShowdata, text= " Show Data ", compound="right",  height=18,  command=showdata)      # bouton showdata
      tkgrid(showdata, column=1, row=5, sticky="w")
 
-     Envir$Text <- tklabel(Envir$rawdata,text= paste("Current active file: ", Envir$Name.split, "                   "))    # texte montrant le fichier actif
-     tkgrid(Envir$Text, column=1, row=2, sticky="w")
-     tktitle(Envir$tt) <- paste("Temporal Trend Analysis: ", Envir$Name.split)                                             # nom du fichier dans le top panel
+     empty <- "                                                                                                                                 "
 
-     Envir$Text2 <- tklabel(Envir$rawdata,text= paste("Current save directory: ", Envir$save.WD, "                  "))    # texte montrant chemin de sauvegarde
+     Envir$Text <- tklabel(Envir$rawdata,text= paste("Current active file: ", Envir$Name.split, empty))        # texte montrant le fichier actif
+     tkgrid(Envir$Text, column=1, row=2, sticky="w")
+    
+     tktitle(Envir$tt) <- paste("Temporal Trend Analysis interface: ", Envir$Name.split)                       # nom du fichier dans le top panel
+
+     Envir$Text2 <- tklabel(Envir$rawdata,text= paste("Current save directory: ", Envir$save.WD, empty))       # texte montrant chemin de sauvegarde
      tkgrid(Envir$Text2, column=1, row=4, sticky="w")
 
      STAT1 <- function () { FULLoption( param, depth, sal, site, rawdata="YES")  }                             # bouton appelant l'argument rawdata 
@@ -78,9 +90,14 @@ Lib()                                                                           
      
      tkgrid(tklabel(Envir$rawdata, text="      "), column=1, row=12)
      
-     HELP1.but <- tkbutton(Envir$HelpFrame, text=" Help ",command=function() {                                                 # bouton d'aide n°1
-     browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP1.txt",fsep=.Platform$file.sep)) })            # fichier txt a aller chercher
-     tkgrid(HELP1.but, column=1, row=1, sticky="nw")                                                                           # dans la dossier inst/aide
+     imgHelp <- tclVar()                                                                                                
+     tcl("image","create","photo",imgHelp,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgHelp.gif",fsep=.Platform$file.sep))
+     HELP1.but <- tkbutton(Envir$HelpFrame, image=imgHelp, text=" Help ", compound="right", command=function() { Aide1() })            # fichier txt a aller chercher
+     tkgrid(HELP1.but, column=1, row=1, sticky="nw")
+      
+     #HELP1.but <- tkbutton(Envir$HelpFrame, image=imgHelp, text=" Help ", compound="right", command=function() {               # bouton d'aide n°1
+     #browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP1.txt",fsep=.Platform$file.sep)) })            # fichier txt a aller chercher
+     #tkgrid(HELP1.but, column=1, row=1, sticky="nw")                                                                           # dans la dossier inst/aide
 
 #_______________________________________________________________________________________________________________________Onglet Selection des parametres
 
@@ -93,14 +110,19 @@ Lib()                                                                           
                 for (i in 1:length(Env$variables)) { tkinsert(liste1,"end",Env$variables[i]) }                # rempli la premiere liste avec le nom des stations
      liste2 <- tklistbox(Envir$Select,selectmode="extended", activestyle="dotbox", height=10, width=22)       # cree la deuxieme liste (de selection)
 
-     bouton1 <- tkbutton(Envir$Select,text="->",width=5,height=2,command=function() {                         # bouton de selection
+     imgArrowright <- tclVar()                                                                                                
+     tcl("image","create","photo",imgArrowright,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgArrowright.gif",fsep=.Platform$file.sep))
+     imgArrowleft <- tclVar()                                                                                                
+     tcl("image","create","photo",imgArrowleft,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgArrowleft.gif",fsep=.Platform$file.sep))
+      
+     bouton1 <- tkbutton(Envir$Select,image=imgArrowright,width=30,height=30,command=function() {                # bouton de selection
                 if (tclvalue(tkcurselection(liste1))!="") {
                       val <- unlist(strsplit(tclvalue(tkcurselection(liste1)), "\\ "))                           # les stations selectionnees sont stockees dans 'val'
                       selection <- as.numeric(val)+1                                                             # puis sont transformees (+1 car la premiere valeur de la liste = 0)
                       for (i in min(selection):max(selection)) { tkinsert(liste2,"end",Env$variables[i]) }       # insertion des valeurs selectionnees dans la liste 2
                       Env$variables.selectionnees.temp <- c(Env$variables.selectionnees.temp, selection) }       # les valeurs finales selectionnees sont stockees
                 else { tkmessageBox(message="No station selected !",type="ok",icon="info", title="!Warning!") }})
-     bouton2 <- tkbutton(Envir$Select,text="<-",width=5,height=2,command=function() {                            # bouton de deselection
+     bouton2 <- tkbutton(Envir$Select,image=imgArrowleft ,width=30,height=30,command=function() {                # bouton de deselection
                 if (tclvalue(tkcurselection(liste2))!="") {
                       val <- unlist(strsplit(tclvalue(tkcurselection(liste2)), "\\ "))
                       selection <- as.numeric(val)+1
@@ -135,7 +157,7 @@ Lib()                                                                           
                for (i in 1:length(Env2$variables)) { tkinsert(liste3,"end",Env2$variables[i]) }
      liste4 <- tklistbox(Envir$Select,selectmode="single", activestyle="dotbox", height=6, width=22)
 
-     bouton3 <- tkbutton(Envir$Select,text="->",width=5, height=6, command=function() {
+     bouton3 <- tkbutton(Envir$Select,image=imgArrowright, width=30, height=81, command=function() {
                 if (tclvalue(tkcurselection(liste3))!="") {
                    val2 <- unlist(strsplit(tclvalue(tkcurselection(liste3)), "\\ "))
                    selection2 <- as.numeric(val2)+1
@@ -210,8 +232,9 @@ Lib()                                                                           
 
      if (any(colnames(Envir$Data) == "DATES")) {                                                                      # idem pour les annees
 
+            if (is.numeric(Envir$Data$DATES) == TRUE ) { years <- Envir$Data$DATES } else {
             d <- as.Date(Envir$Data$DATES, format="%d/%m/%Y")                                                         # formattage de la date
-            years <- as.numeric(format(d, format = "%Y"))                                                             # on recupere les annees
+            years <- as.numeric(format(d, format = "%Y")) }                                                            # on recupere les annees
 
             year1 <- tclVar(min(years, na.rm=TRUE))                                                                   # boite de texte avec fleches
             SpinBox1 <- tkwidget(Envir$Select
@@ -238,10 +261,13 @@ Lib()                                                                           
            emptybox20<- tklabel(Envir$Select, text="                                          ")
            tkgrid(emptybox20, column=2, row=20)
 
-           mois <- tclVar(c(1:12))                                                               # les mois sous forme de liste de 1 a 12 (separes par un espace)
+           if (is.numeric(Envir$Data$DATES) ==TRUE) { mois <- NULL } else {
+           
+           m <- as.factor(format(d, format = "%m"))
+           mois <- tclVar(as.numeric(levels(m)))                                                 # uniquement les mois present dans la base de donnees (separes par un espace)
            entry.mois <-tkentry(Envir$Select,width="21",textvariable=mois)
            tkgrid(tklabel(Envir$Select,text="Select month(s)"), column=2, row=21)
-           tkgrid(entry.mois, column=2, row=22) }
+           tkgrid(entry.mois, column=2, row=22) } }
 
      else { emptybox10 <- tklabel(Envir$Select, text="!No date in your data!")                   # s'il n'y a pas de colonne DATES
             tkconfigure(emptybox10, foreground="red")
@@ -278,7 +304,8 @@ Lib()                                                                           
            if (any(colnames(Envir$Data) == "DATES")) {                                       
             start <- as.numeric(tclvalue(year1))                                             # annee de debut
             end <- as.numeric(tclvalue(year2))                                               # annee de fin
-            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }                 # mois
+            if (is.numeric(Envir$Data$DATES) ==TRUE) { } else {
+            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) } }                # mois
            else { tkmessageBox(message="No date selected!", icon = "warning", type = "ok", title="!Warning!")}        # erreur si pas de dates
            FULLoption(param, depth, sal, site, rawdata="NO", select="YES", resume.reg="NO", test.normality="NO",      # applique la fonction FULLoption...
                      plotB="NO", plotZ="NO", datashow="NO",                                                           #    ...avec les arguments
@@ -290,9 +317,12 @@ Lib()                                                                           
 
      tkgrid(tklabel(Envir$Select, text="      "), column=0, row=25)
 
-     HELP2.but <- tkbutton(Envir$Select, text=" Help ",command=function() {                           # bouton d'aide n°2
-     browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP2.txt",fsep=.Platform$file.sep)) }) 
+     HELP2.but <- tkbutton(Envir$Select, image=imgHelp, text=" Help ", compound="right",command=function() { Aide2() } )     # bouton d'aide n°2  
      tkgrid(HELP2.but, column=0, row=26, sticky="w")
+     
+     #HELP2.but <- tkbutton(Envir$Select, image=imgHelp, text=" Help ", compound="right",command=function() {                # bouton d'aide n°2
+     #browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP2.txt",fsep=.Platform$file.sep)) }) 
+     #tkgrid(HELP2.but, column=0, row=26, sticky="w")
 
 #_________________________________________________________________________________________________________________________________Onglet regularisation
 
@@ -335,7 +365,8 @@ Lib()                                                                           
            if (any(colnames(Envir$Data) == "DATES")) {
             start <- as.numeric(tclvalue(year1))
             end <- as.numeric(tclvalue(year2))
-            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }
+            if (is.numeric(Envir$Data$DATES) ==TRUE) { } else {
+            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }  }
            else { tkmessageBox(message="no date selected", icon = "warning", type = "ok", title="!Warning!")}
            FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
                      plotB="YES", plotZ="NO", datashow="NO",
@@ -347,7 +378,7 @@ Lib()                                                                           
 
      tkgrid(tklabel(Envir$datam, text="              "), column=0, row=1)
 
-     LabeledFrame2 <- tkwidget(Envir$datam,"labelframe",text="Select the time step for your final time series",padx=25,pady=10)
+     LabeledFrame2 <- tkwidget(Envir$datam,"labelframe",text="Select the data frequency in your final time series",padx=25,pady=10)
      tkgrid(LabeledFrame2, column=0, row=2, sticky="w")
      
          rb1 <- tkradiobutton(LabeledFrame2)                                                     # radio buttons pour le time step
@@ -357,21 +388,25 @@ Lib()                                                                           
          rb5 <- tkradiobutton(LabeledFrame2)
          rb6 <- tkradiobutton(LabeledFrame2)
          rb7 <- tkradiobutton(LabeledFrame2)
-         rb1Value <- tclVar("auto")
+         rb8 <- tkradiobutton(LabeledFrame2) 
+         if (is.numeric(Envir$Data$DATES) ==TRUE) { rb1Value <- tclVar("Annual") } else {
+         rb1Value <- tclVar("auto") }
          tkconfigure(rb1,variable=rb1Value,value="Annual")                                       # valeur de l'argument pour chaque bouton
          tkconfigure(rb2,variable=rb1Value,value="Mensual")
          tkconfigure(rb3,variable=rb1Value,value="Fortnight")
          tkconfigure(rb4,variable=rb1Value,value="Semi-fortnight")
          tkconfigure(rb5,variable=rb1Value,value="Mono-mensual")
-         tkconfigure(rb6,variable=rb1Value,value="help")
-         tkconfigure(rb7,variable=rb1Value,value="auto")
-         tkgrid(tklabel(LabeledFrame2,text="Yearly "),rb1, sticky="w")                           # texte afficher a cote de chaque bouton
-         tkgrid(tklabel(LabeledFrame2,text="Monthly "),rb2, sticky="w")
-         tkgrid(tklabel(LabeledFrame2,text="Fortnightly "),rb3, sticky="w")
+         tkconfigure(rb6,variable=rb1Value,value="Daily")
+         tkconfigure(rb7,variable=rb1Value,value="help")
+         tkconfigure(rb8,variable=rb1Value,value="auto")
+         tkgrid(tklabel(LabeledFrame2,text="Daily "),rb6, sticky="w")                            # texte afficher a cote de chaque bouton
          tkgrid(tklabel(LabeledFrame2,text="Semi-fortnightly "),rb4, sticky="w")
-         tkgrid(tklabel(LabeledFrame2,text="Monomensualy "),rb5, sticky="w")
-         tkgrid(tklabel(LabeledFrame2,text="Guidance to choose the time step "),rb6, sticky="w")
-         tkgrid(tklabel(LabeledFrame2,text="Auto "),rb7, sticky="w")
+         tkgrid(tklabel(LabeledFrame2,text="Fortnightly "),rb3, sticky="w")
+         tkgrid(tklabel(LabeledFrame2,text="Monthly "),rb2, sticky="w")
+         tkgrid(tklabel(LabeledFrame2,text="Yearly "),rb1, sticky="w")                           
+         tkgrid(tklabel(LabeledFrame2,text="Monomensualy (see help)"),rb5, sticky="w")
+         tkgrid(tklabel(LabeledFrame2,text="Guidance to choose the frequency "),rb7, sticky="w")
+         tkgrid(tklabel(LabeledFrame2,text="Auto "),rb8, sticky="w") 
 
      tkgrid(tklabel(Envir$datam, text="              "), column=0, row=3)
 
@@ -384,7 +419,8 @@ Lib()                                                                           
          rb4 <- tkradiobutton(LabeledFrame3)
          rb5 <- tkradiobutton(LabeledFrame3)
          rb6 <- tkradiobutton(LabeledFrame3)
-         rb2Value <- tclVar("auto")
+         if (is.numeric(Envir$Data$DATES) ==TRUE) { rb2Value <- tclVar("Mean") } else {
+         rb2Value <- tclVar("auto") }
          tkconfigure(rb1,variable=rb2Value,value="Mean")
          tkconfigure(rb2,variable=rb2Value,value="Median")
          tkconfigure(rb3,variable=rb2Value,value="Quantile")
@@ -395,8 +431,8 @@ Lib()                                                                           
          tkgrid(tklabel(LabeledFrame3,text="Median "),rb2, sticky="w")
          tkgrid(tklabel(LabeledFrame3,text="Quantile 0.9 "),rb3, sticky="w")
          tkgrid(tklabel(LabeledFrame3,text="Maximum "),rb4, sticky="w")
-         tkgrid(tklabel(LabeledFrame3,text="Guidance to choose the method "),rb5, sticky="w")
-         tkgrid(tklabel(LabeledFrame3,text="Auto "),rb6, sticky="w")
+         tkgrid(tklabel(LabeledFrame3,text="Guidance to choose the method      "),rb5, sticky="w")
+         tkgrid(tklabel(LabeledFrame3,text="Auto "),rb6, sticky="w") 
 
          tkgrid(tklabel(Envir$datam, text="              "), column=2, row=2)
          
@@ -431,7 +467,8 @@ Lib()                                                                           
            if (any(colnames(Envir$Data) == "DATES")) {
             start <- as.numeric(tclvalue(year1))
             end <- as.numeric(tclvalue(year2))
-            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }
+            if (is.numeric(Envir$Data$DATES) ==TRUE) { } else {
+            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) } }
            else { tkmessageBox(message="no date selected", icon = "warning", type = "ok", title="!Warning!")}
 
           cb2Value <- as.character(tclvalue(cb2Value))                           # valeur de l'argument na.replace
@@ -447,6 +484,7 @@ Lib()                                                                           
           if (rb1Value=="Fortnight"){ time.step <- "Fortnight" }
           if (rb1Value=="Semi-fortnight"){ time.step <- "Semi-fortnight" }
           if (rb1Value=="Mono-mensual"){ time.step <- "Mono-mensual" }
+          if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ help.timestep <- "N0" }
@@ -498,7 +536,8 @@ Lib()                                                                           
            if (any(colnames(Envir$Data) == "DATES")) {
             start <- as.numeric(tclvalue(year1))
             end <- as.numeric(tclvalue(year2))
-            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }
+            if (is.numeric(Envir$Data$DATES) ==TRUE) { } else {
+            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) } }
            else { tkmessageBox(message="no date selected", icon = "warning", type = "ok", title="!Warning!")}
 
           cb2Value <- as.character(tclvalue(cb2Value))
@@ -514,6 +553,7 @@ Lib()                                                                           
           if (rb1Value=="Fortnight"){ time.step <- "Fortnight" }
           if (rb1Value=="Semi-fortnight"){ time.step <- "Semi-fortnight" }
           if (rb1Value=="Mono-mensual"){ time.step <- "Mono-mensual" }
+          if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ help.timestep <- "N0" }
@@ -565,7 +605,8 @@ Lib()                                                                           
            if (any(colnames(Envir$Data) == "DATES")) {
             start <- as.numeric(tclvalue(year1))
             end <- as.numeric(tclvalue(year2))
-            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }
+            if (is.numeric(Envir$Data$DATES) ==TRUE) { } else {
+            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) } }
            else { tkmessageBox(message="no date selected", icon = "warning", type = "ok", title="!Warning!")}
 
           cb2Value <- as.character(tclvalue(cb2Value))
@@ -581,6 +622,7 @@ Lib()                                                                           
           if (rb1Value=="Fortnight"){ time.step <- "Fortnight" }
           if (rb1Value=="Semi-fortnight"){ time.step <- "Semi-fortnight" }
           if (rb1Value=="Mono-mensual"){ time.step <- "Mono-mensual" }
+          if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ help.timestep <- "N0" }
@@ -610,31 +652,42 @@ Lib()                                                                           
 
      tkgrid(tklabel(Envir$datam, text="      "), column=0, row=5)
 
-     HELP3.but <- tkbutton(Envir$datam, text=" Help ",command=function() {                            # bouton d'aide n°3
-     browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP3.txt",fsep=.Platform$file.sep)) })
+     HELP3.but <- tkbutton(Envir$datam, image=imgHelp, text=" Help ", compound="right", command=function() { Aide3() })       # bouton d'aide n°3
      tkgrid(HELP3.but, column=0, row=6, sticky="w")
+     
+     #HELP3.but <- tkbutton(Envir$datam, image=imgHelp, text=" Help ", compound="right", command=function() {                 # bouton d'aide n°3
+     #browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP3.txt",fsep=.Platform$file.sep)) })
+     #tkgrid(HELP3.but, column=0, row=6, sticky="w")
 
 #_______________________________________________________________________________________________________________________________________Onglet analyses
 
      LabeledFrame4 <- tkwidget(Envir$trend,"labelframe",text="Diagnostics (optional)",padx=25,pady=10)
      tkgrid(LabeledFrame4, column=0, row=0, sticky="w")
+     
+     diagFrame <- tkwidget(LabeledFrame4,"labelframe",padx=0,pady=0)
+     tkconfigure(diagFrame, borderwidth=0)
+     tkpack(diagFrame, side="left")
 
-     rb17 <- tkradiobutton(LabeledFrame4)                                                             # radio bouton du choix du diagnostic
-     rb18 <- tkradiobutton(LabeledFrame4)
-     rb19 <- tkradiobutton(LabeledFrame4)
-     rb20 <- tkradiobutton(LabeledFrame4)
-     rb21 <- tkradiobutton(LabeledFrame4)
+     rb17 <- tkradiobutton(diagFrame)                                                             # radio bouton du choix du diagnostic
+     rb18 <- tkradiobutton(diagFrame)
+     rb19 <- tkradiobutton(diagFrame)
+     rb20 <- tkradiobutton(diagFrame)
+     rb21 <- tkradiobutton(diagFrame)
      rb5Value <- tclVar("2")
      tkconfigure(rb17,variable=rb5Value,value="1")                                                    # valeur donnee a chaque bouton
      tkconfigure(rb18,variable=rb5Value,value="2")
      tkconfigure(rb19,variable=rb5Value,value="3")
      tkconfigure(rb20,variable=rb5Value,value="4")
      tkconfigure(rb21,variable=rb5Value,value="5")
-     tkgrid(tklabel(LabeledFrame4,text="Spectrum analysis*    "),rb17, sticky="w")                    # texte afficher avec chaque bouton
-     tkgrid(tklabel(LabeledFrame4,text="Autocorrelation    "),rb18, sticky="w")
-     tkgrid(tklabel(LabeledFrame4,text="Shapiro normality test    "),rb19, sticky="w")
-     tkgrid(tklabel(LabeledFrame4,text="Anomaly (color.plot)    "),rb20, sticky="w")
-     tkgrid(tklabel(LabeledFrame4,text="Seasonal decomposition*  "),rb21, sticky="w")
+     tkgrid(tklabel(diagFrame,text="Spectrum analysis*    "),rb17, sticky="w")                    # texte afficher avec chaque bouton
+     tkgrid(tklabel(diagFrame,text="Autocorrelation    "),rb18, sticky="w")
+     tkgrid(tklabel(diagFrame,text="Shapiro normality test    "),rb19, sticky="w")
+     tkgrid(tklabel(diagFrame,text="Anomaly (color.plot)    "),rb20, sticky="w")
+     tkgrid(tklabel(diagFrame,text="Seasonal decomposition*  "),rb21, sticky="w")
+     
+      
+     imgProcess <- tclVar()                                                                                                
+     tcl("image","create","photo",imgProcess,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgProcess.gif",fsep=.Platform$file.sep))
 
 #_______________________________________________________________________________bouton de diagnostic
      OnOK3 <- function()  {
@@ -661,7 +714,8 @@ Lib()                                                                           
            if (any(colnames(Envir$Data) == "DATES")) {
             start <- as.numeric(tclvalue(year1))
             end <- as.numeric(tclvalue(year2))
-            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }
+            if (is.numeric(Envir$Data$DATES) ==TRUE) { } else {
+            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) } }
            else { tkmessageBox(message="no date selected", icon = "warning", type = "ok", title="!Warning!")}
 
           cb2Value <- as.character(tclvalue(cb2Value))
@@ -677,6 +731,7 @@ Lib()                                                                           
           if (rb1Value=="Fortnight"){ time.step <- "Fortnight" }
           if (rb1Value=="Semi-fortnight"){ time.step <- "Semi-fortnight" }
           if (rb1Value=="Mono-mensual"){ time.step <- "Mono-mensual" }
+          if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ help.timestep <- "N0" }
@@ -713,40 +768,46 @@ Lib()                                                                           
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
                  autocorr, spectrum, anomaly, zsmooth, local.trend="NO", test="NO") }
-     OK3.but <- tkbutton(LabeledFrame4, text="   Run   ",command=OnOK3)
-     tkgrid(OK3.but, column=2, row=2)
+     OK3.but <- tkbutton(LabeledFrame4, image=imgProcess, text=" Run ", compound="right", command=OnOK3)
+     tkpack(OK3.but, side="right")
 #_______________________________________________________________________________fin du bouton
      
-     tkgrid(tklabel(Envir$trend, text="  "), column=0, row=2)
-
+     tkgrid(tklabel(Envir$trend, text="* Cannot be perform with missing values", font=tkfont.create(size=7)), column=0, row=2, sticky="w")
+     tkgrid(tklabel(Envir$trend, text="      "), column=0, row=3)
+     
      LabeledFrame5 <- tkwidget(Envir$trend,"labelframe",text="Trend Analyses",padx=25,pady=10)
-     tkgrid(LabeledFrame5, column=0, row=3, sticky="w")
-
-     cb10 <- tkcheckbutton(LabeledFrame5)                                                        # check button pour cusum
+     tkgrid(LabeledFrame5, column=0, row=4, sticky="w")
+     
+     testFrame <- tkwidget(LabeledFrame5,"labelframe",padx=0,pady=0)
+     tkconfigure(testFrame, borderwidth=0)
+     tkpack(testFrame, side="left")
+     
+     cb10 <- tkcheckbutton(testFrame)                                                        # check button pour cusum
      cb10Value <- tclVar("0")
      tkconfigure(cb10,variable=cb10Value)
-     tkgrid(tklabel(LabeledFrame5,text="Cumulative sum"), column=0, row=1, sticky="w")
+     tkgrid(tklabel(testFrame,text="Cumulative sum*"), column=0, row=1, sticky="w")
      tkgrid(cb10, column=1, row=1)
 
-     rb12 <- tkradiobutton(LabeledFrame5)                                                        # radio button du choix de l'analyse
-     rb13 <- tkradiobutton(LabeledFrame5)
-     rb14 <- tkradiobutton(LabeledFrame5)
-     rb15 <- tkradiobutton(LabeledFrame5)
-     rb16 <- tkradiobutton(LabeledFrame5)
-     rb4Value <- tclVar("seasonMann")
+     rb12 <- tkradiobutton(testFrame)                                                        # radio button du choix de l'analyse
+     rb13 <- tkradiobutton(testFrame)
+     rb14 <- tkradiobutton(testFrame)
+     rb15 <- tkradiobutton(testFrame)
+     rb16 <- tkradiobutton(testFrame)
+     if (is.numeric(Envir$Data$DATES) ==TRUE) { rb4Value <- tclVar("MannKen") } else {
+     rb4Value <- tclVar("seasonMann") }
      tkconfigure(rb12,variable=rb4Value,value="seasonMann")                                      # valeur de chaque bouton
      tkconfigure(rb13,variable=rb4Value,value="MannKen")
      tkconfigure(rb14,variable=rb4Value,value="MixingDiagram")
      tkconfigure(rb15,variable=rb4Value,value="Extended")
      tkconfigure(rb16,variable=rb4Value,value="Lowess")
-     tkgrid(tklabel(LabeledFrame5,text="Seasonal Trend "),rb12, row=2, sticky="w")               # texte affiche
-     tkgrid(tklabel(LabeledFrame5,text="Global Trend "),rb13, row=3, sticky="w")
-     tkgrid(tklabel(LabeledFrame5,text="Using Mixing Diagram"),rb14, row=6, sticky="w")
-     tkgrid(tklabel(LabeledFrame5,text="Trend based on LOESS   "),rb16, row=4, sticky="w")
+     tkgrid(tklabel(testFrame,text="Seasonal Trend "),rb12, row=2, sticky="w")               # texte affiche
+     tkgrid(tklabel(testFrame,text="Global Trend "),rb13, row=3, sticky="w")
+     tkgrid(tklabel(testFrame,text="Using Mixing Diagram"),rb14, row=6, sticky="w")
+     tkgrid(tklabel(testFrame,text="Trend based on LOESS   "),rb16, row=4, sticky="w")
 
      Npsu <- tclVar(c(30))                                                                       # choix de la valeur de la salinite de standardisation
-     entry.npsu <-tkentry(LabeledFrame5, width="4", textvariable=Npsu)                           # (30 par defaut)
-     tkgrid(tklabel(LabeledFrame5, text="      --> select psu"), row= 7, column=0, sticky="w")
+     entry.npsu <-tkentry(testFrame, width="4", textvariable=Npsu)                           # (30 par defaut)
+     tkgrid(tklabel(testFrame, text="      --> select psu"), row= 7, column=0, sticky="w")
      tkgrid(entry.npsu, row=7, column =0, sticky="e")
 
 #_______________________________________________________________________________bouton d'appel de l'analyse temporelle
@@ -774,7 +835,8 @@ Lib()                                                                           
            if (any(colnames(Envir$Data) == "DATES")) {
             start <- as.numeric(tclvalue(year1))
             end <- as.numeric(tclvalue(year2))
-            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }
+            if (is.numeric(Envir$Data$DATES) ==TRUE) { } else {
+            months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) } }
            else { tkmessageBox(message="no date selected", icon = "warning", type = "ok", title="!Warning!")}
 
           cb2Value <- as.character(tclvalue(cb2Value))
@@ -790,6 +852,7 @@ Lib()                                                                           
           if (rb1Value=="Fortnight"){ time.step <- "Fortnight" }
           if (rb1Value=="Semi-fortnight"){ time.step <- "Semi-fortnight" }
           if (rb1Value=="Mono-mensual"){ time.step <- "Mono-mensual" }
+          if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ help.timestep <- "N0" }
@@ -827,21 +890,44 @@ Lib()                                                                           
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm, npsu,
                  autocorr = "NO", spectrum="NO",anomaly="NO", zsmooth="NO", local.trend, test) }
-     OK4.but <- tkbutton(LabeledFrame5, text="   Run   ",command=OnOK4)
-     tkgrid(OK4.but, column=2, row=3)
+     OK4.but <- tkbutton(LabeledFrame5, image=imgProcess, text=" Run ", compound="right", command=OnOK4)
+     tkpack(OK4.but, side="right")
 #_______________________________________________________________________________fin du bouton      
 
-     tkgrid(tklabel(Envir$trend, text="* Cannot be perform with missing values", font=tkfont.create(size=7)), column=0, row=4, sticky="w")
-     tkgrid(tklabel(Envir$trend, text="      "), column=0, row=5)
+     tkgrid(tklabel(Envir$trend, text="* Selected periods should be longer than 1 year", font=tkfont.create(size=7)), column=0, row=5, sticky="w")
+     tkgrid(tklabel(Envir$trend, text="      "), column=0, row=6)
 
-     HELP4.but <- tkbutton(Envir$trend, text=" Help ",command=function() {                                # bouton d'aide n°4
-     browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP4.txt",fsep=.Platform$file.sep)) })
-     tkgrid(HELP4.but, column=0, row=6, sticky="w")
+     HELP4.but <- tkbutton(Envir$trend, image=imgHelp, text=" Help ", compound="right", command=function() { Aide4() })      # bouton d'aide n°4
+     tkgrid(HELP4.but, column=0, row=7, sticky="w")
+     
+     #HELP4.but <- tkbutton(Envir$trend, image=imgHelp, text=" Help ", compound="right", command=function() {                # bouton d'aide n°4
+     #browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP4.txt",fsep=.Platform$file.sep)) })
+     #tkgrid(HELP4.but, column=0, row=7, sticky="w")  
+       
    }
 #_______________________________________________________________________________fin de la boucle d'ouverture du fichier   
-    open <- tkbutton(Envir$rawdata,text="Import CSV File",command=getfile, width=13)   # open button (ce n'est qu'une fois selectionne que tout le
-    tkgrid(open, column=1, row=1, sticky="w")                                          #    programme ci-dessus se lance)
-                                                                                       # ce qui suit est affiche avant que les donnees ne soit importees
+    Envir$openframe <- tkwidget(Envir$rawdata,"labelframe",text="",padx=0,pady=0)
+    tkconfigure(Envir$openframe, borderwidth=0)
+    tkgrid(Envir$openframe, column=1, row=1, sticky="w")
+    open <- tkbutton(Envir$openframe,text="Import CSV File", command=getfile , width=13)   
+    #open <- tkbutton(Envir$openframe,text="Import CSV File", command=function() {
+    #getfile(inipath="C:/") } , width=13) 
+    tkgrid(open, column=1, row=1, sticky="w")                                            
+    
+    tkgrid(tklabel(Envir$openframe, text="  "), column=2, row=1)
+    
+    Example <- tkcheckbutton(Envir$openframe)                                                        
+    ExampleValue <- tclVar("0")
+    tkconfigure(Example,variable=ExampleValue)
+    tkgrid(tklabel(Envir$openframe,text="-> open data example (SRNDunkerque)"), column=4, row=1, sticky="w")
+    tkgrid(Example, column=3, row=1, sticky="e")
+      
+#________________________________________________________ce qui suit est affiche avant que les donnees ne soit importees
+    logoRcran <- tclVar()                                                                                                
+    tcl("image","create","photo",logoRcran,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","Small_Logo_R.gif",fsep=.Platform$file.sep))
+    imgAsLabel2 <- tklabel(Envir$openframe,image=logoRcran)
+    tkgrid(imgAsLabel2, column=0, row=1, sticky="w")
+    
     Text3 <- tklabel(Envir$rawdata,text= "Need R v2.14+ to work")                      # texte montrant la version minimum de R
     tkconfigure(Text3, font=tkfont.create(size=7))                                              
     tkgrid(Text3, column=1, row=11, sticky="w")
@@ -870,20 +956,43 @@ Lib()                                                                           
     Envir$HelpFrame <- tkwidget(Envir$rawdata,"labelframe", text="", padx=0,pady=0)                                     # cadre de texte pour afficher les 2 boutons
     tkconfigure(Envir$HelpFrame, borderwidth=0)                                                                     
     tkgrid(Envir$HelpFrame, column=1, row=13, sticky="w")
-    HELP5.but <- tkbutton(Envir$HelpFrame, text=" User Guide ",command=function() {                                     # bouton d'appel du guide utilisateur
-    browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","UserGuide.pdf",fsep=.Platform$file.sep)) })
+    imgUserguide <- tclVar()                                                                                                
+    tcl("image","create","photo",imgUserguide,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgUserguide.gif",fsep=.Platform$file.sep))
+    HELP5.but <- tkbutton(Envir$HelpFrame, image=imgUserguide, text=" User Guide ", compound="right",command=function() {             # bouton d'appel du guide utilisateur
+    browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"doc","UserGuide.pdf",fsep=.Platform$file.sep)) })
     tkgrid(HELP5.but, column=0, row=1, sticky="nw")
     
     tkgrid(tklabel(Envir$HelpFrame, text="      "), column=1, row=1)
     tkgrid(tklabel(Envir$HelpFrame, text="                                                        "), column=2, row=1)
-    
-    logoifr <- tclVar()                                                                                                 # affichage du logo
-    tcl("image","create","photo",logoifr,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","Logo_R.gif",fsep=.Platform$file.sep))
-    imgAsLabel <- tklabel(Envir$HelpFrame,image=logoifr)
-    tkgrid(imgAsLabel, column=3, row=1, sticky="e")
-    
-#________________________________________________________________________________________________________________________________________Onglet results
 
+    #Example.data <- tkbutton(Envir$HelpFrame, text=" Data example ", compound="right", command=function() {          # bouton pour appeler le 
+    #getfile( inipath <- file.path(.path.package("TTAinterfaceTrendAnalysis"),"data","SRNDunkerque.csv", fsep=.Platform$file.sep )) })  # fichier example Gravelines
+    #tkgrid(Example.data, column=0, row=2, sticky="sw")
+       
+    #logoifr <- tclVar()                                                                                                 # affichage du logo ifremer
+    #tcl("image","create","photo",logoifr,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","Logo_Ifremer.gif",fsep=.Platform$file.sep))
+    #imgAsLabel <- tklabel(Envir$HelpFrame,image=logoifr)
+    #tkgrid(imgAsLabel, column=3, row=1, sticky="e")
+    
+    tkwm.protocol(Envir$tt, "WM_DELETE_WINDOW" , function ( ) {                                           # demande de confirmation avant fermeture de l'interface
+                  response <- tkmessageBox (title="TTAinterface",
+                  icon = "question" ,
+                  message = paste("Anlysis of", Envir$Name.split, "in progress"),
+                  detail = "Do you want to quit the interface?" ,
+                  type = "yesno" ,
+                  parent = Envir$tt)
+                  if (as.character(response) == "no")
+                  return( )
+                  tkdestroy(Envir$tt) } )
+
+#______________________________________________________________________________________________________________________fin du remplissage de l'interface
+tkpack(Envir$onglets, fill="both",expand=1)
+tcl(Envir$onglets,"raise","1-Data_managment")
+
+    Envir$result <- tkwidget(Envir$tt,"labelframe", text= "",padx=0,pady=0)                                     
+    tkconfigure(Envir$result, borderwidth=0)                                                                     
+    tkpack(Envir$result, fill='both',expand=TRUE, side="right")
+     
     textframe1 <- tkwidget(Envir$result,"labelframe",text="Messages window", padx=5, pady=5)              # cadre de la fenetre 1 (message)
     tkconfigure(textframe1, font=tkfont.create(size=10, weight="bold"),borderwidth=0)               
     textframe2 <- tkwidget(Envir$result,"labelframe",text="Results window", padx=5, pady=5)               # cadre de la fenetre 2 (resultats)
@@ -913,9 +1022,6 @@ Lib()                                                                           
     tkpack(yscr2,side="right",fill="y")
     tkpack(xscr2,side="bottom",fill="x")
     tkpack(Envir$txt2,fill="both",expand=1)
-    tkpack(tkbutton(textframe2, text="-Clear-", command=function(){ tkdelete(Envir$txt2, "1.0", "end") } ), side="bottom", fill="x")
-
-#______________________________________________________________________________________________________________________fin du remplissage de l'interface
-tkpack(Envir$onglets,fill="both",expand=1)
-tcl(Envir$onglets,"raise","1-Data_managment")
+    tkpack(tkbutton(textframe2, text="-Clear-", command=function(){ tkdelete(Envir$txt2, "1.0", "end") } ), side="bottom", fill="x")  
+    
 }

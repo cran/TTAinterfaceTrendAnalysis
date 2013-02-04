@@ -1,20 +1,23 @@
 This is the first panel of the Temporal Trend Analysis Interface
 
-This panel shows 4 options/buttons:
+This panel shows 6 options/buttons:
 
-    _The first give you the possibility to import your data file in the interface.
+    _The <Import CSV File> button give you the possibility to import your data file in the interface.
      
      This file must be a 'csv' file. 'csv' files can be created using Microsoft Excel
      or OpenOffice Calc. In a 'csv' file data column are separated with ';'. 
      Decimal separator must be '.' (dote) and not ',' (comma).
 
-    _The second give you the possibility to change the path where the results and figures 
-     will be saved(by default it's the same path as your .csv file). Each time you import a new
+    _The <Select your save directory> button give you the possibility to change the path where results and figures 
+     will be saved (by default it's the same path as your .csv file). Each time you import a new
      data file, the path is return to default.
 
-    _The third give you the possibility to show the data you just import in a data frame
+    _The <Show Data> button give you the possibility to show the data you just import in a data frame
 
-    _The forth give you the possibility to fix some problem that can occur during the importation
+    _The <Summary> button call the descriptive statistics of the raw data, display in the result window
+     (the right part of the interface) and in the front of the screen.
+
+    _The <Fix Data> give you the possibility to fix some problem that can occur during the importation
      of your data.
 
      The most common problem is the absence of parameter/dates or stations in the interface.
@@ -29,8 +32,5 @@ This panel shows 4 options/buttons:
 
      Each time the fix button is used, the new file will be saved as filename_fixed.csv
 
-    _The fifth show you the descriptive statistics of the raw data, display in the result window
-     (panel 5) and in the front of the screen.
-
-The text between button 2 and 3 show the active file (also show in the header of the interface)
-The text after button 5 show the current path where results are saved
+The text between button 1 and 2 show the active file (also show in the header of the interface)
+The text between button 2 and 3 show the current path where results are saved

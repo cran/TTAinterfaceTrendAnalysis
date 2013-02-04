@@ -3,44 +3,43 @@ This is the forth panel of the interface
 Here, you can observe some of the data characteristics or proceed to temporal
 trend analysis.
 
-      _The diagnostics. They are here to give you extra information about your time series.
+      _The <Diagnostics> box, propose different options that give some extra informations about your time series.
 
-
-       Spectrum analysis estimates the spectral density of the time series. Pick value
+       <Spectrum analysis> estimates the spectral density of the time series. Pick value
        in the figure show you the major frequencies of your time series. If your time step
        is monthly and the major frequency is 1 then the time series have a cycle of 12 months.
        A time series could have more than one identified frequency.
 
-       Autocorrelation compute an autocorrelation function on the time series and display
+       <Autocorrelation> compute an autocorrelation function on the time series and display
        a figure of the result.
 
-       Shapiro normality test, test the normality of the time series distribution. 
+       <Shapiro normality test>, test the normality of the time series distribution. 
 
-       Anomaly (color.plot) draw a color plot by year each time.step (months or weeks)
+       <Anomaly (color.plot)> draw a color plot by year each time.step (months or weeks)
        minus the mean of the time.step of all years. Red colors show positive anomalies and
        blue colors negative anomalies.
 
-       Detrended decompose a time series into seasonal, trend and irregular components using 
+       <Seasonal decomposition> decompose a time series into seasonal, trend and irregular components using 
        loess and display the results in a figure (with remainder=residuals). 
 
-      _Trend analysis. You can perform a temporal trend analysis on the time series
+
+      _ In the <Trend analysis> box you can perform a temporal trend analysis on the time series
        you compute through the interface.
 
-
-       Cumulative sum let you show the cusum curve of your time series ('pastecs' package), 
+       <Cumulative sum> let you show the cusum curve of your time series ('pastecs' package), 
        select interesting periods and perform Kendall family test on these sub-series.
 
-       Seasonal Trend performs a Seasonal Mann-Kendall test ('wq' package) on your time series.
+       <Seasonal Trend> performs a Seasonal Mann-Kendall test ('wq' package) on your time series.
        Mann-Kendall is therefore compute on each season or time step you choose (i.e. weeks, 
        months...)
 
-       Global Trend perform a Seasonal Mann Kendall on the entire time series, taking into account
+       <Global Trend> perform a Seasonal Mann Kendall on the entire time series, taking into account
        the seasonality of your data.
        
-       Trend based on LOESS fit a polynomial surface determined by one or more numerical predictors, 
+       <Trend based on LOESS> fit a polynomial surface determined by one or more numerical predictors, 
        using local fitting. A Global Trend with Sen's slope is perform on this fitting.
 
-       Trend based on mixing diagram used normalized value of nutrient concentration at salinity npsu for each year. 
+       <Trend based on mixing diagram> used normalized value of nutrient concentration at salinity npsu for each year. 
        This is obtain by doing a linear regression between salinity and nutrient concentration of this year. 
        The nutrient concentration predicted by the regression at salinity npsu is kept for the year. 
        The final curve is obtain by plotting the predicted nutrient concentration for each year.
