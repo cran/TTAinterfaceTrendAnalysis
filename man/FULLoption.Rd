@@ -11,12 +11,13 @@ This is the core function of the interface. It receive arguments from the
 \usage{
 FULLoption(param, depth = NULL, sal = NULL, site = NULL, rawdata = "NO"
            , select = "NO" , resume.reg = "NO", test.normality = "NO"
-           , plotB = "NO", plotZ = "NO", datashow = "NO", help.timestep = "NO"
-           , auto.timestep = "NO", time.step = NULL, help.aggreg = "NO"
-           , auto.aggreg = "NO", aggreg = NULL, mix = "YES", outliers.re = "NO"
-           , na.replace = "NO", start = NULL, end = NULL, months = c(1:12)
-           , norm = "NO", npsu = 30, autocorr = "NO", spectrum = "NO"
-           , anomaly = "NO", zsmooth = "NO", local.trend = "NO", test = "MK")
+           , plotB = "NO", selectBox="ByYears", plotZ = "NO", datashow = "NO"
+           , help.timestep = "NO", auto.timestep = "NO", time.step = NULL
+           , help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL, mix = "YES"
+           , outliers.re = "NO", na.replace = "NO", start = NULL, end = NULL
+           , months = c(1:12), norm = "NO", npsu = 30, autocorr = "NO"
+           , spectrum = "NO", anomaly = "NO", zsmooth = "NO", local.trend = "NO"
+           , test = "MK")
 }
 \arguments{
   \item{param}{
@@ -56,8 +57,11 @@ Perform a Shapiro-Wilk normality test on selected parameter,
  can be "YES" or "NO" (the default).
 }
   \item{plotB}{
-Display a boxplot (by year) of rawdata with outliers identified as cirle,
+Display a boxplot of rawdata with outliers identified as cirle,
  can be "YES" or "NO" (the default).
+}
+  \item{selectBox}{
+Options for plotB: allow to choose between boxplot by years or by months.
 }
   \item{plotZ}{
 Display a plot of the regularized time series, can be "YES" or "NO" (the default).

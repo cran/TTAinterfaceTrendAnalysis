@@ -1,0 +1,32 @@
+Version 1.00
+
+  o Initial realise
+
+Changes in version 1.01
+
+  o Minor bugs correction
+  o First submission to CRAN
+
+Changes in version 1.02
+
+  o OS compatibility improvments
+
+Changes in version 1.03
+
+  o Improved graphical interface: panel 5 (results) always visible; addition of icons.
+  o Addition of the possibility of reading a datasheet with only years in the DATES column (for annual monitoring),
+    the interface automatically selects the annuel frequency.
+  o Months displays in the panel 2 are the ones present in the database and neither the 12 months by défault.
+  o Correction of a bug affecting the saving path.
+  o Addition of the daily frequency for time series building: by default 366 days a year.
+  o Significant results of Kendall tests are displayed in bold.
+  o The interface asks for confirmation before its closure.
+  o If a lower or equal period of 1 year is selected to make test, a warning message is sent instead of making crashing the interface.
+  o Automatic scrolling towards the last results obtained.
+  o Update of the user guide.
+  o Correction of minor bugs and addition of minor improvments.
+  
+Changes in version 1.04
+
+  o Minor code updates
+  o Addition of two boxplot options allowing to display a boxplot by years (the original option) or a boxplot by months.
