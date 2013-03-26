@@ -1,6 +1,6 @@
 FULLoption <-
 function (param, depth=NULL, sal = NULL, site=NULL, rawdata="NO", select="NO", resume.reg="NO", 
-test.normality="NO", plotB = "NO", plotZ="NO", datashow="NO",
+test.normality="NO", plotB = "NO", selectBox="ByYears", plotZ="NO", datashow="NO",
 help.timestep = "NO", auto.timestep = "NO", time.step = NULL, help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL ,  
 mix = "YES", outliers.re = "NO", na.replace="NO", start = NULL, end = NULL, months = c(1:12), norm = "NO", npsu = 30,
 autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", test= "MK")
@@ -368,17 +368,28 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
   if (plotB == "YES") {
       if (is.numeric(TS$DATES) == TRUE) { } else {
       TS <- subset(TS, MONTHS %in% months, drop = TRUE) }
-      dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", sep= ""), recursive = TRUE)
-      save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", Envir$File.Name,"_Boxplot_",param,".png", sep = "")
+      dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", site, "/", start,"-", end, "/", param, "/", sep= ""), recursive = TRUE)
+      save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", site, "/", start,"-", end, "/", param, "/", Envir$File.Name,"_Boxplot_",param,".png", sep = "")
+     if (selectBox=="ByYears") { 
       png(save.boxplot.path)
-      boxplot(TS$param~TS$YEARS, xlab="Time", ylab=paste(param, "concentration")        # enregistre la figure
+      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param, "concentration")        # enregistre la figure
               , main=paste("Boxplot of",param,"concentration","(o = outliers)"))
       title(main=paste("\n\n\n", "at station(s): ", liste.stations), cex.main=0.8) 
       dev.off()
-      boxplot(TS$param~TS$YEARS, xlab="Time", ylab=paste(param, "concentration")        # affiche la boite à moustache par annees
+      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param, "concentration")        # affiche la boite à moustache par annees
               , main=paste("Boxplot of",param,"concentration","(o = outliers)"))
       title(main=paste("\n\n\n", "at station(s): ", liste.stations), cex.main=0.8)
-      return() }    
+      return() }
+     if (selectBox=="ByMonths") { 
+      png(save.boxplot.path)
+      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param, "concentration")        # enregistre la figure
+              , main=paste("Boxplot of",param,"concentration","(o = outliers)"))
+      title(main=paste("\n\n\n", "at station(s): ", liste.stations), cex.main=0.8) 
+      dev.off()
+      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param, "concentration")        # affiche la boite à moustache par annees
+              , main=paste("Boxplot of",param,"concentration","(o = outliers)"))
+      title(main=paste("\n\n\n", "at station(s): ", liste.stations), cex.main=0.8)
+      return() } }    
   else{}
 
   if (outliers.re == "YES") {
@@ -882,11 +893,11 @@ autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend = "NO", 
          dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)
          save.figure.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", start,"-", end, "/", param, "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_TimeSeries_",param,".png", sep = "")
          png(save.figure.path)
-         plot(z, ylab=paste(param, "concentration"), xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"))
+         plot(z, ylab=paste(param, "concentration"), type = "o", xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"))
          title(main=paste("\n\n", "at station(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
          minor.tick(nx=5, ny=2, tick.ratio=0.4)  
          dev.off() 
-         plot(z, ylab=paste(param, "concentration"), xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"))
+         plot(z, ylab=paste(param, "concentration"), type = "o", pch = 20, xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"))
          title(main=paste("\n\n", "at station(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)} 
        else{ } }
   else{ tkmessageBox(message=paste("Cannot build a time series if stations are dissociate", "\n\n", "only Table and Summary are available", "\n\n", "OK to continue", sep=""), icon = "warning", type = "ok", title="!Warning!")  }

@@ -5,7 +5,7 @@ Lib()                                                                           
 #_________________________________________________________________________________________________Creation de la fenetre principale (tt) et des onglets
  Envir$tt <- tktoplevel()                                                                                      # creation de la page principale
      tktitle(Envir$tt) <- "Temporal Trend Analysis interface"                                                  # on donne un nom visible à cette page
-     tkwm.geometry(Envir$tt, "1200x630")                                                                       # taille de la fenetre principale
+     tkwm.geometry(Envir$tt, "1200x650")                                                                       # taille de la fenetre principale
                                                                  
      Envir$topframe <- tkwidget(Envir$tt,"labelframe", text= "",padx=0,pady=0)                                 # cadre de texte pour afficher les 2 boutons
      tkconfigure(Envir$topframe, borderwidth=0)                                                                     
@@ -23,7 +23,7 @@ Lib()                                                                           
  getfile <- function(inipath) {
 
      ExampleValue <- tclvalue(ExampleValue)
-     if (ExampleValue=="1"){ inipath = file.path(.path.package("TTAinterfaceTrendAnalysis"),"data","SRNDunkerque.csv", fsep=.Platform$file.sep )  }
+     if (ExampleValue=="1"){ inipath = file.path(path.package("TTAinterfaceTrendAnalysis"),"data","SRNDunkerque.csv", fsep=.Platform$file.sep )  }
      else { inipath = "C:/" }
 
      Envir$Name <- tclvalue(tkgetOpenFile(filetypes="{{CSV Files} {.csv}}", initialdir =inipath))              # le chemin du fichier est assigne a Name
@@ -46,13 +46,13 @@ Lib()                                                                           
 
      fixdata1 <- function() { fixdata( ) }                                                                     # appel la fonction fixdata.R
      imgFixdata <- tclVar()                                                                                                
-     tcl("image","create","photo",imgFixdata,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgFixdata.gif",fsep=.Platform$file.sep))
+     tcl("image","create","photo",imgFixdata,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgFixdata.gif",fsep=.Platform$file.sep))
      fixdata.but <- tkbutton(Envir$rawdata, image=imgFixdata, text=" Fix Data ", compound="right", command=fixdata1)    # bouton fixdata
      tkgrid(fixdata.but, column=1, row=7, sticky="w")
 
      showdata <- function()  { showData(Envir$Data) }                                                          # appel la fonction showData
      imgShowdata <- tclVar()                                                                                                
-     tcl("image","create","photo",imgShowdata,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgShowdata.gif",fsep=.Platform$file.sep))
+     tcl("image","create","photo",imgShowdata,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgShowdata.gif",fsep=.Platform$file.sep))
      showdata <- tkbutton(Envir$rawdata, image=imgShowdata, text= " Show Data ", compound="right",  height=18,  command=showdata)      # bouton showdata
      tkgrid(showdata, column=1, row=5, sticky="w")
 
@@ -91,12 +91,12 @@ Lib()                                                                           
      tkgrid(tklabel(Envir$rawdata, text="      "), column=1, row=12)
      
      imgHelp <- tclVar()                                                                                                
-     tcl("image","create","photo",imgHelp,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgHelp.gif",fsep=.Platform$file.sep))
+     tcl("image","create","photo",imgHelp,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgHelp.gif",fsep=.Platform$file.sep))
      HELP1.but <- tkbutton(Envir$HelpFrame, image=imgHelp, text=" Help ", compound="right", command=function() { Aide1() })            # fichier txt a aller chercher
      tkgrid(HELP1.but, column=1, row=1, sticky="nw")
       
      #HELP1.but <- tkbutton(Envir$HelpFrame, image=imgHelp, text=" Help ", compound="right", command=function() {               # bouton d'aide n°1
-     #browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP1.txt",fsep=.Platform$file.sep)) })            # fichier txt a aller chercher
+     #browseURL(file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","HELP1.txt",fsep=.Platform$file.sep)) })            # fichier txt a aller chercher
      #tkgrid(HELP1.but, column=1, row=1, sticky="nw")                                                                           # dans la dossier inst/aide
 
 #_______________________________________________________________________________________________________________________Onglet Selection des parametres
@@ -111,9 +111,9 @@ Lib()                                                                           
      liste2 <- tklistbox(Envir$Select,selectmode="extended", activestyle="dotbox", height=10, width=22)       # cree la deuxieme liste (de selection)
 
      imgArrowright <- tclVar()                                                                                                
-     tcl("image","create","photo",imgArrowright,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgArrowright.gif",fsep=.Platform$file.sep))
+     tcl("image","create","photo",imgArrowright,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgArrowright.gif",fsep=.Platform$file.sep))
      imgArrowleft <- tclVar()                                                                                                
-     tcl("image","create","photo",imgArrowleft,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgArrowleft.gif",fsep=.Platform$file.sep))
+     tcl("image","create","photo",imgArrowleft,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgArrowleft.gif",fsep=.Platform$file.sep))
       
      bouton1 <- tkbutton(Envir$Select,image=imgArrowright,width=30,height=30,command=function() {                # bouton de selection
                 if (tclvalue(tkcurselection(liste1))!="") {
@@ -308,7 +308,7 @@ Lib()                                                                           
             months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) } }                # mois
            else { tkmessageBox(message="No date selected!", icon = "warning", type = "ok", title="!Warning!")}        # erreur si pas de dates
            FULLoption(param, depth, sal, site, rawdata="NO", select="YES", resume.reg="NO", test.normality="NO",      # applique la fonction FULLoption...
-                     plotB="NO", plotZ="NO", datashow="NO",                                                           #    ...avec les arguments
+                     plotB="NO", selectBox, plotZ="NO", datashow="NO",                                                           #    ...avec les arguments
                      help.timestep="NO", auto.timestep="NO", time.step="NULL", help.aggreg="NO", auto.aggreg="NO", aggreg="NULL",
                      mix, outliers.re="NO", na.replace="NO", start, end, months)  }                                   
      STAT2.but <- tkbutton(Envir$Select, text="Summary",command=STAT2)                                                # bouton d'appel de la fonction STAT2
@@ -321,7 +321,7 @@ Lib()                                                                           
      tkgrid(HELP2.but, column=0, row=26, sticky="w")
      
      #HELP2.but <- tkbutton(Envir$Select, image=imgHelp, text=" Help ", compound="right",command=function() {                # bouton d'aide n°2
-     #browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP2.txt",fsep=.Platform$file.sep)) }) 
+     #browseURL(file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","HELP2.txt",fsep=.Platform$file.sep)) }) 
      #tkgrid(HELP2.but, column=0, row=26, sticky="w")
 
 #_________________________________________________________________________________________________________________________________Onglet regularisation
@@ -340,6 +340,16 @@ Lib()                                                                           
          tkconfigure(cb3,variable=cb3Value)
          tkgrid(tklabel(LabeledFrame1,text="Remove outliers ?"), column=0, row=1, sticky="w")
          tkgrid(cb3, column=1, row=1)
+         
+         selectBox<-NULL
+         rb21 <- tkradiobutton(LabeledFrame1)                                                     # radio buttons pour le time step
+         rb22 <- tkradiobutton(LabeledFrame1)
+         rb20Value <- tclVar("ByYears")
+         tkconfigure(rb21,variable=rb20Value,value="ByYears")                                       # valeur de l'argument pour chaque bouton
+         tkconfigure(rb22,variable=rb20Value,value="ByMonths")
+         tkgrid(tklabel(LabeledFrame1,text="   |->By years "),rb21, row = 3, sticky="w")                            # texte afficher a cote de chaque bouton
+         tkgrid(tklabel(LabeledFrame1,text="   |->By months "),rb22, row= 4, sticky="w")
+         
 #_______________________________________________________________________________bouton d'appel de la boxplot (argument plotB)
      BoxPlot <- function()  {
             param <- Env2$variables[unique(Env2$variables.selectionnees.temp)]
@@ -368,8 +378,11 @@ Lib()                                                                           
             if (is.numeric(Envir$Data$DATES) ==TRUE) { } else {
             months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }  }
            else { tkmessageBox(message="no date selected", icon = "warning", type = "ok", title="!Warning!")}
+           rb20Value <- as.character(tclvalue(rb20Value))                           
+           if (rb20Value=="ByYears"){ selectBox <- "ByYears" }                       # valeur de l'argument time.step pour chaque bouton
+           if (rb20Value=="ByMonths"){ selectBox <- "ByMonths" }
            FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
-                     plotB="YES", plotZ="NO", datashow="NO",
+                     plotB="YES", selectBox, plotZ="NO", datashow="NO",
                      help.timestep="NO", auto.timestep="NO", time.step="NULL", help.aggreg="NO", auto.aggreg="NO", aggreg="NULL",
                      mix, outliers.re="NO", na.replace="NO", start, end, months) }
      BoxPlot.but <- tkbutton(LabeledFrame1, text="Show boxplot",command=BoxPlot)
@@ -504,7 +517,7 @@ Lib()                                                                           
                                  aggreg <- "NULL" }
           else{ auto.aggreg <- "N0" }
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
-                 plotB="NO", plotZ="YES", datashow="NO",
+                 plotB="NO", selectBox, plotZ="YES", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
                  autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend="NO", test="NO") }
@@ -573,7 +586,7 @@ Lib()                                                                           
                                  aggreg <- "NULL" }
           else{ auto.aggreg <- "N0" }
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
-                 plotB="NO", plotZ="NO", datashow="YES",
+                 plotB="NO", selectBox, plotZ="NO", datashow="YES",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
                  autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend="NO", test="NO") }
@@ -642,7 +655,7 @@ Lib()                                                                           
                                  aggreg <- "NULL" }
           else{ auto.aggreg <- "N0" }
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="YES", test.normality="NO",
-                 plotB="NO", plotZ="NO", datashow="NO",
+                 plotB="NO", selectBox, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
                  autocorr = "NO", spectrum="NO", anomaly="NO", zsmooth="NO", local.trend="NO", test="NO")   }
@@ -656,7 +669,7 @@ Lib()                                                                           
      tkgrid(HELP3.but, column=0, row=6, sticky="w")
      
      #HELP3.but <- tkbutton(Envir$datam, image=imgHelp, text=" Help ", compound="right", command=function() {                 # bouton d'aide n°3
-     #browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP3.txt",fsep=.Platform$file.sep)) })
+     #browseURL(file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","HELP3.txt",fsep=.Platform$file.sep)) })
      #tkgrid(HELP3.but, column=0, row=6, sticky="w")
 
 #_______________________________________________________________________________________________________________________________________Onglet analyses
@@ -687,7 +700,7 @@ Lib()                                                                           
      
       
      imgProcess <- tclVar()                                                                                                
-     tcl("image","create","photo",imgProcess,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgProcess.gif",fsep=.Platform$file.sep))
+     tcl("image","create","photo",imgProcess,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgProcess.gif",fsep=.Platform$file.sep))
 
 #_______________________________________________________________________________bouton de diagnostic
      OnOK3 <- function()  {
@@ -764,7 +777,7 @@ Lib()                                                                           
           else { zsmooth <- "NO" }
 
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality, 
-                 plotB="NO", plotZ="NO", datashow="NO",
+                 plotB="NO", selectBox, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
                  autocorr, spectrum, anomaly, zsmooth, local.trend="NO", test="NO") }
@@ -886,7 +899,7 @@ Lib()                                                                           
           else {  norm <- "NULL" }
           npsu <- as.numeric(tclvalue(Npsu))
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO", 
-                 plotB="NO", plotZ="NO", datashow="NO",
+                 plotB="NO", selectBox, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm, npsu,
                  autocorr = "NO", spectrum="NO",anomaly="NO", zsmooth="NO", local.trend, test) }
@@ -901,7 +914,7 @@ Lib()                                                                           
      tkgrid(HELP4.but, column=0, row=7, sticky="w")
      
      #HELP4.but <- tkbutton(Envir$trend, image=imgHelp, text=" Help ", compound="right", command=function() {                # bouton d'aide n°4
-     #browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","HELP4.txt",fsep=.Platform$file.sep)) })
+     #browseURL(file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","HELP4.txt",fsep=.Platform$file.sep)) })
      #tkgrid(HELP4.but, column=0, row=7, sticky="w")  
        
    }
@@ -924,11 +937,11 @@ Lib()                                                                           
       
 #________________________________________________________ce qui suit est affiche avant que les donnees ne soit importees
     logoRcran <- tclVar()                                                                                                
-    tcl("image","create","photo",logoRcran,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","Small_Logo_R.gif",fsep=.Platform$file.sep))
+    tcl("image","create","photo",logoRcran,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","Small_Logo_R.gif",fsep=.Platform$file.sep))
     imgAsLabel2 <- tklabel(Envir$openframe,image=logoRcran)
     tkgrid(imgAsLabel2, column=0, row=1, sticky="w")
     
-    Text3 <- tklabel(Envir$rawdata,text= "Need R v2.14+ to work")                      # texte montrant la version minimum de R
+    Text3 <- tklabel(Envir$rawdata,text= "Need R v2.15+ to work properly")                      # texte montrant la version minimum de R
     tkconfigure(Text3, font=tkfont.create(size=7))                                              
     tkgrid(Text3, column=1, row=11, sticky="w")
 
@@ -957,20 +970,20 @@ Lib()                                                                           
     tkconfigure(Envir$HelpFrame, borderwidth=0)                                                                     
     tkgrid(Envir$HelpFrame, column=1, row=13, sticky="w")
     imgUserguide <- tclVar()                                                                                                
-    tcl("image","create","photo",imgUserguide,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","imgUserguide.gif",fsep=.Platform$file.sep))
+    tcl("image","create","photo",imgUserguide,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgUserguide.gif",fsep=.Platform$file.sep))
     HELP5.but <- tkbutton(Envir$HelpFrame, image=imgUserguide, text=" User Guide ", compound="right",command=function() {             # bouton d'appel du guide utilisateur
-    browseURL(file.path(.path.package("TTAinterfaceTrendAnalysis"),"doc","UserGuide.pdf",fsep=.Platform$file.sep)) })
+    browseURL(file.path(path.package("TTAinterfaceTrendAnalysis"),"doc","UserGuide.pdf",fsep=.Platform$file.sep)) })
     tkgrid(HELP5.but, column=0, row=1, sticky="nw")
     
     tkgrid(tklabel(Envir$HelpFrame, text="      "), column=1, row=1)
     tkgrid(tklabel(Envir$HelpFrame, text="                                                        "), column=2, row=1)
 
     #Example.data <- tkbutton(Envir$HelpFrame, text=" Data example ", compound="right", command=function() {          # bouton pour appeler le 
-    #getfile( inipath <- file.path(.path.package("TTAinterfaceTrendAnalysis"),"data","SRNDunkerque.csv", fsep=.Platform$file.sep )) })  # fichier example Gravelines
+    #getfile( inipath <- file.path(path.package("TTAinterfaceTrendAnalysis"),"data","SRNDunkerque.csv", fsep=.Platform$file.sep )) })  # fichier example Gravelines
     #tkgrid(Example.data, column=0, row=2, sticky="sw")
        
     #logoifr <- tclVar()                                                                                                 # affichage du logo ifremer
-    #tcl("image","create","photo",logoifr,file=file.path(.path.package("TTAinterfaceTrendAnalysis"),"aide","Logo_Ifremer.gif",fsep=.Platform$file.sep))
+    #tcl("image","create","photo",logoifr,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","Logo_Ifremer.gif",fsep=.Platform$file.sep))
     #imgAsLabel <- tklabel(Envir$HelpFrame,image=logoifr)
     #tkgrid(imgAsLabel, column=3, row=1, sticky="e")
     
