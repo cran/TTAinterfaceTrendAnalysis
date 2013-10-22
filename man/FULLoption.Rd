@@ -9,15 +9,15 @@ This is the core function of the interface. It receive arguments from the
  , perform diagnostics and analyses.
 }
 \usage{
-FULLoption(param, depth = NULL, sal = NULL, site = NULL, rawdata = "NO"
-           , select = "NO" , resume.reg = "NO", test.normality = "NO"
-           , plotB = "NO", selectBox="ByYears", plotZ = "NO", datashow = "NO"
-           , help.timestep = "NO", auto.timestep = "NO", time.step = NULL
-           , help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL, mix = "YES"
-           , outliers.re = "NO", na.replace = "NO", start = NULL, end = NULL
-           , months = c(1:12), norm = "NO", npsu = 30, autocorr = "NO"
-           , spectrum = "NO", anomaly = "NO", zsmooth = "NO", local.trend = "NO"
-           , test = "MK")
+FULLoption(param, depth=NULL, sal = NULL, site=NULL, rawdata="NO", select="NO"
+          , resume.reg="NO", test.normality="NO", plotB = "NO"
+          , selectBox="ByYears", log.trans="NO", plotZ="NO", datashow="NO"
+          , help.timestep = "NO", auto.timestep = "NO", time.step = NULL
+          , help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL, mix = "YES"
+          , outliers.re = "NO", na.replace="NO", start = NULL, end = NULL
+          , months = c(1:12), norm = "NO", npsu = 30, autocorr = "NO"
+          , spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO"
+          , local.trend = "NO", test= "MK")
 }
 \arguments{
   \item{param}{
@@ -63,6 +63,9 @@ Display a boxplot of rawdata with outliers identified as cirle,
   \item{selectBox}{
 Options for plotB: allow to choose between boxplot by years or by months.
 }
+  \item{log.trans}{
+This option transform your data in log(x+1) prior to perform analysis.
+}
   \item{plotZ}{
 Display a plot of the regularized time series, can be "YES" or "NO" (the default).
 }
@@ -94,8 +97,8 @@ Choice of the method of aggregation during the build of the time series,
  for selection of the quantile 90%.
 }
   \item{mix}{
-Allow to mix the data of all sampling site during analysis? 
- Can be "YES" (the default) or "NO". 
+Allow to mix the data of all sampling site during analysis. 
+ Permanently set to "YES" and removed from the GUI since version 1.5. 
 }
   \item{outliers.re}{
 Remove the outliers from the rawdata, the outliers list is save in a .csv file.
@@ -129,12 +132,16 @@ Display the autocorrelation diagramme of the regularized time series using the a
  Can be "YES" or "NO" (the default)
 }
   \item{spectrum}{
-Display the Fourrier spectrum of the regularized time series using the spectrum
- function with span arguemtns =c(3,5). Can be "YES" or "NO" (the default). 
+Display the Fourrier spectrum of the regularized time series using a 
+Smoothed Periodogram (spec.pgram). Can be "YES" or "NO" (the default). 
 }
   \item{anomaly}{
 Display a color box (function filled.contour) plot by year each time.step (months or weeks)
  minus the mean of the time.step of all years. Red colors show positive 
+ anomalies and blue colors negative anomalies. Can be "YES" or "NO" (the default).
+}
+  \item{a.barplot}{
+Display an anomaly barplot as a function of the time.step. Red colors show positive 
  anomalies and blue colors negative anomalies. Can be "YES" or "NO" (the default).
 }
   \item{zsmooth}{
@@ -158,33 +165,34 @@ Perform a test to evaluate the presence and the magnitude of a temporal trend on
 
 \value{
 
-Results are return as .png figures or .csv files
- Results are also directly readable through the panel 5
+Results are return as .png figures or .txt files
+ Results are also directly readable directly in the right part 
  of the interface.
  
  Savepath can be choose using the option 'Select directory'
  (see the function {selectdirectory} more more informations)
  
  Name of saved filed follow the nomenclature :
- Original.file.name_analysis.name_parameter.csv/.png
+ Original.file.name_analysis.name_parameter.txt/.png
  
  or for multiple period analysis (see cusum for more details) :
- Original.file.name_analysis.name_parameter_starting.year_ending.years.csv.
+ Original.file.name_analysis.name_parameter_starting.year_ending.years.txt.
  
  analysis.names are :
  
  _Boxplot_  for boxplot figure (.png).
- _Outliers_  for the save of removed outliers (.csv).
+ _Outliers_  for the save of removed outliers (.txt).
  _TimeSeries_  for the plot of the regularized time series (.png).
- _Regularised_data_  for the table of regularized time series (.csv).
+ _Regularised_data_  for the table of regularized time series (.txt).
  _Autocor_  for the autocorelation diagram (.png).
  _Spectrum_  for the Fourier spectrum plot (.png) .
  _ColorPlot_  for the anomaly color.plot (.png).
+ _Anomaly BarPlot_  for the anomaly barplot (.png)
  _Detrended_  for detrended plot (.png).
- _Local_Global Trend_  for result of Seasonal Mann Kendall apply to local trend (.csv).
- _Local_Seasonal Trend_  same as above with detail for each time step (.csv).
- _Global Trend_  for result of Seasonal Mann Kendall (.csv).
- _Seasonal Trend_  same as above with detail for each time step (.csv).
+ _Local_Global Trend_  for result of Seasonal Mann Kendall apply to local trend (.txt).
+ _Local_Seasonal Trend_  same as above with detail for each time step (.txt).
+ _Global Trend_  for result of Seasonal Mann Kendall (.txt).
+ _Seasonal Trend_  same as above with detail for each time step (.txt).
  _LOESSplot_  for loess plot (.png). 
  _NormalNutri_  for analysis of normalized values of nutrients (.png).
 

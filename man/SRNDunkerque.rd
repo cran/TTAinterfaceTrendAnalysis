@@ -9,7 +9,7 @@ at three different stations distributed onshore to offshore (North See) near the
 This database contain many missing values.
 }
 \usage{SRNDunkerque}
-\format{ A data.frame (CSV) containing 1561 measurments of temperature, salinity and chlorophyll-a concentration  }
+\format{ A data.frame (TXT) containing 1561 measurments of temperature, salinity and chlorophyll-a concentration  }
 \source{ The Ifremer QUADRIGE_2 meta-database }
 \keyword{datasets}
 

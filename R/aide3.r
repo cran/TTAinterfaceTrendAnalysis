@@ -12,7 +12,7 @@ tkinsert(AIDE3, "end", paste("This is the third panel of the interface." ,"\n\n"
 "    _In the <Data interaction> box you can choose to replace the missing values present" ,"\n",
 "     in your data. This can offer you the possibility to perform more analysis or diagnostics","\n",
 "     (the ones labelled with an *). It works in two times, first when more than 3 values are"   ,"\n",
-"     successively missed, the are replace by the median of equivalent cycle (i.e. months or weeks)."    ,"\n",
+"     successively missed, they are replace by the median of equivalent cycle (i.e. months or weeks)."    ,"\n",
 "     For small interval missed (less than 3 values), data are replace by a linear regression of"    ,"\n",
 "     the data before and after (data are generally link in time series due to autocorrelation)."  ,"\n",
 "     However when missing values are numerous (here higher than 1/20 of the data quantity)"    ,"\n",
@@ -38,8 +38,8 @@ tkinsert(AIDE3, "end", paste("This is the third panel of the interface." ,"\n\n"
 
 "    _The third box do the same things as the second one but with the mathematical method of" ,"\n",
 "     aggregation instead of frequency."  ,"\n",
-"     <Guidance to choose the method> perform a non parametric Wilcoxon test between the rawdata"  ,"\n",
-"     and the dataset obtain by each method and select the method with the highest p.value" ,"\n",
+"     <Guidance to choose the method> perform an Anova with a Dunnett's post-hoc test between the"  ,"\n",
+"     rawdata and the dataset obtain by each method and select the method with the highest p.value" ,"\n",
 "     (less significant differences)." ,"\n\n",
 
 "    _The <Show regularised time series> buttons let you show the table, the figure or the descriptive statistics"  ,"\n",

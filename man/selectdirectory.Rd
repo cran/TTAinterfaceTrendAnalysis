@@ -4,7 +4,7 @@
 Saved path selection
 }
 \description{
-Allow to chose the directory where results (.csv and .png files) will be
+Allow to chose the directory where results (.txt and .png files) will be
  saved.
 }
 \usage{

@@ -3,7 +3,7 @@
   tkwm.geometry(startup, "230x80")
   tkwm.resizable(startup, 0,0)
   tktitle(startup) <- "Start Panel"
-  LOAD1 <- function() { Lib()
+  LOAD1 <- function() {  tclRequire("BWidget")
   TTAinterface()   }
   imgStart <- tclVar()                                                                                                
   tcl("image","create","photo",imgStart,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgStart.gif",fsep=.Platform$file.sep))
@@ -12,8 +12,9 @@
   tkpack(tklabel(startup, text=""), side="top")
   tkpack(LOAD1.but, side="top")
   tkpack(tklabel(startup, text=""), side="top")
-   
-  subtext <- tklabel(startup,text= "TTAinterface v1.04 launch panel")                       
+  
+  Envir$pversion <- utils::packageVersion("TTAinterfaceTrendAnalysis") 
+  subtext <- tklabel(startup,text= paste("TTAinterface v",Envir$pversion, " launch panel", sep=""))                       
   tkconfigure(subtext, font=tkfont.create(size=7))                                              
   tkpack(subtext, side="top")
   
@@ -24,6 +25,6 @@
    
 }
 
-if(getRversion() >= "2.15.3") globalVariables(names=c("STATIONS","S","DEPTH","MONTHS", "param",
+if(getRversion() >= "2.15.3") globalVariables(names=c("Category","Salinity","Depth","MONTHS", "param",
 "depth","sal","site","npsu"), 
 package="TTAinterfaceTrendAnalysis")

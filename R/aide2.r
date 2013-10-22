@@ -9,17 +9,11 @@ tkinsert(AIDE2, "end", paste("This is the second panel of the interface", "\n\n"
 "In this panel you will be able to select the parameter, the station(s) and the dates","\n",
 "you want to test.","\n\n",
 
-"     _In the first selection panel, the first list show you all the stations present in the STATIONS","\n",
-"      column of your database.", "\n",
+"     _In the first selection panel, the first list show you the categories (Stations, Taxa,...) present in your file.","\n",
 "      You can select them one by one or by group in the first list by using the top blue arrow button.","\n",
-"      Select < -All- > to take all the stations into account.","\n",
-"      The selected stations appear in the second list.",  "\n",
-"      To remove stations from your selection, select them in the second list and use the bottom blue arrow button.","\n\n",
-
-"     _The <Aggregate stations ?> option give you the possibility to combine the data of the",  "\n",
-"      different stations during the analysis (the most common case...) and is selected be default.", "\n",
-"      If you uncheck this option each station will be treat separately and most analysis couldn't",  "\n",
-"      be perform due to the incapacity to treat different time series at the same time.","\n\n",  "\n",
+"      Select < -All- > to take all categories into account.","\n",
+"      The selected categories appear in the second list.",  "\n",
+"      To remove category from your selection, select them in the second list and use the bottom blue arrow button.","\n\n",
 
 "     _In the second selection panel, the first list show you all parameters present in your database.", "\n",
 "      You can select only one parameter; select it and clicking on the arrow button.",   "\n",
