@@ -16,7 +16,7 @@ TTAinterface()
 }
 
 \value{
-Results are saved in .csv files or .png figures in the desire directory (see selectdirectory).
+Results are saved in .txt files or .png figures in the desire directory (see selectdirectory).
  See 'FULLoption' values fore more details.
 }
 

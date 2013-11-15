@@ -1,3 +1,13 @@
+importFrom(e1071, impute)
 import(tcltk)
+importFrom(Hmisc, minor.tick)
+import(pastecs)
+import(reshape)
+import(wq)
+import(timeSeries)
+import(fBasics)
+import(relimp)
+import(multcomp)
+import(nlme)
 export(TTAinterface)
 

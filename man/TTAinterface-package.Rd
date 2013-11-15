@@ -13,8 +13,8 @@ Just follow the successive step from the data frmatting to the results sorting.
 \tabular{ll}{
 Package: \tab TTAinterface\cr
 Type: \tab Package\cr
-Version: \tab 1.03\cr
-Date: \tab 2013-03-19\cr
+Version: \tab 1.5\cr
+Date: \tab 2013-10-22\cr
 License: \tab GPL (>=2)\cr
  }
 }
@@ -26,7 +26,7 @@ Maintainer: <Alain.Lefebvre@ifremer.fr>
 
 
 \keyword{ 
-package 
+GUI 
 temporal trend analyses
 time series regularization 
 }
