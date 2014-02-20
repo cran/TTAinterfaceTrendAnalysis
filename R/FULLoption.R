@@ -26,25 +26,28 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 # your datasheet must be in .csv file, if possible select only the interesting column before creation of the datasheet (parameters, Category names, dates...) 
 # name exactly the dates column "DATES", the station one "Category", the depth ones "Depth" et the salinity one "S"
 # date format must be as followed : YYYY-mm-dd  and decimal separator must be '.' (dote)
-
-{ 
- {Category <- NULL
+{
+#____________________________________________________________________________________________________________Pour eviter des 'NOTES' supplementaire lors du check 
+ {
+  YEARS <- NULL
+  DayYears <-NULL
+  Category <- NULL
   Salinity <- NULL
   Depth <- NULL
  }
-#____________________________________________________________________________________________________________stat descriptive sur les donnees de base
+#____________________________________________________________________________________________________________Stat descriptive sur les donnees de base
  {                                                                                              
-  if (rawdata == "YES") {                                                                            # appel la fonction si rawdata = YES
+  if (rawdata == "YES") {                                                                                                                                         # appel la fonction si rawdata = YES
   # capture la sortie de summary(Envir$Data)                                                                        
       sumdata <- capture.output(summary(Envir$Data))
   # insert le resultat de la capture dans la fenetre de texte 'Envir$txt2'                                                            
-      tkinsert(Envir$txt2, "end", paste("-Descriptive statistics on raw data-", "\n"))                # mise en page
+      tkinsert(Envir$txt2, "end", paste("-Descriptive statistics on raw data-", "\n"))                     # mise en page
       tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
       tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=9,weight="bold"))
       sumdata <- paste(sumdata, collapse="\n")
       tkinsert(Envir$txt2,"end",paste(sumdata, "\n\n"))
       
-      ll <- ncol(Envir$Data)                                                                         # comptage de la quantite de donnee pas colonne
+      ll <- ncol(Envir$Data)                                                                                                                                     # comptage de la quantite de donnee par colonne
       res1 <- length(Envir$Data[1][!is.na(Envir$Data[1])])
       for (i in 2:ll) { res2 <- length(Envir$Data[i][!is.na(Envir$Data[i])])
       res1 <- data.frame(cbind(res1,res2)) } 
@@ -72,35 +75,34 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  
   # fait appraitre le resultat dans une frame directement affichee à l'ecran                                             
       Stat1 <- NULL                                                                                  # tableau vide a remplir
-      md <- as.matrix(summary(Envir$Data))                                                           # cree une matrice avec le resultat de summary
+      md <- as.matrix(summary(Envir$Data))                                    # cree une matrice avec le resultat de summary
       ncol(md)                                                                                       
-      for (i in 1:ncol(md)) {                                                                        # remplit le tableau vide avec... 
-           mb <- md[, i]                                                                             # ...le contenu de la matrice
+      for (i in 1:ncol(md)) {                                                                # remplit le tableau vide avec... 
+           mb <- md[, i]                                                                               # ...le contenu de la matrice
            Stat1 <- cbind(Stat1, mb) }                                                               
-      Summary_RawData <- data.frame(Stat1)                                                           # transforme le tableau en dataframe
-      names(Summary_RawData) <- names(Envir$Data)                                                    # nome les colonnes
-      return(showData(Summary_RawData))                                                              # affiche le tableau
+      Summary_RawData <- data.frame(Stat1)                                    # transforme le tableau en dataframe
+      names(Summary_RawData) <- names(Envir$Data)                      # nomme les colonnes
+      return(showData(Summary_RawData))                                        # affiche le tableau
       }
   else{}   
  }
 #________________________________________________________________________________________preparation du tableau de donnees par station(s) et parametre    
  {                                                          
-  if (any(colnames(Envir$Data) == "Category")) {                                             # effectue la commande si une colonne 'Category' existe
-      Ts <- subset(Envir$Data,Category %in% site, drop =TRUE) }                              # nouveau tableau avec les Category selectionnees
-  else { tkmessageBox(message=paste("No Category column in your dataset")
-         ,icon = "warning", type = "ok", title="!Warning!") }                                                                           
+  if (any(colnames(Envir$Data) == "Category")) {                                                                                                # effectue la commande si une colonne 'Category' existe
+      Ts <- subset(Envir$Data, Category %in% site, drop =TRUE) }                                                                          # nouveau tableau avec les Category selectionnees
+  else { tkmessageBox(message=paste("No Category column in your dataset")  ,icon = "warning", type = "ok", title="!Warning!") }                                                                           
   
-  if (any(colnames(Envir$Data) == "Salinity") & any(!is.na(Envir$Data$Salinity)) == TRUE) {                                   # effectue la commande si une colonne 'S' existe
+  if (any(colnames(Envir$Data) == "Salinity") & any(!is.na(Envir$Data$Salinity)) == TRUE) {                                                 # effectue la commande si une colonne 'S' existe
       if (max(sal) >= round(max(Ts$Salinity, na.rm=TRUE),0) & min(sal) <= round(min(Ts$Salinity, na.rm=TRUE),0) ) { }         # si toutes les salinites sont selectionnees (de min à max) alors toutes les salinites, NA inclus, seront pris en compte.
-      else { Sal <- na.omit(Ts$Salinity[(Ts$Salinity >= min(sal)) &  (Ts$Salinity <= max(sal))])                  # selection des donnees comprises entre les salinites indiquees, NA exclues
-             Ts <- subset(Ts, Salinity %in% Sal, drop = TRUE) } }                                   # nouveau tableau avec les salinites selectionnees
+      else { Sal <- na.omit(Ts$Salinity[(Ts$Salinity >= min(sal)) &  (Ts$Salinity <= max(sal))])                                              # selection des donnees comprises entre les salinites indiquees, NA exclues
+             Ts <- subset(Ts, Salinity %in% Sal, drop = TRUE) } }                                                                                                                    # nouveau tableau avec les salinites selectionnees
   else{ }
      
-  if (any(colnames(Envir$Data) == "Depth") & any(!is.na(Envir$Data$Depth)) == TRUE) {                               # effectue la commande si une colonne 'Depth' existe
+  if (any(colnames(Envir$Data) == "Depth") & any(!is.na(Envir$Data$Depth)) == TRUE) {                                               # effectue la commande si une colonne 'Depth' existe
       if (max(depth) >= round(max(Ts$Depth, na.rm=TRUE),0) & min(depth) <= round(min(Ts$Depth, na.rm=TRUE),0) )     # si toutes les profondeurs sont selectionnees (de min à max) alors toutes les profondeurs, NA inclus, seront pris en compte.
       { }                                                                          
-      else { Depths <- na.omit(Ts$Depth[(Ts$Depth >= min(depth)) &  (Ts$Depth <= max(depth))])    # selection des donnees comprises entre les profondeurs indiquees, NA exclues                                                     
-      Ts <- subset(Ts, Depth %in% Depths, drop = TRUE) }  }                                       # nouveau tableau avec les profondeurs selectionnees
+      else { Depths <- na.omit(Ts$Depth[(Ts$Depth >= min(depth)) &  (Ts$Depth <= max(depth))])              # selection des donnees comprises entre les profondeurs indiquees, NA exclues                                                     
+      Ts <- subset(Ts, Depth %in% Depths, drop = TRUE) }  }                                                                                      # nouveau tableau avec les profondeurs selectionnees
   else{}
   
   if (any(colnames(Envir$Data) == "Depth") & length(Ts$Depth)==0 | any(colnames(Envir$Data) == "Salinity") & length(Ts$Salinity)==0) {
@@ -110,38 +112,34 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 
   if (any(colnames(Envir$Data) == "Salinity")) {     
       TS <- data.frame(Ts$Category, Ts$Dates, Ts$Salinity)                                              # nouveau tableau avec les Category selectionnees, les dates et les salinites pour la standardisation des sels nut (les profondeurs sont prise en compte mais n'apparaissent pas)
-      TS$param <- Ts[,names(Ts)==param]                                                          # le parametre selectionne est inclu dans le nouveau tableau
-      names(TS) <- c("Category", "Dates", "Salinity", "param") }                                        # les colonnes sont nommees  (le paramètre restera "param" pour faciliter les analyses automatiques)
-  else { TS <- data.frame(Ts$Category, Ts$Dates)                                                 # meme chose mais s'il n'y a pas de colonne 'S'
+      TS$param <- Ts[,names(Ts)==param]                                                                                 # le parametre selectionne est inclu dans le nouveau tableau
+      names(TS) <- c("Category", "Dates", "Salinity", "param") }                                     # les colonnes sont nommees  (le paramètre restera "param" pour faciliter les analyses automatiques)
+  else { TS <- data.frame(Ts$Category, Ts$Dates)                                                              # meme chose mais s'il n'y a pas de colonne 'S'
       TS$param <- Ts[,names(Ts)==param]                                                       
       names(TS) <- c("Category", "Dates", "param") }                                           
  }
 #________________________________________________________________________________________________________Transformer les donnees en log+1 
 { 
  if (log.trans == "YES") { Envir$param <- TS$param
- TS$param <- log10((TS$param)+1) 
- logtext <- "Log10(x+1)" 
+ TS$param <- log10((TS$param)+1)                                                                                         # transformation des donnees du parametre
+ logtext <- "Log10(x+1)"                                                                                                         # on renomme le parametre pour les figures
  param <- paste("Log10(x+1)", param) } 
  else{ logtext <- "" }
 }
-#________________________________________________________________________________________________________Pour eviter des 'NOTES' lors du check 
- {
- YEARS=DayYears=NULL
- }
 #________________________________________________________________________________________________________Calcul du temps moyen entre 2 donnees en jour
  {
   if (is.numeric(TS$Dates) == TRUE) { }
-  else{ TS$Dates <- as.Date(TS$Dates, format="%Y-%m-%d") }                  # les dates sont formatees
-  TS <- TS[!is.na(TS$Dates), ]                                              # selection des cas ou les dates sont bien presentes
-  if (mix == "YES"){                                                        # trie dans l'ordre toutes les mesures si les Category sont mixees
+  else{ TS$Dates <- as.Date(TS$Dates, format="%Y-%m-%d") }                 # les dates sont formatees
+  TS <- TS[!is.na(TS$Dates), ]                                                                       # selection des cas ou les dates sont bien presentes
+  if (mix == "YES"){                                                                                          # trie dans l'ordre toutes les mesures si les Category sont mixees
       TS <- TS[order(TS$Dates), ] }
   else {
       TS <- TS[order(TS$Dates), ]
-      TS <- TS[order(TS$Category), ]}                                       # trie dans l'ordre les mesures par Category si les Category ne sont pas mixees
+      TS <- TS[order(TS$Category), ]}                                                             # trie dans l'ordre les mesures par Category si les Category ne sont pas mixees (plus d'actualite)
   TSS <- TS
-  ecarts <- TS$Dates[2:nrow(TS)]-TS$Dates[1:(nrow(TS)-1)]                   # calcul l'ecart en jour entre deux mesures successives
+  ecarts <- TS$Dates[2:nrow(TS)]-TS$Dates[1:(nrow(TS)-1)]               # calcul l'ecart en jour entre deux mesures successives
   xx <- as.numeric(ecarts)
-  TS$time <- c(1, round(cumsum(xx)))                                        # somme cumulee des ecarts et integration au tableau (TS$time) : donne une échelle temporelle a la serie de donnees
+  TS$time <- c(1, round(cumsum(xx)))                                                           # somme cumulee des ecarts et integration au tableau (TS$time) : donne une échelle temporelle a la serie de donnees
   TS$time[TS$time==0] <- 1                                                                    
  }
 #_____________________________________________________________________________________________Extraction des dates hors semaines (besoin du time step)
@@ -149,18 +147,18 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   if (is.numeric(TS$Dates) == TRUE) { TS$YEARS <- TS$Dates }
   else {  
   TS$YEARS <- as.numeric(format(TS$Dates, format = "%Y"))                   # extraction des annees
-  TS$MONTHS <- as.numeric(format(TS$Dates, format = "%m"))                  # extraction des mois
-  TS$days <- as.numeric (format(TS$Dates, format = "%d"))                   # extraction des jours
-  TS$DY <- as.numeric(format(TS$Dates, format="%j"))                        # extraction des jours/annee
+  TS$MONTHS <- as.numeric(format(TS$Dates, format = "%m"))                 # extraction des mois
+  TS$days <- as.numeric (format(TS$Dates, format = "%d"))                    # extraction des jours 01 -> 31
+  TS$DY <- as.numeric(format(TS$Dates, format="%j"))                           # extraction des jours/annee 1 -> 356
   TS$week.month <- TS$days }
  
-  if (is.null(start)) {                                                     # selection de l'annee de début de la série a analyser
+  if (is.null(start)) {                                                                                   # selection de l'annee de début de la série a analyser
       start <- min(TS$YEARS) } else {}
-  if (is.null(end)) {                                                       # selection de l'annee de fin de la série a analyser
+  if (is.null(end)) {                                                                                       # selection de l'annee de fin de la série a analyser
       end <- max(TS$YEARS) } else {} 
-  TS <- TS[(TS$YEARS >= start & TS$YEARS <= end),]                          # tableau avec les donnees comprises entre les annees de début et de fin 
+  TS <- TS[(TS$YEARS >= start & TS$YEARS <= end),]                                    # tableau avec les donnees comprises entre les annees de début et de fin 
  }  
-#______________________________________ Etabli la liste des Category pour les inclure dans les resultats sous forme de texte (3 sites maxi ensuite '...') 
+#______________________________________ Etabli la liste des Category pour les inclure dans les resultats sous forme de texte (3 category maxi ensuite '...') 
 {
  if (length(site)==1) liste.stations <- site[1]
  if (length(site)==2) liste.stations <- paste(site[1], site[2], sep=", ")
@@ -168,7 +166,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  if (length(site)>3) { for (i in 1 : 3) { liste.stations <- paste(site[1], site[2], site[3], sep=", ") }
                        liste.stations <- paste(liste.stations, "[...]", sep=", ") }
 }
-#_________________________________Statistiques descriptives sur les donnees de base (option : select), prend en compte la selection des annees et mois
+#_______________________________________Statistiques descriptives sur les donnees de base (option : select), prend en compte la selection des annees et mois
 # meme principe que pour 'rawdata'
  {
   if (select == "YES"){
@@ -194,19 +192,19 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  }
 #_________________________________________________________________________Aide pour trouver le bon time.step (option : help.timestep et auto.timestep)
  {
-  # Calcul de l'ecart moyen, en jours, entre 2 mesures successives (les mesures prise le meme jour sont considerees comme 1 seule) 
+ #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Calcul de l'ecart moyen, en jours, entre 2 mesures successives (les mesures prise le meme jour sont considerees comme 1 seule) 
   
-  TSS <- TSS[!is.na(TSS$param), ]                                                # reprend le tableau TS sans les valeurs manquantes 
+  TSS <- TSS[!is.na(TSS$param), ]                                                                           # reprend le tableau TS sans les valeurs manquantes 
   TSS$YEARS <- as.numeric(format(TSS$Dates, format = "%Y"))                         # extraction des annees
-  TSS$MONTHS <- as.numeric(format(TSS$Dates, format = "%m"))                        # extraction des mois
+  TSS$MONTHS <- as.numeric(format(TSS$Dates, format = "%m"))                       # extraction des mois
   TSS <- subset(TSS, MONTHS %in% months, drop = TRUE)
-  TSS <- TSS[(TSS$YEARS >= start & TSS$YEARS <= end),]                           # tableau avec les donnees comprises entre les annees de début et de fin
-  ecarts <- TSS$Dates[2:nrow(TSS)]-TSS$Dates[1:(nrow(TSS)-1)]                    # calcule les ecarts reels entre chaque mesure presente
+  TSS <- TSS[(TSS$YEARS >= start & TSS$YEARS <= end),]                                      # tableau avec les donnees comprises entre les annees de début et de fin
+  ecarts <- TSS$Dates[2:nrow(TSS)]-TSS$Dates[1:(nrow(TSS)-1)]                 # calcule les ecarts reels entre chaque mesure presente
   Ecarts <- ecarts[ecarts!=0]                             
   Mean.time <- data.frame(mean(Ecarts))
   mt <- as.numeric(Mean.time)
 
-  # Proposition du meilleur time step (option : help.timestep) en fonction de mt
+  #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Proposition du meilleur time step (option : help.timestep) en fonction de mt
  {  
  
   if (help.timestep == "NO" & auto.timestep == "NO" & is.null(time.step)) {              
@@ -214,15 +212,15 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   
   if (time.step != "NULL") {                                          # affiche la proposition mais effectue l'aggregation avec la méthode choisi par l'utilisateur
     
-    if (mt<=5) {                                                       # si l'ecart moyen est inferieur à 5 jours
+    if (mt<=5) {                                                                  # si l'ecart moyen est inferieur à 5 jours
         T <- "Use daily frequency" }                                                                
-     else { if (mt>5 & mt<=10) {                                      # si l'ecart moyen est entre 5 et 10 jours
+     else { if (mt>5 & mt<=10) {                                       # si l'ecart moyen est entre 5 et 10 jours
           T <- "Use semi-fortnightly frequency"}
       else { if (mt>10 & mt<=24) {                                    # si l'ecart moyen est entre 10 jours et 24 jours
                  T <- "Use fortnightly frequency" }
-             else { if (mt>24 & mt<=60) {                              # si l'ecart moyen est entre 24 jours et 60 jours
+             else { if (mt>24 & mt<=60) {                             # si l'ecart moyen est entre 24 jours et 60 jours
                         T <- "Use monthly frequency" }
-                    else { if (mt>60) {                               # si l'ecart moyen est superieur à 60 jours
+                    else { if (mt>60) {                                      # si l'ecart moyen est superieur à 60 jours
                                T <- "Use yearly frequency" }
                            else { return(print("No solution! Should be a problem somewhere...")) }}}}}           
       time.step <- time.step                                               
@@ -234,7 +232,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
       tkinsert(Envir$txt, "end", paste("Advice: ", T, "\n\n")) 
       tksee (Envir$txt,"end") }
                        
-  # affiche uniquement la proposition                     
+  #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _affiche uniquement la proposition                     
   else { if (help.timestep == "YES") {                                                                           
             Mean.time <- data.frame(rbind("Mean time between two measurements (days):", as.character(round(mean(Ecarts),2))))
             names(Mean.time) <- "T"
@@ -254,16 +252,14 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
                                      T <- as.character("-> Use yearly frequency           ") }
                                  else {return(print("No solution! Should be a problem somewhere..."))}}}}}
             
-            tt <- paste("Mean time between two measurements:", "\n",
-            "  ", as.character(round(mt, 2))," days", "\n",
-            "Time range (min - max):", "\n",
-            "  ", as.character(range(Ecarts))[1]," - ", as.character(range(Ecarts))[2], " days", "\n\n",
+            tt <- paste("Mean time between two measurements:", "\n", "  ", as.character(round(mt, 2))," days", "\n",
+            "Time range (min - max):", "\n", "  ", as.character(range(Ecarts))[1]," - ", as.character(range(Ecarts))[2], " days", "\n\n",
             "Advice ", T , sep="")
 
             tkmessageBox(title = "Frequency Choice Guidance", message = tt, icon = "info", type = "ok")
             return()   }
  
-  # Selection auto du time step (option : auto.timestep) 
+  #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Selection auto du time step (option : auto.timestep) 
   else { if (auto.timestep == "YES")  {
           if (mt<=5) {
              Time.step <- "Daily frequency automatically use"
@@ -296,41 +292,41 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  {
   if (is.numeric(TS$Dates) == TRUE) { } else { 
   if (time.step == "Fortnight") {                                                                                                                                                     
-      TS$week.month[TS$days <= 15] <- 1                    # extraction du numero de semaines du mois (échelle hebdo = 2 quinzaines/mois)  
+      TS$week.month[TS$days <= 15] <- 1                              # extraction du numero de quinzaine du mois (échelle hebdo = 2 quinzaines/mois)  
       TS$week.month[TS$days > 15] <- 2 }                                                                                                                                           
   else {                                                                                                                                                                           
-      TS$week.month[TS$days <= 8] <- 1                     # extraction du numero de semaines du mois (autres échelle = 4 semi-quinzaines/mois) 
+      TS$week.month[TS$days <= 8] <- 1                                # extraction du numero de semi-quinzaine du mois (autres échelle = 4 semi-quinzaines/mois) 
       TS$week.month[TS$days > 8 & TS$days <= 15] <- 2                                                                                                                              
       TS$week.month[TS$days > 15 & TS$days <= 23] <- 3                                                                                                                             
       TS$week.month[TS$days > 23] <- 4 }                                                                                                                                           
-  TS$days <- NULL                                          # suppression de la colonne days pour plus de clarete (plus besoin)
+  TS$days <- NULL                                                                    # suppression de la colonne days pour plus de clarete (plus besoin)
   TSs <- TS
  } }
-#____________________________Valeurs normalisees en fonction de la salinite (npsu), pour les sels nutritifs. Effectue sur les donnees non regularisees
+#_____________________________Valeurs normalisees en fonction de la salinite (npsu), pour les sels nutritifs. Effectue sur les donnees non regularisees
  {  
   if (norm == "YES") {
      if (any(colnames(Envir$Data) == "Salinity")) { 
       if (local.trend == "YES") { return(tkmessageBox(message="Work only for Seasonal and Global Trend", icon = "warning", type = "ok", title="Warning")) }
-      TS <- subset(TS, MONTHS %in% months, drop = TRUE)                         # selection des mois a traiter
+      TS <- subset(TS, MONTHS %in% months, drop = TRUE)                                  # selection des mois a traiter
       dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", sep= ""), recursive = TRUE)  # création du répertoir de sauvegarde
       
       a <- min(TS$YEARS, na.rm=TRUE)                                       
       b <- max(TS$YEARS, na.rm=TRUE)
       c <- sort(rep(a:b, length(months)))
-      NormNutri <- matrix(c)                                                    # matrice vide que l'on va remplir avec les valeurs normalisees par annees (a:b)
+      NormNutri <- matrix(c)                                                                                # matrice vide que l'on va remplir avec les valeurs normalisees par annees (a:b)
       NormNutri <- data.frame(cbind(NormNutri, (rep(months, length(a:b)))))
       NormNutri <- data.frame(cbind(NormNutri, (rep(NA, length(c)))))
       names(NormNutri) <- c("YEARS", "MONTHS", "Normalized")                    # on nomme les colonnes par souci de clarete
       
-      for (i in a:b) {                                                          # pour chaque annee i :
-       for (j in months) {                                                      # et pour chaque mois j :    
-           nutrient <- TS$param[TS$YEARS==i & TS$MONTHS==j]                     #      on recupere les valeurs du parametre à traiter
-           sal <- TS$Salinity[TS$YEARS==i & TS$MONTHS==j]                              #      on recupere les salinites a traiter
+      for (i in a:b) {                                                                                              # pour chaque annee i :
+       for (j in months) {                                                                                       # et pour chaque mois j :    
+           nutrient <- TS$param[TS$YEARS==i & TS$MONTHS==j]                         #      on recupere les valeurs du parametre a traiter
+           sal <- TS$Salinity[TS$YEARS==i & TS$MONTHS==j]                             #      on recupere les salinites a traiter
  
            if ( sum(nutrient*sal, na.rm=TRUE)== 0 | max(sal, na.rm=TRUE)<npsu ) { 
-           NormNutri$Normalized[NormNutri$YEARS==i & NormNutri$MONTHS==j] <- NA }                                                                                                                     # si toute les conditions sont rempli (parametres present et salinites inferieures a la salinite de normalisation) :
-           else { reg <- lm(nutrient~sal)                                                                                          #           on effectue la regression entre salinite et nutriment par annee
-           NormNutri$Normalized[NormNutri$YEARS==i & NormNutri$MONTHS==j] <- (npsu * (reg$coefficients[2]))+(reg$coefficients[1])  #           on calcule la valeur normalisee
+           NormNutri$Normalized[NormNutri$YEARS==i & NormNutri$MONTHS==j] <- NA }                                                 # si toute les conditions sont rempli (parametres present et salinites inferieures a la salinite de normalisation) :
+           else { reg <- lm(nutrient~sal)                                                                                                                                #           on effectue la regression entre salinite et nutriment par annee
+           NormNutri$Normalized[NormNutri$YEARS==i & NormNutri$MONTHS==j] <- (npsu * (reg$coefficients[2]))+(reg$coefficients[1])          #          et on calcule la valeur normalisee
             
             save.mixingdia.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-",end,"/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_MixingDiagram_", strsplit(param,"/")[[1]][1],"_",j,",",i,".png", sep="")                        # sauve chaque mixing diagram (par année)
             if (nchar(save.mixingdia.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
@@ -384,7 +380,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  if(any(colnames(TS) == "Salinity")) { TS$Salinity <- NULL }
  else { }                                   
  }
-#_____________________________________________________________Extraction des outliers (option : outliers.re), pas necessaire pour un test Mann-Kendall
+#_____________________________________________________________Boxplot et Extraction des outliers par annee: pas necessaire pour un test Mann-Kendall
  {   
   if (plotB == "YES") {
       if (is.numeric(TS$Dates) == TRUE) { } else {
@@ -394,48 +390,44 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
       save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Boxplot_byYears_", strsplit(param,"/")[[1]][1],".png", sep = "") 
       if (nchar(save.boxplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
       png(save.boxplot.path, width=1000, height=1000, res=150)
-      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param)        # enregistre la figure
-              , main=paste("Boxplot of",param,"(o = outliers)"))
+      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param) , main=paste("Boxplot of",param,"(o = outliers)"))
       title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8) 
       dev.off()
-      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param)        # affiche la boite a moustache par annees
-              , main=paste("Boxplot of",param,"(o = outliers)"))
+      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param), main=paste("Boxplot of",param,"(o = outliers)"))                     # affiche la boite a moustache par annees   
       title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8)
       return() }
      if (selectBox=="ByMonths") {
       save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Boxplot_byMonths_", strsplit(param,"/")[[1]][1],".png", sep = "") 
       if (nchar(save.boxplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
       png(save.boxplot.path, width=1000, height=1000, res=150)
-      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param)        # enregistre la figure
-              , main=paste("Boxplot of",param,"(o = outliers)"))
+      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param), main=paste("Boxplot of",param,"(o = outliers)"))        
       title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8) 
       dev.off()
-      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param)        # affiche la boite a moustache par mois
-              , main=paste("Boxplot of",param,"(o = outliers)"))
+      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param), main=paste("Boxplot of",param,"(o = outliers)"))                 # affiche la boite a moustache par mois
       title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8)
       return() } }    
   else{}
 
   if (outliers.re == "YES") {
-      a <- min(TS$YEARS)                                                         # pose les arguments qui seront utilises 
+      a <- min(TS$YEARS)                                                                      # pose les arguments qui seront utilises 
       b <- max(TS$YEARS)
       Tf <- NULL
       Text <- NULL
 
-      for (i in a:b) {                                                           # extraction des donnees tous les ans de la premiere (a) a la derniere (b)
-           T <- TS$param[TS$YEARS==i]                                            # extrait les donnees a traite pour l'annee i
+      for (i in a:b) {                                                                            # extraction des donnees tous les ans de la premiere (a) a la derniere (b)
+           T <- TS$param[TS$YEARS==i]                                                 # extrait les donnees a traite pour l'annee i
            EXT <- TS$param[TS$YEARS==i]                                          
            Q3 <- quantile (T, 0.75, na.rm=TRUE)                                  # calcul le 3eme quantile
            Q1 <- quantile (T, 0.25, na.rm=TRUE)                                  # calcul le 1er quantile
            Q <- Q3-Q1
            h <- Q3+(Q*1.5)                                                       # limite haute des outliers
            l <- Q1-(Q*1.5)                                                       # limite basse des outliers
-           T[T>h]<-NA                                                            # suppression des donnees au dessus de la limite haute
-           T[T<l]<-NA                                                            # suppression des donnees en dessous de la limite basse
-           EXT[EXT<=h & EXT>=l]<-NA                                              # conserve les donnees supprimees dans EXT
+           T[T>h]<-NA                                                               # suppression des donnees au dessus de la limite haute
+           T[T<l]<-NA                                                               # suppression des donnees en dessous de la limite basse
+           EXT[EXT<=h & EXT>=l]<-NA                                     # conserve les donnees supprimees dans EXT
 
            t <- list(T)                                                                    
-           Tf <- rbind.data.frame(Tf, t)                                         # construit le tableau (Tf) annee par annee (donnees avec outliers supprimes)
+           Tf <- rbind.data.frame(Tf, t)                                                # construit le tableau (Tf) annee par annee (donnees avec outliers supprimes)
            ext <- list(EXT)                                                                 
            Text <- rbind.data.frame(Text, ext) }                                 # construit le tableau (Text) des donnees supprimees annee apres annee
                                                                                  
@@ -456,21 +448,21 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   Dates <- TS$Dates
   TS$Dates <- NULL                                                                               
  }
-#_________________________________________________________________________Ajout d'un tableau temporel fictif pour combler les mois/semaines manquantes
+#_________________________________________________________________________Ajout d'un tableau temporel fictif pour combler les mois/semaines manquants
  {
  # Tableau des années
 
   yy <- (min(TS$YEARS):max(TS$YEARS))                                             # suite de toutes les annees comprise entre l'annee de debut et de fin de la serie
-  mm <- rep(1, length(yy))                                                        # remplis la nouvelle colonne mois avec des 1
+  mm <- rep(1, length(yy))                                                                     # remplis la nouvelle colonne mois avec des 1
   aa <- rep(NA, length(yy))
   if (is.numeric(Dates) == TRUE) {
-  fic2 <- data.frame(aa,aa,aa,yy)                                                 # nouveau tableau fictif
+  fic2 <- data.frame(aa,aa,aa,yy)                                                        # nouveau tableau fictif
   names(fic2) = c("Category", "param", "time", "YEARS") } else {                  # ...
   
-  fic2 <- data.frame(aa,aa,aa,yy,mm,aa,aa)                                           # nouveau tableau fictif
+  fic2 <- data.frame(aa,aa,aa,yy,mm,aa,aa)                                         # nouveau tableau fictif
   names(fic2) = c("Category", "param", "time", "YEARS", "MONTHS", "week.month", "DY")  }                
 
-  TS <- rbind(fic2, TS)                                                           # fusion des tableaux
+  TS <- rbind(fic2, TS)                                                                           # fusion des tableaux
   
   if (is.numeric(Dates) ==TRUE) { } else {
   if (time.step == "Daily") {
@@ -511,32 +503,32 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 #________________________________________________________________ Tableaux croises avec toutes les methodes d'aggregation (temporelle et mathematique)
  {
 
- if(time.step == "Daily") {
+ if(time.step == "Daily") {  name.freq <- c("Days")
         Mean <- tapply(TS$param, list(TS$YEARS, TS$DY), mean, na.rm=TRUE)
         Quantile <- tapply(TS$param, list(TS$YEARS, TS$DY), quantile, probs = (0.9), na.rm=TRUE)
         Median <- tapply(TS$param, list(TS$YEARS, TS$DY), median, na.rm=TRUE)
         Max <- tapply(TS$param, list(TS$YEARS, TS$DY), max, na.rm=TRUE) }
-  else { if (time.step == "Fortnight") {
+  else { if (time.step == "Fortnight") { name.freq <- c("Fortnights")
           Mean <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), mean, na.rm=TRUE)
           Quantile <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), quantile, probs = (0.9), na.rm=TRUE)
           Median <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), median, na.rm=TRUE)
           Max <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), max, na.rm=TRUE) }
-     else { if (time.step=="Monthly") {
+     else { if (time.step=="Monthly") {  name.freq <- c("Months")
                  Mean <- tapply(TS$param, list(TS$YEARS, TS$MONTHS), mean, na.rm=TRUE)
                  Quantile <- tapply(TS$param, list(TS$YEARS, TS$MONTHS), quantile, probs = (0.9), na.rm=TRUE)
                  Median <- tapply(TS$param, list(TS$YEARS, TS$MONTHS), median, na.rm=TRUE)
                  Max <- tapply(TS$param, list(TS$YEARS, TS$MONTHS), max, na.rm=TRUE) }
-         else { if (time.step=="Annual") {
+         else { if (time.step=="Annual") {   name.freq <- c("Years")
                         Mean <- tapply(TS$param, list(TS$YEARS), mean, na.rm=TRUE)
                         Quantile <- tapply(TS$param, list(TS$YEARS), quantile, probs = (0.9), na.rm=TRUE)
                         Median <- tapply(TS$param, list(TS$YEARS), median, na.rm=TRUE)
                         Max <- tapply(TS$param, list(TS$YEARS), max, na.rm=TRUE)}
-                else { if (time.step == "Mono-mensual") {
+                else { if (time.step == "Mono-mensual") {  name.freq <- c("Months")
                                Mean <- tapply(TS$param, list(TS$MONTHS), mean, na.rm=TRUE)
                                Quantile <- tapply(TS$param, list(TS$MONTHS), quantile, probs = (0.9), na.rm=TRUE)
                                Median <- tapply(TS$param, list(TS$MONTHS), median, na.rm=TRUE)
                                Max <- tapply(TS$param, list(TS$MONTHS), max, na.rm=TRUE) }
-                       else { if (time.step == "Semi-fortnight") {
+                       else { if (time.step == "Semi-fortnight") {   name.freq <- c("Semi-fortnights")
                                       Mean <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), mean, na.rm=TRUE)
                                       Quantile <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), quantile, probs = (0.9), na.rm=TRUE)
                                       Median <- tapply(TS$param, list(TS$YEARS, TS$week.month, TS$MONTHS), median, na.rm=TRUE)
@@ -544,18 +536,18 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
                               else {return(print("You have to choose a time step to aggregate your data!"))}                                
   }}}}}
  }  
-#__________________________________________Choix de la methode d'aggregation avec les p.values du test Wilcoxon (options : help.aggreg et auto.aggreg)
+#__________________________________________Choix de la methode d'aggregation avec les p.values de l'ANOVA suivi d'un post-hoc de Dunett (options : help.aggreg et auto.aggreg)
  {
   if (help.aggreg == "YES" | auto.aggreg== "YES") {
  
       a <- data.frame(rep(NA, (max(TS$YEARS, na.rm=TRUE)+1-min(TS$YEARS[TS$YEARS > 0], na.rm=TRUE))*365.25))        # tableau vide avec nombre de jour total de la série regularisée 
-      a <- data.frame(a, 1:nrow(a))                                                         # numerotation des lignes
+      a <- data.frame(a, 1:nrow(a))                                                                         # numerotation des lignes
       aa <- data.frame(TS$param[!is.na(TS$time)])                                           # on recupere les données parametres  
-      aa <- data.frame(aa, TS$time[!is.na(TS$time)])                                        #     et l'on y accole les donnees temporelle
-      regraw <- merge(a, aa, by.x = 2, by.y = 2, all = TRUE)                                # on fusionne les donnees brute (aa) et la serie temporelle
+      aa <- data.frame(aa, TS$time[!is.na(TS$time)])                                       #     et l'on y accole les donnees temporelles
+      regraw <- merge(a, aa, by.x = 2, by.y = 2, all = TRUE)                                   # on fusionne les donnees brute (aa) et la serie temporelle
       zraw <- ts(regraw[, 3], start=min(TS$YEARS[TS$YEARS > 0], na.rm=TRUE), frequency=366) #     reguliere pour obtenir une serie regularisee (echelle de la journee) avec des NA
    
-      v1 <- as.data.frame(Mean)                                                             # on recupere le tableau croise
+      v1 <- as.data.frame(Mean)                                                                               # on recupere le tableau croise
       v2 <- as.data.frame(Quantile)
       v3 <- as.data.frame(Median)
       v4 <- as.data.frame(Max)
@@ -577,11 +569,11 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
       C2 <- "The quantiles 0.9 give better fit"
       C3 <- "The medians give better fit"
       C4 <- "The maximums give better fit"
-      choice <- rbind(C1,C2,C3,C4)                                                                 # tableau des differentes propositions
+      choice <- rbind(C1,C2,C3,C4)                                                                  # tableau des differentes propositions
 
       R <- cbind(data.frame(summary(test.dunnett)$test$pvalues),choice)
-      r <- as.data.frame(R)                                                                        # fusion des tableaux
-      names(r)[c(1)] <- c("p.values")                                                              # on fignole le tableau...
+      r <- as.data.frame(R)                                                                             # fusion des tableaux
+      names(r)[c(1)] <- c("p.values")                                                         # on fignole le tableau...
       names(r)[c(2)] <- c("choice") 
       r$choice <- as.character(r$choice)                                                                   
       r$p.values <- as.numeric(r$p.values) }
@@ -625,26 +617,29 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 
   if (na.replace=="YES") {
      wx <- v[-1, ]
-   
-     if (length(wx[is.na(wx)]) > ((length(wx))/20)) {                          # affiche un message de warning
+     test.wx <- as.data.frame(wx)                                                                                                                                # evite les problemes de format "array" pour les frequences annuelle et monomensuelle
+     P.NA <- (length(test.wx[is.na(test.wx)])/(dim(test.wx)[1]*dim(test.wx)[2]))*100
+     P.NA <- round(P.NA,2)
+     
+     if ( length(test.wx[is.na(test.wx)]) > ((dim(test.wx)[1]*dim(test.wx)[2])/20) ) {                          # affiche un message de warning si les NAs representent plus de 5% de la serie
          tkinsert(Envir$txt, "end", paste("-!Warning message!-", "\n"))
          tktag.add(Envir$txt, "titre2", "end -2 lines linestart","end -2 lines lineend") 
          tktag.configure(Envir$txt, "titre2", foreground="red", font=tkfont.create(family="courier",size=9,weight="bold")) 
-         tkinsert(Envir$txt, "end", paste("Missing values represent more that 1/20 of the regularised data,", "\n"))
+         tkinsert(Envir$txt, "end", paste("Missing values represent ", P.NA, "% of the regularised data,", "\n", sep=""))
          tkinsert(Envir$txt, "end", paste("replacing them is not a good idea.", "\n\n"))
          tksee (Envir$txt,"end") 
-         tkmessageBox(message=paste("Missing values represent more that 5% of the regularised data,", "\n", "replacing them is not a good idea.", sep=""), icon = "warning", type = "ok", title="!Warning!") }
+         tkmessageBox(message=paste("Missing values represent ", P.NA, "% of the regularised data,", "\n", "replacing them is not a good idea.", sep=""), icon = "warning", type = "ok", title="!Warning!") }
      else{} 
      
-     cc <- matrix(NA, nrow(v), ncol(v))                                            # matrice vide à remplir
+     cc <- matrix(NA, nrow(v), ncol(v))                                              # matrice vide à remplir
      vc <- v
-     vc[is.na(vc)] <- -5000                                                        # remplacement des NA par la valeur -5000 (evite les problemes avec les NA et les 0)
+     vc[is.na(vc)] <- -5000                                                                  # remplacement des NA par la valeur -5000 (evite les problemes avec les NA et les 0)
      ccc <- impute(v, what=c("median"))                                            # matrice avec valeurs remplacees par la methode des medianes/cycle # impute = package 'e1071' ##
      
      if (time.step=="Annual" | time.step=="Mono-mensual") {
         for (i in 1:(nrow(v)-2)) {
            if ((vc[i,]+vc[i+1,]+vc[i+2,])== -15000) {                              # pour chaque serie de 3 valeurs successives dans vc, si leur somme = -15000 (valeurs manquantes) alors 
-                cc[i,] <- ccc[i,] }                                                # la premiere donnee de cette serie est remplacee par la valeur correspondante dans la matrice des medianes
+                cc[i,] <- ccc[i,] }                                                                      # la premiere donnee de cette serie est remplacee par la valeur correspondante dans la matrice des medianes
            else { cc[i,] <- v[i,] } } 
         cc[nrow(v)-1, ] <- v[nrow(v)-1, ]
         cc[nrow(v), ] <- v[nrow(v), ] } 
@@ -653,12 +648,12 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
         for (i in 1:nrow(v)) {
            for (j in 1:(ncol(v)-2)) {
               if ((vc[i,j]+vc[i,j+1]+vc[i,j+2])== -15000) {                        # pour chaque serie de 3 valeurs successives dans vc, si leur somme = -15000 (valeurs manquantes) alors 
-                  cc[i,j] <- ccc[i,j] }                                            # la premiere donnee de cette serie est remplacee par la valeur correspondante dans la matrice des medianes
-              else { cc[i,j] <- v[i,j] } } }                                       # sinon la valeur est laissee telle quelle (meme si c'est une valeurs manquante)                                                                                 
+                  cc[i,j] <- ccc[i,j] }                                                                   # la premiere donnee de cette serie est remplacee par la valeur correspondante dans la matrice des medianes
+              else { cc[i,j] <- v[i,j] } } }                                                         # sinon la valeur est laissee telle quelle (meme si c'est une valeurs manquante)                                                                                 
         cc[ , ncol(v)-1] <- v[ , ncol(v)-1]
         cc[ , ncol(v)] <- v[ , ncol(v)]    }
   
-     if (is.na(cc[1,1])) {                                                         # remplace la premiere valeur de la serie si celle-ci est toujours NA
+     if (is.na(cc[1,1])) {                                                                              # remplace la premiere valeur de la serie si celle-ci est toujours NA
          cc[2,1] <- ccc[2,1] }                            
      else{}                                             
      if (is.na(cc[nrow(cc),ncol(cc)])) {                
@@ -668,7 +663,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
      row.names(cc) <- row.names(v)
      v <- as.data.frame(cc) 
      names(v) <- names(vc) }
-### autre methode possible: les splines ->  spline(v, n=length(v), method="natural")  , mais moyen si beaucoup de valeur manquante  ###
+##### autre methode possible: les splines ->  spline(v, n=length(v), method="natural")  , mais moyen si beaucoup de valeur manquante  #####
   
   else { v <- as.data.frame(v) }
   
@@ -693,7 +688,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   TimeSerie$time <- 1:(nrow(TimeSerie))
   
   Ja <- as.matrix(rep(1, 31))
-  Fe <- as.matrix(rep(2, 29))
+  Fe <- as.matrix(rep(2, 28))
+  Fe.leap <- as.matrix(rep(2, 29))
   Ma <- as.matrix(rep(3, 31))
   Av <- as.matrix(rep(4, 30))
   My <- as.matrix(rep(5, 31))
@@ -704,9 +700,13 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   Oc <- as.matrix(rep(10, 31))
   No <- as.matrix(rep(11, 30))
   De <- as.matrix(rep(12, 31))
-  Mois <- rbind(Ja,Fe,Ma,Av,My,Ju,Jl,Ao,Se,Oc,No,De)
+  Mois <- rbind(Ja,Fe,Ma,Av,My,Ju,Jl,Ao,Se,Oc,No,De,NA)
+  Mois.leap <- rbind(Ja,Fe.leap,Ma,Av,My,Ju,Jl,Ao,Se,Oc,No,De)
 
-  TimeSerie$MONTHS <- rep(Mois, max(TimeSerie$YEARS)+1-min(TimeSerie$YEARS)) 
+  for (i in yy)  {  if (leap_year(i) == TRUE ) {
+   TimeSerie$MONTHS [TimeSerie$YEARS ==i] <- Mois.leap }
+   else { TimeSerie$MONTHS [TimeSerie$YEARS==i]  <- Mois } }
+  
   TimeSerie <- subset(TimeSerie, select=c(param, YEARS, MONTHS, DayYears, time)) } 
   
  else { if (time.step=="Annual"){
@@ -781,14 +781,14 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 #_________________________________________________________________________________________________________________________Selection des mois a traiter et suppression des valeurs extrapolees en debut et fin de serie 
  {
   if (time.step == "Mono-mensual") { F <- 1 }  else {
-      F <- length(TimeSerie$param[TimeSerie$YEARS == min(TimeSerie$YEARS)])                                            # on garde la frequence de la serie de base
+      F <- length(TimeSerie$param[TimeSerie$YEARS == min(TimeSerie$YEARS)])                                          # trouve la frequence de la serie de base
       
       if (time.step == "Monthly" | time.step == "Semi-fortnight" | time.step == "Fortnight") {
       Fm <- (TSs[order(TSs$YEARS,TSs$MONTHS,TSs$week.month), ]$MONTHS[1])-1                                            # trouve le premier mois de la serie temporelle originale
             if (time.step == "Monthly") { Fw <- 1 } 
-                else{ Fw <- TSs[order(TSs$YEARS,TSs$MONTHS,TSs$week.month), ]$week.month[1] }                          # trouve la premiere semaine de la serie temporelle originale                                        
-            if (((Fm*coefT+Fw)-1) != 0 ) {                                                                             # si les dates sont differentes
-            TimeSerie$param[1:((Fm*coefT+Fw)-1)] <- NA } else {}                                                       #    on remplace le debut de la ts par des NA
+                else{ Fw <- TSs[order(TSs$YEARS,TSs$MONTHS,TSs$week.month), ]$week.month[1] }                    # trouve la premiere semaine de la serie temporelle originale                                        
+            if (((Fm*coefT+Fw)-1) != 0 ) {                                                                                                                   # si les dates sont differentes
+            TimeSerie$param[1:((Fm*coefT+Fw)-1)] <- NA } else {}                                                                       #    on remplace le debut de la ts par des NA
       Lm <- 12-((TSs[order(TSs$YEARS,TSs$MONTHS,TSs$week.month), ]$MONTHS)[length(na.omit(TSs$MONTHS))])               # idem avec la fin de la serie temporelle  
             if (time.step == "Monthly") { Lw <- 1 } 
                 else{ Lw <- (TSs[order(TSs$YEARS,TSs$MONTHS,TSs$week.month), ]$week.month)[length(na.omit(TSs$week.month))] }
@@ -796,7 +796,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
             TimeSerie$param[(((length(TimeSerie$param)+1)-((Lm*coefT)+(coefT-Lw)))):length(TimeSerie$param)] <- NA  } else {}  } else{}  }            
   
   if (any(colnames(TimeSerie) == "MONTHS")) {
-      TimeSerie <- subset(TimeSerie, MONTHS %in% months, drop = TRUE) }                                                # on extrait les mois voulu
+      TimeSerie <- subset(TimeSerie, MONTHS %in% months, drop = TRUE) }                                                         # on extrait les mois voulu
   else{}
  }
 #__________________________________________________________________________________________________________________Creation de la serie temporelle 'z'
@@ -805,8 +805,10 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
            
   if (time.step=="Mono-mensual") {
       start.year <- min(TimeSerie$MONTHS) }
-  else { start.year <- min(TimeSerie$YEARS) }
- 
+  else { start.year <- min(TimeSerie$YEARS)  }
+  
+  start.time <- min(na.omit(TimeSerie)["time"])
+   
   freq <- 1/F    
  
   if (!is.null(months) & any(colnames(TimeSerie) == "MONTHS")) {
@@ -816,25 +818,28 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  # construction de la serie temporelle et remplacement des dernieres valeurs manquantes par regression lineaire
  {      
      z <- ts(as.numeric(TimeSerie$param), start = c(start.year), deltat = freq)
-     z1 <- z    
-       if (na.replace=="YES") {
-         z <- interpNA(z, "linear")                                              # interpolation des NA restant en faisant une regression lineaire entre les valeur avant et apres
-         z <- ts(z, start = c(start.year), deltat = freq)
-         z1 <- z                                                                 # garde la serie avec NA au début et à la fin (z1) pour afficher le tableau (evite les problemes de longueur de colonne) 
-         z2 <- na.omit(z, method = c("ir"), interp = c("linear"))                 # supprime les NA en debut et fin de serie temporelle, la nouvelle serie commence a n+1 et finie a n-1.
-         z2 <- ts(as.numeric(z2), start = c(start.year), deltat = freq)            # on reconstruit la serie pour eliminer les probemes de serie temporelle multivariee  (ss NA pour spectrum() et detrend() )
+     z1 <- z
+     z2 <- z
+      if (na.replace=="YES") {
+         z <- interpNA(z, "linear")                                                              # interpolation des NAs restant en faisant une regression lineaire entre les valeur avant et apres
+         z <- ts(z, start = c(start.year), deltat = freq)                        # dans cette version il reste les NAs du debut et de la fin qui ne doivent pas etre extrapoles
+         z1 <- z                                                                                                  # garde la serie avec NAs au début et à la fin (z1) pour afficher le tableau (evite les problemes de longueur de colonne) 
+         z2 <- na.omit(z, method = c("ir"), interp = c("linear"))                                              # supprime les NAs en debut et fin de serie temporelle
+         z2 <- ts(as.numeric(z2), start = c(start.year, start.time), deltat = freq)            # on reconstruit la serie pour eliminer les probemes de serie temporelle multivariee  (ss NA pour spectrum() et detrend() )
          }  else{} 
-       
+   
+       if (time.step == "Mono-mensual") { time.xlab <- c("Months") } else { time.xlab <- c("Years")  }
+        
        if (plotZ == "YES") {
          dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)
          save.figure.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_TimeSeries_", strsplit(param,"/")[[1]][1],".png", sep = "")
          if (nchar(save.figure.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
          png(save.figure.path, width=1300,height=700, res=100)
-         plot(z, ylab=paste(param), type = "o", xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"))
+         plot(z, ylab=paste(param), type = "o", xlab=time.xlab, main=paste("Regularised Time Series of",param,"concentration","\n"))
          title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
          minor.tick(nx=5, ny=2, tick.ratio=0.4)  
          dev.off()
-         plot(z, ylab=paste(param), type = "o", pch = 20, xlab="Years", main=paste("Regularised Time Series of",param,"concentration","\n"))
+         plot(z, ylab=paste(param), type = "o", pch = 20, xlab=time.xlab, main=paste("Regularised Time Series of",param,"concentration","\n"))
          title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
          minor.tick(nx=5, ny=2, tick.ratio=0.4) } 
        else{ } 
@@ -844,7 +849,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
      Regularised.Data <- TimeSerie                      
      Param <- as.numeric(z)                            
      Regularised.Data$param <- Param                    # tableau de donnees avec NA remplaces
-     Regularised.data <- Regularised.Data               # on garde la serie avec le nom inchange pour les tests qui ont besoin de la colone standard 'param'
+     Regularised.data <- Regularised.Data          # on garde la serie avec le nom inchange pour les tests qui ont besoin de la colone standard 'param'
      Name <- names(Regularised.Data)                    # pour la sortie tableau
      Name[1] <- param 
      colnames(Regularised.Data) <- Name 
@@ -878,13 +883,13 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
     
   else{}
  }
-#___________________________________________________________________________________Test de normalite sur la serie temporelle (option: test.normality)
+#___________________________________________________________________________________Tests de normalite sur la serie temporelle (option: test.normality)
  { 
   if (test.normality == "YES") {
-      qqnorm(z)
+      qqnorm(z)                                                                                     # Q-Q plot
       qqline(z)
       shap <- shapiro.test(z)                                                                  
-      shap.p <- shap$p.value                                                             # extrait la valeur de p du test Shapiro et la compare au niveau de significativite
+      shap.p <- shap$p.value                                                             # extrait la valeur de p du test Shapiro et la comparer au niveau de significativite
       shap.stat <- round(shap$statistic, digits = 4)  
       if (shap.p <= 0.05) {  
           tkinsert(Envir$txt2, "end", paste("-Shapiro-Wilk normality test result-", "\n"))
@@ -938,7 +943,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  ## !! Les spectres de Fourier ne supporte pas les valeurs manquantes !! ##
  { 
   if (spectrum == "YES") {
-          if (length(z2[is.na(z2)]) == 0) {                                               # ne fait pas de spectre si z contient des valeurs manquantes
+    if (length(z2[is.na(z2)]) == 0) {                                                                                  # ne fait pas de spectre si z contient des valeurs manquantes
               Spec <- spectrum(z2, method=c("pgram"), plot=FALSE)
               plot(1/Spec$freq, Spec$spec, type="l", log="x", lwd=2, main=paste("Spectral density of", param, "regularised Time Series", "\n\n"), ylab="Spectral density", xlab="Frequency = Months / 12")              
               title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
@@ -962,9 +967,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
                  png(save.spectrum.path, width=1000, height=700, res=120)
                  plot(1/Spec$freq, Spec$spec, type="l", log="x", lwd=2, main=paste("Spectral density of", param, "regularised Time Series", "\n\n"), ylab="Spectral density", xlab="Frequency = Months / 12")
                  title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)  
-                 dev.off() 
-              }
-          else { return(tkmessageBox(message="Cannot perform spetrum alnaysis : missing values in time series", icon = "warning", type = "ok", title="!Warning!"))} }  
+                 dev.off()    }
+         else { return(tkmessageBox(message="Cannot detrend with missing values", icon = "warning", type = "ok", title="!Warning!")) } }         
   else{}
  }
 #_________________________________________________________________________________________________________Montre un color plot des anomalies par annee  
@@ -1049,16 +1053,35 @@ else{}
   if (zsmooth=="YES")  {
    if (time.step=="Daily" | time.step=="Monthly" | time.step=="Semi-fortnight" | time.step=="Fortnight") {
       if (length(z2[is.na(z2)])==0) {
-          a <- stl(z2, s.window="periodic", t.window=(F*10), na.action=na.fail)
-          plot(a)
+          z.stl <- stl(z2, s.window="periodic", t.window=(F*10), na.action=na.fail)
+      ###construction du tableau a sauvegarder     
+          z.date <- as.character(time(z.stl$time.series[, 1])+0.00000001)
+          z.Years <- as.numeric(do.call("rbind", strsplit(z.date,"[.]")) [,1])
+          z.Time <- round(((as.numeric(paste("0.", do.call("rbind", strsplit(z.date,"[.]")) [,2], sep=""))*F)+1), 0)
+          z.tbl <- cbind(z.Years, z.Time, z.stl$time.series[, 1], z.stl$time.series[, 2], z.stl$time.series[, 3])
+          colnames(z.tbl) <- c("Years", "Time", "Seasonal", "Trend", "Remainder")
+      ### figure principale    
+          plot(z.stl)
           title(main=paste("Seasonal Decomposition of Time Series by Loess", "\n\n"), cex.main=1)
+      ### figure de la saisonalite    
+          dev.new()
+          z.tbl2 <- as.numeric(as.character(window(z.stl$time.series[, 1], c(min(Regularised.data$YEARS)+1, 1), c(min(Regularised.data$YEARS)+1, F))))
+          plot(z.tbl2, ylab=paste(param), xlab=paste(name.freq), main=paste("Seasonality of the Time Series by Loess", "\n\n"), cex.main=1, type="l")
+                     
             dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE)
-            save.stl.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Deseasonal_", strsplit(param,"/")[[1]][1],".png", sep = "")
-            if (nchar(save.stl.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
-            png(save.stl.path, width=1200, height=1000, res=160)
-            plot(a)
+            save.stltbl.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Deseasonal_", strsplit(param,"/")[[1]][1],".txt", sep = "")
+            write.table(z.tbl, sep="\t", row.names=FALSE, file=save.stltbl.path)
+            save.stlgr.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Deseasonal_", strsplit(param,"/")[[1]][1],".png", sep = "")
+            save.stlgr2.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Seasonality_", strsplit(param,"/")[[1]][1],".png", sep = "")
+            if (nchar(save.stlgr.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
+            png(save.stlgr.path, width=1200, height=1000, res=160)
+            plot(z.stl)
             title(main=paste("Seasonal Decomposition of Time Series by Loess", "\n\n"), cex.main=1)
-            dev.off() }
+            dev.off() 
+            png(save.stlgr2.path, width=1200, height=1000, res=160)
+            plot(z.tbl2, ylab=paste(param), xlab=paste(name.freq), main=paste("Seasonality of the Time Series by Loess", "\n\n"), cex.main=1, type="l")
+            dev.off() 
+            }
       else { return(tkmessageBox(message="Cannot detrend with missing values", icon = "warning", type = "ok", title="!Warning!")) } }
      else { return(tkmessageBox(message="Cannot detrend with annual or monomensual time steps", icon = "warning", type = "ok", title="!Warning!")) } }      
   else { } 

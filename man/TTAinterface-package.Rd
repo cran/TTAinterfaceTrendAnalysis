@@ -13,8 +13,8 @@ Just follow the successive step from the data frmatting to the results sorting.
 \tabular{ll}{
 Package: \tab TTAinterface\cr
 Type: \tab Package\cr
-Version: \tab 1.5\cr
-Date: \tab 2013-10-22\cr
+Version: \tab 1.5.1\cr
+Date: \tab 2014-02-20\cr
 License: \tab GPL (>=2)\cr
  }
 }
