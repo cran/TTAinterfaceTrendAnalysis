@@ -45,7 +45,7 @@ tkinsert(AIDE3, "end", paste("This is the third panel of the interface." ,"\n\n"
 "    _The <Show regularised time series> buttons let you show the table, the figure or the descriptive statistics"  ,"\n",
 "     of your data passed through the regulation methods you choose. Figure and tables are automatically saved.", sep=""))
      
-tkpack(tkbutton(aide3, text="Ok", command=function(){ tkdestroy(aide3) } , width=20 ), side="bottom")
-tkconfigure(AIDE3, state="disabled")
+tkpack(tk2button(aide3, text="Ok", command=function(){ tkdestroy(aide3) } , width=20 ), side="bottom")
+tkconfigure(AIDE3, state="disabled", background="white")
 
 }

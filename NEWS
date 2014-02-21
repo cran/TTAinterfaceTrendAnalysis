@@ -47,3 +47,12 @@ Changes in version 1.5
   o Figure resolutions and outputs have been improved
   o Shaprio-Wilk normality test display also a Q-Q plot
   o Possibility to direclty transform your data in Log10(x+1) from the interface
+  
+Changes in version 1.5.1
+  
+  o Minor bugs correction
+  o Minor code improvment
+  o Add a new graph with the option Detrend (Seasonality)
+  o Interface visual improvment
+  o Daily frequency analysis improvment
+

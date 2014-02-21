@@ -25,15 +25,15 @@ tkinsert(AIDE1, "end", paste("This is the first panel of the Temporal Trend Anal
 "      Then you can change the name of the column, the value of each case and the category of the data" ,"\n",
 "      by clicking on the column header (two choice : numeric or character). Choose" ,"\n",
 "      numeric for your parameters and character for stations and date." ,"\n",
-"      Date column must be named as 'DATES' and date must be formatted as dd/mm/yyyy." ,"\n",
-"      Sampling site column must be names as 'STATIONS'" ,"\n",
+"      Date column must be named as 'Dates' and date must be formatted as yyyy-mm-dd (ISO 8601)." ,"\n",
+"      Categorical factors (sampling station, taxa etc...) column must be names as 'Category'" ,"\n",
 "      Salinity column must be names as 'S'" ,"\n",
-"      Depth column must be names as 'DEPTH'", "\n\n",
-"      Each time the fix button is used, the new file will be saved as filename_fixed.csv", "\n\n",
+"      Depth column must be names as 'Depth'", "\n\n",
+"      Each time the fix button is used, the new file will be saved as filename_fixed.txt", "\n\n",
 "The text between button 1 and 2 show the active file (also show in the header of the interface)" ,"\n",
 "The text between button 2 and 3 show the current path where results are saved", sep=""))
 
-tkpack(tkbutton(aide1, text="Ok", command=function(){ tkdestroy(aide1) }, width=20 ), side="bottom")
-tkconfigure(AIDE1, state="disabled")
+tkpack(tk2button(aide1, text="Ok", command=function(){ tkdestroy(aide1) }, width=20 ), side="bottom")
+tkconfigure(AIDE1, state="disabled", background="white")
 
 }

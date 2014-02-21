@@ -35,7 +35,7 @@ tkinsert(AIDE2, "end", paste("This is the second panel of the interface", "\n\n"
 "     _The <Summary> button display descriptive statistics of the selected parameters in the results window", "\n",
 "      (in right side of the interface) and in the front of the screen (in a data frame).", sep=""))
       
-tkpack(tkbutton(aide2, text="Ok", command=function(){ tkdestroy(aide2) } , width=20), side="bottom")
-tkconfigure(AIDE2, state="disabled")
+tkpack(tk2button(aide2, text="Ok", command=function(){ tkdestroy(aide2) } , width=20), side="bottom")
+tkconfigure(AIDE2, state="disabled", background="white")
 
 }
