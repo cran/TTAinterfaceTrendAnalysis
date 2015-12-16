@@ -32,7 +32,7 @@ tkinsert(AIDE3, "end", paste("This is the third panel of the interface." ,"\n\n"
 "     separate two measurement in your database. As a function of the result it suggest a frequency" ,"\n",
 "     to use (daily if the result <=5, semi-fortnightly <=10 days; fortnightly <=24 days;"  ,"\n",
 "     monthly <=60 days and yearly >60 days)"  ,"\n",
-"     Monomensual aggregate the respective months of all years. "  ,"\n",
+"     Monthly - Climato aggregate the respective months of all years. "  ,"\n",
 "     The auto method use the result of the guidance to automatically perform the aggregation,"  ,"\n",
 "     this is the default method." ,"\n\n",
 

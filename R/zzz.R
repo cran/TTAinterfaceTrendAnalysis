@@ -34,11 +34,16 @@
   tkpack(LOAD1.but, side="top")
   tkpack(label.theme, cb.theme, side="top")
   tkpack(tk2separator(startup), fill="x", side="top")
-  
-  Envir$pversion <- utils::packageVersion("TTAinterfaceTrendAnalysis") 
-  subtext <- tklabel(startup,text= paste("TTAinterface v", Envir$pversion, " launch panel", sep=""))                       
-  tkconfigure(subtext, font=tkfont.create(size=7))                                              
-  tkpack(subtext, side="bottom")
+
+  Envir$pversion <- utils::packageVersion("TTAinterfaceTrendAnalysis")
+  subtext <- tklabel(startup,text= paste("TTAinterface v", Envir$pversion, " launch panel", sep=""))
+  tkconfigure(subtext, font=tkfont.create(size=7))
+  tkpack(subtext, side="top", fill="both")
+
+  tk2tip(subtext,
+  if(getRversion() >= "3.0.0") {
+   text= paste("Need R v3.0.0+ ; Your R version:", getRversion(), "(Good)") } else {
+   text= paste("Need R v3.0.0+ ; Your R version:", getRversion(), "(Need update)") } )
 
 }
 
