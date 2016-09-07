@@ -7,20 +7,20 @@ function ( )  {
     
 ##### copier ici a partir de 'Save.directory <- function...' jusqu'a 'open <- tkgrid(HELP4.but...'  #####   
 
-     Save.directory <- function() { selectdirectory() }                                                                                                  # appel la fonction selectdirectory.R
-     save.select <- tk2button(Envir$rawdata, text=" Select your save directory ", command=Save.directory)                          # bouton select save path
+     Save.directory <- function() { selectdirectory() }                                                                   # appel la fonction selectdirectory.R
+     save.select <- tk2button(Envir$rawdata, text=" Select your save directory ", command=Save.directory)                 # bouton select save path
      tkgrid(save.select, column=1, row=3, sticky="w")
 
-     fixdata1 <- function() { fixdata( ) }                                                                                                                                                        # appel la fonction fixdata.R
+     fixdata1 <- function() { fixdata( ) }                                                                                # appel la fonction fixdata.R
      imgFixdata <- tclVar()
      tcl("image","create","photo",imgFixdata,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgFixdata.gif",fsep=.Platform$file.sep))
      fixdata.but <- tk2button(Envir$rawdata, image=imgFixdata, text="Fix Data ", compound="right", command=fixdata1, width=8)         # bouton fixdata
      tkgrid(fixdata.but, column=1, row=7, sticky="w")
 
-     showdata <- function()  { showData(Envir$Data) }                                                                                                                                                   # appel la fonction showData
+     showdata <- function()  { showData(Envir$Data) }                                                                     # appel la fonction showData
      imgShowdata <- tclVar()
      tcl("image","create","photo",imgShowdata,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgShowdata.gif",fsep=.Platform$file.sep))
-     showdata <- tk2button(Envir$rawdata, image=imgShowdata, text= "Show Data ", compound="right", command=showdata, width=10)      # bouton showdata
+     showdata <- tk2button(Envir$rawdata, image=imgShowdata, text= "Show Data ", compound="right", command=showdata, width=10)        # bouton showdata
      tkgrid(showdata, column=1, row=5, sticky="w")
 
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Frame avec texte variable
@@ -111,8 +111,8 @@ function ( )  {
                       for (i in 1:length(selection)) { Env$variables.selectionnees.temp <- Env$variables.selectionnees.temp[-min(selection)]  }}
                 else { tkmessageBox(message="No categorical factor selected !",type="ok",icon="info", title="!Warning!") } })
 
-     tkgrid(tklabel(Envir$Select, text="Select your categorical factor(s)"), row=0, column=0,rowspan=2)                        # titres des listes
-     tkgrid(tklabel(Envir$Select, text="Selected categorical factor(s)"), row=0, column=2,rowspan=2)                           # mise en page...
+     tkgrid(tklabel(Envir$Select, text="Categorical factor(s)"), row=0, column=0,rowspan=2)                        # titres des listes
+     tkgrid(tklabel(Envir$Select, text="Selected factor(s)"), row=0, column=2,rowspan=2)                           # mise en page...
      tkgrid(liste1,row=2,column=0,rowspan=2)
      tkgrid(bouton1,row=2,column=1)
      tkgrid(bouton2,row=3,column=1)
@@ -144,7 +144,7 @@ function ( )  {
                    Env2$variables.selectionnees.temp <- c(selection2) }
                 else { tkmessageBox(message="No variable selected !",type="ok",icon="info", title="!Warning!") }})
 
-     tkgrid(tklabel(Envir$Select, text="Select a parameter"), row=11, column=0,rowspan=2)            # titre des listes
+     tkgrid(tklabel(Envir$Select, text="Parameter(s)"), row=11, column=0,rowspan=2)            # titre des listes
      tkgrid(tklabel(Envir$Select, text="Selected parameter"), row=11, column=2,rowspan=2)            #       "
      tkgrid(liste3, row=13, column=0)
      tkgrid(bouton3, row=13, column=1)
@@ -178,7 +178,7 @@ function ( )  {
 
 #_______________________________________________________________________________________________________________________Sliders salinite et profondeur
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Sliders pour les salinites
-     if (any(colnames(Envir$Data) == "Salinity") & any(!is.na(Envir$Data$Salinity))==TRUE) {                                                     # si une colonne S est presente
+     if (any(colnames(Envir$Data) == "Salinity") & any(!is.na(Envir$Data$Salinity))== TRUE) {                                                     # si une colonne S est presente
         if (class(Envir$Data$Salinity) == "numeric") {                                                                                                                                  #      et si c'est bien une valeur numerique  :
           sal1 <- tclVar(min(Envir$Data$Salinity, na.rm=TRUE))                                                                                                                    # prend la valeur mini de la salinite
           slider1 <- tk2scale(Envir$Select, from=min(Envir$Data$Salinity, na.rm=TRUE), to=max(Envir$Data$Salinity, na.rm=TRUE),        # slider coulissant entre...
@@ -266,7 +266,7 @@ function ( )  {
             d <- as.Date(Envir$Data$Dates, format="%Y-%m-%d")                                                                                      # formattage de la date
             years <- as.numeric(format(d, format = "%Y")) }                                                                                             # on recupere les annees
 
-            if ( is.na(d) == FALSE ) {} else { return(tkmessageBox(message="Wrong date format: must be 'yyy-mm-dd'"
+            if ( anyNA(d) == FALSE ) {} else { return(tkmessageBox(message="Wrong date format: must be 'yyyy-mm-dd'"
                                                                    ,icon = "warning", type = "ok", title="!Warning!")) }
 
             year1 <- tclVar(min(years, na.rm=TRUE))                                                                                                          # boite de texte avec fleches
@@ -398,7 +398,7 @@ function ( )  {
          tkgrid(tklabel(LabeledFrame1,text="Remove outliers ?"), column=0, row=2, sticky="w")
          tkgrid(cb3, column=1, row=2)
 
-         selectBox<-NULL                                                                                                                                                                    # radio button pour les boxplots
+         selectBox <- NULL                                                                                                                                                                    # radio button pour les boxplots
          rb21 <- tk2radiobutton(LabeledFrame1)
          rb22 <- tk2radiobutton(LabeledFrame1)
          rb20Value <- tclVar("ByYears")
@@ -485,6 +485,7 @@ function ( )  {
          rb2 <- tk2radiobutton(LabeledFrame3)
          rb3 <- tk2radiobutton(LabeledFrame3)
          rb4 <- tk2radiobutton(LabeledFrame3)
+          rbC <- tk2radiobutton(LabeledFrame3)
          rb5 <- tk2radiobutton(LabeledFrame3)
          rb6 <- tk2radiobutton(LabeledFrame3)
          if (is.numeric(Envir$Data$Dates) ==TRUE) { rb2Value <- tclVar("Mean") } else {
@@ -493,16 +494,23 @@ function ( )  {
          tkconfigure(rb2,variable=rb2Value,value="Median")
          tkconfigure(rb3,variable=rb2Value,value="Quantile")
          tkconfigure(rb4,variable=rb2Value,value="Max")
+         tkconfigure(rbC,variable=rb2Value,value="Other")
+          Fun.C <- tclVar( "" )                                                                                                                   # choix de la valeur de la salinite de standardisation (30 par defaut)
+          entry.Fun <-tk2entry(LabeledFrame3, width="17", textvariable=Fun.C, background="white")
          tkconfigure(rb5,variable=rb2Value,value="help")
          tkconfigure(rb6,variable=rb2Value,value="auto")
-         tkgrid(tklabel(LabeledFrame3,text="Mean "),rb1, sticky="w")
-         tkgrid(tklabel(LabeledFrame3,text="Median "),rb2, sticky="w")
-         tkgrid(tklabel(LabeledFrame3,text="Quantile 0.9 "),rb3, sticky="w")
-         tkgrid(tklabel(LabeledFrame3,text="Maximum "),rb4, sticky="w")
-         tkgrid(tklabel(LabeledFrame3,text="Guidance to choose the method      "),rb5, sticky="w")
-         tkgrid(tklabel(LabeledFrame3,text="Auto "),rb6, sticky="w")
+         tkgrid(tklabel(LabeledFrame3,text="Mean "),rb1, sticky="w", row=1)
+         tkgrid(tklabel(LabeledFrame3,text="Median "),rb2, sticky="w", row=2)
+         tkgrid(tklabel(LabeledFrame3,text="Quantile 0.9 "),rb3, sticky="w", row=3)
+         tkgrid(tklabel(LabeledFrame3,text="Maximum "),rb4, sticky="w", row=4)
+          tkgrid(tklabel(LabeledFrame3,text="Other :"),rbC, sticky="w", row=5)
+          tkgrid(entry.Fun, sticky="n", row=5)
+         tkgrid(tklabel(LabeledFrame3,text="Guidance to choose the method      "),rb5, sticky="w", row=7)
+         tkgrid(tklabel(LabeledFrame3,text="Auto "),rb6, sticky="w", row=8)
 
          tkgrid(tklabel(Envir$datam, text="           "), column=2, row=2)
+
+         tk2tip(rbC, paste("Exemple de fonctions utilisables :","\n","min; max; sum; prod; ","\n","quantile,probs=x / x entre 0 et 1"))
 
      LabeledFrame7 <- tkwidget(Envir$datam,"labelframe",text="Show regularised time series", padx=10, pady=0, relief = "groove")
      tkgrid(LabeledFrame7, column=3, row=2, sticky="n")
@@ -566,6 +574,8 @@ function ( )  {
           if (rb2Value=="Median"){ aggreg <- "Median" }
           if (rb2Value=="Quantile"){ aggreg <- "Quantile" }
           if (rb2Value=="Max"){ aggreg <- "Max" }
+          if (rb2Value=="Other"){ aggreg <- "Other"
+                                  Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
           else{ help.aggreg <- "N0" }
@@ -635,6 +645,8 @@ function ( )  {
           if (rb2Value=="Median"){ aggreg <- "Median" }
           if (rb2Value=="Quantile"){ aggreg <- "Quantile" }
           if (rb2Value=="Max"){ aggreg <- "Max" }
+          if (rb2Value=="Other"){ aggreg <- "Other"
+                                  Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
           else{ help.aggreg <- "N0" }
@@ -705,6 +717,8 @@ function ( )  {
           if (rb2Value=="Median"){ aggreg <- "Median" }
           if (rb2Value=="Quantile"){ aggreg <- "Quantile" }
           if (rb2Value=="Max"){ aggreg <- "Max" }
+          if (rb2Value=="Other"){ aggreg <- "Other"
+                                  Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
           else{ help.aggreg <- "N0" }
@@ -813,6 +827,8 @@ function ( )  {
           if (rb2Value=="Median"){ aggreg <- "Median" }
           if (rb2Value=="Quantile"){ aggreg <- "Quantile" }
           if (rb2Value=="Max"){ aggreg <- "Max" }
+          if (rb2Value=="Other"){ aggreg <- "Other"
+                                  Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
           else{ help.aggreg <- "N0" }
@@ -865,8 +881,7 @@ function ( )  {
      rb14 <- tk2radiobutton(testFrame)
      rb15 <- tk2radiobutton(testFrame)
      rb16 <- tk2radiobutton(testFrame)
-     if (is.numeric(Envir$Data$Dates) ==TRUE) { rb4Value <- tclVar("MannKen") } else {
-     rb4Value <- tclVar("seasonMann") }
+     rb4Value <- tclVar("MannKen")
      tkconfigure(rb12,variable=rb4Value,value="seasonMann")                                                # valeur de chaque bouton
      tkconfigure(rb13,variable=rb4Value,value="MannKen")
      tkconfigure(rb14,variable=rb4Value,value="MixingDiagram")
@@ -938,6 +953,8 @@ function ( )  {
           if (rb2Value=="Median"){ aggreg <- "Median" }
           if (rb2Value=="Quantile"){ aggreg <- "Quantile" }
           if (rb2Value=="Max"){ aggreg <- "Max" }
+          if (rb2Value=="Other"){ aggreg <- "Other"
+                                  Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
           else{ help.aggreg <- "N0" }

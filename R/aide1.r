@@ -33,7 +33,7 @@ tkinsert(AIDE1, "end", paste("This is the first panel of the Temporal Trend Anal
 "The text between button 1 and 2 show the active file (also show in the header of the interface)" ,"\n",
 "The text between button 2 and 3 show the current path where results are saved", sep=""))
 
-tkpack(tk2button(aide1, text="Ok", command=function(){ tkdestroy(aide1) }, width=20 ), side="bottom")
+tkpack(tk2button(aide1, text="OK", command=function(){ tkdestroy(aide1) }, width=20 ), side="bottom")
 tkconfigure(AIDE1, state="disabled", background="white")
 
 }

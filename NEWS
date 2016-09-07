@@ -63,3 +63,8 @@ Changes in version 1.5.2
   o Minor bugs correction
   o Code optimizations
 
+
+Changes in version 1.5.3
+
+  o Possibility to import Dates with only years (yyyy)
+  o Dependency with the package 'wq' has been removed (package archived)

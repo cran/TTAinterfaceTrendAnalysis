@@ -25,7 +25,7 @@
   tcl("image","create","photo",imgStart,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgStart.gif",fsep=.Platform$file.sep))
   LOAD1.but <- tk2button(startup, image=imgStart, text=" Ready to Start ! ", compound="right", command=LOAD1)
   
-  label.theme <- tklabel(startup, text="Choose a theme:")
+  label.theme <- tklabel(startup, text="Available themes:")
   themes.list <- c(tk2theme.list(), "clearlooks", "Auto")
   Theme <- tclVar("Auto")
   cb.theme <- tk2combobox(startup, values=themes.list, textvariable=Theme, state="readonly") 

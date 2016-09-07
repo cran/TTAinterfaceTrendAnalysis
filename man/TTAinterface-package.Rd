@@ -13,15 +13,15 @@ Just follow the successive step from the data frmatting to the results sorting.
 \tabular{ll}{
 Package: \tab TTAinterface\cr
 Type: \tab Package\cr
-Version: \tab 1.5.2\cr
-Date: \tab 2015-12-16\cr
+Version: \tab 1.5.3\cr
+Date: \tab 2015-12-18\cr
 License: \tab GPL (>=2)\cr
  }
 }
 
 \author{
 David Devreker, Alain Lefebvre\cr
-Maintainer: <Alain.Lefebvre@ifremer.fr>
+Maintainer: <david.devreker@ifremer.fr>
 }
 
 

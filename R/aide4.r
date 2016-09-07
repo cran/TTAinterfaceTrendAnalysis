@@ -53,7 +53,7 @@ tkinsert(AIDE4, "end", paste("This is the forth panel of the interface" ,"\n\n",
 "       The final curve is obtain by plotting the predicted nutrient concentration for each year.","\n",
 "       This is only relevant for nutrients.", sep="" ))
        
-tkpack(tk2button(aide4, text="Ok", command=function(){ tkdestroy(aide4) }, width=20 ), side="bottom")
+tkpack(tk2button(aide4, text="OK", command=function(){ tkdestroy(aide4) }, width=20 ), side="bottom")
 tkconfigure(AIDE4, state="disabled", background="white")
 
 }

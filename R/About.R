@@ -3,14 +3,14 @@ about <- function () {
 ab.tt <- tktoplevel()
 tktitle(ab.tt) <- c("About")
 tkwm.resizable(ab.tt, 0,0)
-ico <- tk2ico.load(res = "information")
-tk2ico.set(ab.tt, ico)
+#ico <- tk2ico.load(res = "information")
+#tk2ico.set(ab.tt, ico)
 
 invisibleframe <- tkwidget(ab.tt, "labelframe", text= "", padx=10, pady=10)
 tkconfigure(invisibleframe, borderwidth=0, background="white")
 tkgrid(invisibleframe, column=0, row=0)
 
-tk2ico.set(ab.tt, Envir$ico)
+#tk2ico.set(ab.tt, Envir$ico)
 
 #Affichage du logo FBdataM
 TTAimg <- tclVar()
