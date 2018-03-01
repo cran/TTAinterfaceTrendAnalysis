@@ -38,7 +38,7 @@ tkinsert(AIDE3, "end", paste("This is the third panel of the interface." ,"\n\n"
 
 "    _The third box do the same things as the second one but with the mathematical method of" ,"\n",
 "     aggregation instead of frequency. In <Other> you can tape function such as min; sum; prod"  ,"\n",
-"     or, for quantile, quantile,probs=x where x is between 0 and 1", "\n",
+"     or, for quantile, {quantile, probs=x} where x is between 0 and 1", "\n",
 "     <Guidance to choose the method> perform an Anova with a Dunnett's post-hoc test between the"  ,"\n",
 "     rawdata and the dataset obtain by each method and select the method with the highest p.value" ,"\n",
 "     (less significant differences)." ,"\n\n",

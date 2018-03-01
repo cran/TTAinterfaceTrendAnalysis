@@ -206,7 +206,7 @@ The Seasonal Trend option allows performing a Seasonal Kendall test on the time 
 
 \subsubsection{Global Trend}
 
-Same as above but gives the general trend without detail. This is the seaKen() function of the wq package.
+Same as above but gives the general trend without detail. This is the seaKen() function of the wq package. Corrected p.values for autocorrelated data are obtained from the rkt() function of the rkt package.
 
 \subsubsection{Cumulative sum}
 

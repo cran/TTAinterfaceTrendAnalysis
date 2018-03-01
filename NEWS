@@ -68,3 +68,9 @@ Changes in version 1.5.3
 
   o Possibility to import Dates with only years (yyyy)
   o Dependency with the package 'wq' has been removed (package archived)
+
+Changes in version 1.5.4
+
+  o Automatically perform Seasonnal Mann Kendall test with correction for autocorrelated data (not with all available test of the package)
+  o Add custom choice for aggregation methods (sum, prod, any percentile etc.)
+  o Minor bugs correction

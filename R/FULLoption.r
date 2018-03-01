@@ -403,7 +403,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
       dev.off()
       dev.new(width=8, height=5)
       boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param), col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))                                     # affiche la boite a moustache par annees
-      title(main=paste("\n\n\n", "Station(s): ", liste.stations), cex.main=0.8)
+      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8)
       return() }
      if (selectBox=="ByMonths") {
       save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Boxplot_byMonths_", strsplit(param,"/")[[1]][1],".png", sep = "") 
@@ -414,7 +414,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
       dev.off()
       dev.new(width=8, height=5)
       boxplot(TS$param~TS$MONTHS, xaxt="n", xlab="MONTHS", ylab=paste(param), axes=F, col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))                 # affiche la boite a moustache par mois
-      title(main=paste("\n\n\n", "Station(s): ", liste.stations, "   Years: ", start,"-", end), cex.main=0.8)
+      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations, "   Years: ", start,"-", end), cex.main=0.8)
       box(which = "plot")
       axis(side=1, at =(1:12), labels = month.abb)
       axis(side=2)
@@ -902,6 +902,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
      Name <- names(Regularised.Data)                    # pour la sortie tableau
      Name[1] <- param 
      colnames(Regularised.Data) <- Name
+     #save(Regularised.Data, file="Regularised.Data.rda")
+     save(Regularised.data, file="Regularised.data.rda")
  
  dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)                              # sauve le tableau
  save.regdata.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Regularised_data_", strsplit(param,"/")[[1]][1],".txt", sep = "") 
@@ -1064,7 +1066,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
               filled.contour(x,y,cc, nlevels= 64, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="WEEKS", main=paste("\n","Time series anomaly of" , param, "\n\n"))
               title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
               dev.off() } 
-              else { return(tkmessageBox(message="Cannot perform anomaly color.plot with Climato, yearly or daily time step", icon = "warning", type = "ok", title="!Warning!")) } }  }
+              else { return(tkmessageBox(message="Cannot perform anomaly color.plot with Monthly-Climato, Yearly or Daily time step", icon = "warning", type = "ok", title="!Warning!")) } }  }
   else{}
  } 
 #____________________________________________________________________________________________________Histogramme d'anomalie
@@ -1086,6 +1088,8 @@ if (a.barplot=="YES") {
                               m.median <- rbind(m.median,m.Median)  }
                               Median.fort <- rep(m.median, (max(Regularised.data$YEARS)-min(Regularised.data$YEARS))+1) 
                               hist.anomaly <- Regularised.data$param-Median.fort }
+  
+if (time.step=="Mono-mensual" | time.step =="Daily" ) { return(tkmessageBox(message="Cannot perform anomaly barplot with Monthly-Climato and Daily time step", icon = "warning", type = "ok", title="!Warning!"))   }
                                                         
  dev.new()
  bp <- barplot(hist.anomaly, ylab= paste(param," anomalies"), xlab="Time", col=c("blue","red")[as.numeric(hist.anomaly>=0)+1], main=paste("Time series anomaly of" , param, "\n\n"))
@@ -1158,6 +1162,7 @@ else{}
       periods <- list()
       lc.mk <- list()
       lc.mk2 <- list()
+      lc.mk.detail.p <- list()
       dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
     
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Limite de detection des test Kendall (periodes de plus de 1 an minimum)
@@ -1187,21 +1192,30 @@ else{}
                                                     , "Outliers.removed: ", outliers.re, "   NA.replaced: ", na.replace, "\n"
                                                     , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n"))
                         tksee (Envir$txt2,"end")                             
-                        for (i in 1:N) { if (time.step == "Annual") { lc.mk[i] <- lapply(periods[[i]], mannKen) } else { lc.mk[i] <- lapply(periods[[i]], seaKen) }
+                        for (i in 1:N) { if (time.step == "Annual"| time.step == "Mono-mensual") { lc.mk[i] <- lapply(periods[[i]], mannKen) 
+                        lc.mk.detail.p[[i]] <- c(NA) } else { lc.mk[i] <- lapply(periods[[i]], seaKen) 
+                        dim.temps <- as.vector(trunc(time(periods[[i]])))
+                        dim.data <- as.vector(periods[[i]])
+                        dim.block <- as.vector(round(((as.numeric(time(periods[[i]])) - as.numeric(trunc(time(periods[[i]]))))+1)*100))
+                        lc.mk.detail <- rkt(date = dim.temps, y = dim.data, block = dim.block, correct = F, rep="e") 
+                        lc.mk.detail.p[i] <- lc.mk.detail$sl.corrected }
                                          save.localMK.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Local_Global Trend_", strsplit(param,"/")[[1]][1],"_"
                                                                     , start(periods[[i]])[1], ",", start(periods[[i]])[2], "-", end(periods[[i]])[1], ",", end(periods[[i]])[2], ".txt", sep = "")
                                          if (nchar(save.localMK.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
                                          write.table(lc.mk[i], sep="\t", row.names=FALSE, file=save.localMK.path)
                                          tkinsert(Envir$txt2,"end", paste("Period ", i, " :  ", start(periods[[i]])[1], ",", start(periods[[i]])[2], " - ", end(periods[[i]])[1], ",", end(periods[[i]])[2]
                                                   , "\n", "Trend (sen.slope): ", round(lc.mk[[i]]$sen.slope, 4), "  original units per year"
-                                                  , "\n", "%Trend (sen.slope.pct): ", round(lc.mk[[i]]$sen.slope.rel, 4), "  percent of mean quantity per year", "\n"
-                                                  , "p.value: ", round(lc.mk[[i]]$p.value, 4)
+                                                  , "\n", "%Trend (sen.slope.pct): ", round(lc.mk[[i]]$sen.slope.rel, 4), "  percent of mean quantity per year"
+                                                  , "\n", "p.value: ", round(lc.mk[[i]]$p.value, 4)
+                                                  , "\n", "p.value.corrected: ", round(lc.mk.detail.p[[i]], 4)
                                                   , "\n", "Ref. value of the complete series: ",round(pos$k, 4), "   Mean trend compare to ref. value: ", round(pos$trends[i], 4),"\n\n", sep=""))
                                          tktag.add(Envir$txt2, "titre4", "end -7 lines linestart","end -7 lines lineend")
                                          tktag.configure(Envir$txt2, "titre4", font=tkfont.create(family="courier",size=10)) 
-                                         if (lc.mk[[i]]$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -4 lines linestart","end -4 lines lineend") 
-                                                                           tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier",size=9,weight="bold"))} else {} }}
-       else { if (test == "SMK") { if (time.step == "Annual") { return(tkmessageBox(message="Cannot perform seasonal trend on annual time series", icon = "warning", type = "ok", title="!Warning!")) }
+                                         if (lc.mk[[i]]$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -5 lines linestart","end -5 lines lineend") 
+                                                                           tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier",size=9,weight="bold"))} else {}
+                                         if ( !is.na(lc.mk.detail.p) & lc.mk.detail.p <= 0.05 ) { tktag.add(Envir$txt2, "titre10", "end -4 lines linestart","end -4 lines lineend") 
+                                           tktag.configure(Envir$txt2, "titre10", font=tkfont.create(family="courier", size=10, weight="bold"))} else {} }}
+       else { if (test == "SMK") { if (time.step == "Annual" | time.step == "Mono-mensual") { return(tkmessageBox(message="Cannot perform seasonal trend on annual of climato time series", icon = "warning", type = "ok", title="!Warning!")) }
                                    tkinsert(Envir$txt2,"end", paste("-Local trend results (seasonal)-", "\n"))
                                    tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
                                    tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=10,weight="bold"))
@@ -1242,24 +1256,36 @@ else{}
       dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
       save.MK.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Global Trend_", strsplit(param,"/")[[1]][1],".txt", sep = "")
       if (nchar(save.MK.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
-      if (time.step == "Annual") { write.table(mannKen(z), sep="\t", row.names=FALSE, file=save.MK.path) } else{ write.table(seaKen(z), sep="\t", row.names=FALSE, file=save.MK.path) }
       tkinsert(Envir$txt2,"end", paste("-Global trend results-", "\n"))
       tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
       tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=10,weight="bold"))
       tkinsert(Envir$txt2, "end", paste( "Parameter: ", param, "\n", "Categorical factor(s): ", liste.stations, "\n"
                                  , "Outliers.removed: ", outliers.re, "   NA.replaced: ", na.replace, "\n"
                                  , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n"))
-     
-      if (time.step == "Annual") { mk <- mannKen(z) } else { mk <- seaKen(z) } 
+      
+if (time.step == "Annual"| time.step == "Mono-mensual") { mk <- mannKen(z) 
+       mk_2 <- NULL
+       p.value <- NA 
+       p.value$sl.corrected <- NA }  else { mk <- seaKen(z)
+       dim.temps <- as.vector(trunc(time(z)))
+       dim.data <- as.vector(z)
+       dim.block <- as.vector(round(((as.numeric(time(z)) - as.numeric(trunc(time(z))))+1)*100))
+       p.value <- rkt(date = dim.temps, y = dim.data, block = dim.block, correct = F, rep="e") } #si le time.step est choisi manuellement cette fonction ne fonctionne qu'avec l'argument correct = F, il donne quand meme la P.value corrige...
+      
       tkinsert(Envir$txt2,"end", paste("Trend (sen.slope): ", round(mk$sen.slope, 4), "  original units per year"
                                         , "\n", "%Trend (sen.slope.pct): ", round(mk$sen.slope.rel, 4), "  percent of mean quantity per year", "\n"
-                                        , "p.value: ", round(mk$p.value, 4), "\n\n", sep=""))                                      
-      if (mk$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -3 lines linestart","end -3 lines lineend") 
-      tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier",size=10,weight="bold"))} else {}
-      tksee (Envir$txt2,"end") }
+                                        , "p.value: ", round(mk$p.value, 4), "\n"
+                                        , "p.value.corrected: ", round(p.value$sl.corrected, 4), "\n\n", sep=""))  
+      if (mk$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -4 lines linestart","end -4 lines lineend")
+      tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier", size=10, weight="bold"))} else {}
+      if ( !is.na(p.value$sl.corrected) & p.value$sl.corrected <= 0.05 ) { tktag.add(Envir$txt2, "titre10", "end -3 lines linestart","end -3 lines lineend") 
+      tktag.configure(Envir$txt2, "titre10", font=tkfont.create(family="courier", size=10, weight="bold"))} else {}
+      tksee(Envir$txt2,"end") 
+      
+      if (time.step == "Annual"| time.step == "Mono-mensual") { write.table(mannKen(z), sep="\t", row.names=FALSE, file=save.MK.path) } else{ write.table(data.frame(seaKen(z), p.value$sl.corrected), sep="\t", row.names=FALSE, file=save.MK.path) } }
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Seasonal Kendall with details
   else { if (test == "SMK") {
-    if (time.step == "Annual") { return(tkmessageBox(message="Cannot perform seasonal trend on annual time series", icon = "warning", type = "ok", title="!Warning!")) }
+    if (time.step == "Annual" | time.step == "Mono-mensual") { return(tkmessageBox(message="Cannot perform seasonal trend on annual or climato time series", icon = "warning", type = "ok", title="!Warning!")) }
        dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
        save.smk.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Seasonal Trend_", strsplit(param,"/")[[1]][1],".txt", sep = "")
        if (nchar(save.smk.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
@@ -1285,8 +1311,8 @@ else{}
          else{ if(smk$p[i]<= 0.05) { tktag.add(Envir$txt2, "titre3", "end -2 lines linestart","end -2 lines lineend") 
          tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier", size=10, weight="bold")) } else {}   } }
        tkinsert(Envir$txt2,"end", paste("\n\n", sep=""))  }
- 
-         else { if (test == "LOWESS") {
+#_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Kendall sur loess
+       else { if (test == "LOWESS") {
              if (time.step=="Daily" | time.step=="Monthly" | time.step=="Semi-fortnight" | time.step=="Fortnight") {
                    dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
                    Loess <- loess(param ~ time, Regularised.data, family="gaussian", span=0.25, control = loess.control(surface = "direct"), na.action=na.exclude)
@@ -1307,6 +1333,11 @@ else{}
                        legend("topright", inset = 0.01, c("Time Series", "LOESS")
                              , col = c("black", "red"), lwd = 1)                                                                                                                                                          
                    mk2 <- seaKen(tsLoess)
+                   dim.temps <- as.vector(trunc(time(tsLoess)))
+                   dim.data <- as.vector(tsLoess)
+                   dim.block <- as.vector(round(((as.numeric(time(tsLoess)) - as.numeric(trunc(time(tsLoess))))+1)*100))
+                   mk_rkt <- rkt(date = dim.temps, y = dim.data, block = dim.block, correct = F, rep="e")
+                   
                    save.loess.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_LoessGlobalTrend_", strsplit(param,"/")[[1]][1],".txt", sep = "")
                    if (nchar(save.loess.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
                    write.table(mk2, sep="\t", row.names=FALSE, file=save.loess.path)                                                                                       ## Kendall package ##
@@ -1318,9 +1349,12 @@ else{}
                                                , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n"))                                                                            
                    tkinsert(Envir$txt2,"end", paste("Trend (sen.slope): ", round(mk2$sen.slope, 4), "  original units per year", "\n"
                                                      , "%Trend (sen.slope.pct): ", round(mk2$sen.slope.rel, 4), "  percent of mean quantity per year", "\n"
-                                                     , "p.value: ", round(mk2$p.value, 4), "\n\n", sep="")) 
-                   if (mk2$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -3 lines linestart","end -3 lines lineend") 
+                                                     , "p.value: ", round(mk2$p.value, 4), "\n"
+                                                     , "p.value.corrected: ", round(mk_rkt$sl.corrected, 4), "\n\n", sep="")) 
+                   if (mk2$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -4 lines linestart","end -4 lines lineend") 
                    tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier",size=10,weight="bold"))} else {}
+                   if ( !is.na(mk_rkt$sl.corrected) & mk_rkt$sl.corrected <= 0.05 ) { tktag.add(Envir$txt2, "titre10", "end -3 lines linestart","end -3 lines lineend") 
+                   tktag.configure(Envir$txt2, "titre10", font=tkfont.create(family="courier", size=10, weight="bold"))} else {}
                    tksee (Envir$txt2,"end") } 
                   else { return(tkmessageBox(message="Cannot be perform with annual or monthly-climato time steps", icon = "warning", type = "ok", title="!Warning!")) } }              
                 }}      

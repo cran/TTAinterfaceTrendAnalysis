@@ -518,7 +518,7 @@ function ( )
 
          tkgrid(tklabel(Envir$datam, text="           "), column=2, row=2)
 
-         tk2tip(rbC, paste("Exemple de fonctions utilisables :","\n","min; max; sum; prod; ","\n","quantile,probs=x / x entre 0 et 1"))
+         tk2tip(rbC, paste("Example of options :","\n","min; max; sum; prod; ","\n","'quantile, probs=x' (0 < x < 1)"))
 
      LabeledFrame7 <- tkwidget(Envir$datam,"labelframe",text="Show regularised time series", padx=10, pady=0, relief = "groove")
      tkgrid(LabeledFrame7, column=3, row=2, sticky="n")

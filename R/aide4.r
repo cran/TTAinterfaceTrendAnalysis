@@ -26,7 +26,9 @@ tkinsert(AIDE4, "end", paste("This is the forth panel of the interface" ,"\n\n",
 "       blue colors negative anomalies. ","\n\n",
 
 "       <Anomaly (bar.plot)> display an anomaly barplot (years to weeks time step).","\n",
-"       Red colors show positive anomalies and blue colors negative anomalies.","\n\n",
+"       Red colors show positive anomalies and blue colors negative anomalies. Calculation of anomalies is adapted to","\n",
+"       the frequencie of the time series, for exempe : for monthly anomalies, each month of each year of the time ", "\n",
+"       series is compared to the overall median of this month","\n\n",
 
 "       <Seasonal decomposition> decompose a time series into seasonal, trend and irregular components using","\n",
 "       loess and display the results in a figure (with remainder=residuals).","\n\n\n",
@@ -42,7 +44,7 @@ tkinsert(AIDE4, "end", paste("This is the forth panel of the interface" ,"\n\n",
 "       months...)","\n\n",
 
 "       <Global Trend> perform a Seasonal Mann Kendall on the entire time series, taking into account","\n",
-"       the seasonality of your data.","\n\n",
+"       the seasonality of your data and show also a corrected p.value for autocorrelated data.","\n\n",
 
 "       <Trend based on LOESS> fit a polynomial surface determined by one or more numerical predictors,","\n",
 "       using local fitting. A Global Trend with Sen's slope is perform on this fitting.","\n\n",
