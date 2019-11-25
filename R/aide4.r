@@ -9,7 +9,7 @@ tkinsert(AIDE4, "end", paste("This is the forth panel of the interface" ,"\n\n",
 "Here, you can observe some of the data characteristics or proceed to temporal","\n",
 "trend analysis.","\n\n",
 
-"      _The <Diagnostics> box, propose different options that give some extra informations about your time series.","\n\n",
+"      _The <Diagnostics> 0box, propose different options that give some extra informations about your time series.","\n\n",
 
 "       <Spectrum analysis> estimates the spectral density of the time series. Select the pick value in the figure", "\n",
 "       and the interface will display the corresponding cycle. If your time step","\n",
@@ -17,7 +17,8 @@ tkinsert(AIDE4, "end", paste("This is the forth panel of the interface" ,"\n\n",
 "       A time series could have more than one identified frequency.","\n\n",
 
 "       <Autocorrelation> compute an autocorrelation function on the time series and display","\n",
-"       a figure of the result.","\n\n",
+"       a figure of the result. The horizontal dashed line from the acf function ","\n",
+"       show the crtitical threshold beyond which the autocorelation is significant.","\n\n",
 
 "       <Shapiro normality test>, test the normality of the time series distribution and display a Q-Q Plot.","\n\n",
 

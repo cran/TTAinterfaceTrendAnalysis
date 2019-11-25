@@ -13,8 +13,8 @@ Just follow the successive step from the data frmatting to the results sorting.
 \tabular{ll}{
 Package: \tab TTAinterface\cr
 Type: \tab Package\cr
-Version: \tab 1.5.4\cr
-Date: \tab 2018-02-28\cr
+Version: \tab 1.5.5\cr
+Date: \tab 2019-11-22\cr
 License: \tab GPL (>=2)\cr
  }
 }
@@ -24,9 +24,8 @@ David Devreker, Alain Lefebvre\cr
 Maintainer: <david.devreker@ifremer.fr>
 }
 
+\references{ Devreker, D. and Lefebvre, A. (2014), TTAinterfaceTrendAnalysis: An R GUI for routine temporal trend analysis and diagnostics. \emph{Journal of Oceanography, Research and Data}, 1(7), 1-18. }
 
-\keyword{ 
-GUI 
-temporal trend analyses
-time series regularization 
-}
+\keyword{GUI} 
+\keyword{temporal trend analyses}
+\keyword{time series regularisation}

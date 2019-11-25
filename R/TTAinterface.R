@@ -121,8 +121,8 @@ TTAinterface <- function() {
      tkgrid(tklabel(AdviceFrame, text="Dates must be in  'yyyy-mm-dd' (ISO 8601 time format)"), sticky="w")
      tkgrid(tklabel(AdviceFrame, text=" Dates column -> Dates"), sticky="w")
      tkgrid(tklabel(AdviceFrame, text=" Categorical factors column (Taxa, Stations...) -> Category"), sticky="w")
-     tkgrid(tklabel(AdviceFrame, text=" Salinity column -> Salinity"), sticky="w")
-     tkgrid(tklabel(AdviceFrame, text=" Depth column -> Depth"), sticky="w")
+     tkgrid(tklabel(AdviceFrame, text=" Salinity column -> Salinity (optional)"), sticky="w")
+     tkgrid(tklabel(AdviceFrame, text=" Depth column -> Depth (optional)"), sticky="w")
      tkgrid(tklabel(AdviceFrame, text="If your parameters don't appear, select them as 'numeric' with 'Fix Data'"), sticky="w")
      Adv1 <- tklabel(AdviceFrame, text="You can use the 'Fix Data' button to change column labels and data category")
      tkconfigure(Adv1, foreground="red")
@@ -619,7 +619,7 @@ TTAinterface <- function() {
           if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
-          else{ help.timestep <- "N0" }
+          else{ help.timestep <- "NO" }
           if (rb1Value=="auto"){ auto.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ auto.timestep <- "NO" }
@@ -633,10 +633,10 @@ TTAinterface <- function() {
                                   Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ help.aggreg <- "N0" }
+          else{ help.aggreg <- "NO" }
           if (rb2Value=="auto"){ auto.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ auto.aggreg <- "N0" }
+          else{ auto.aggreg <- "NO" }
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="YES", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
@@ -690,7 +690,7 @@ TTAinterface <- function() {
           if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
-          else{ help.timestep <- "N0" }
+          else{ help.timestep <- "NO" }
           if (rb1Value=="auto"){ auto.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ auto.timestep <- "NO" }
@@ -704,10 +704,10 @@ TTAinterface <- function() {
                                   Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ help.aggreg <- "N0" }
+          else{ help.aggreg <- "NO" }
           if (rb2Value=="auto"){ auto.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ auto.aggreg <- "N0" }
+          else{ auto.aggreg <- "NO" }
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="YES",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
@@ -776,10 +776,10 @@ TTAinterface <- function() {
                                   Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ help.aggreg <- "N0" }
+          else{ help.aggreg <- "NO" }
           if (rb2Value=="auto"){ auto.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ auto.aggreg <- "N0" }
+          else{ auto.aggreg <- "NO" }
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="YES", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
@@ -802,7 +802,12 @@ TTAinterface <- function() {
      diagFrame <- tkwidget(LabeledFrame4,"labelframe",padx=0,pady=0)
      tkconfigure(diagFrame, borderwidth=0)
      tkpack(diagFrame, side="left")
-
+     
+     cbDetrend <- tk2checkbutton(diagFrame)                                                                                                                               # check button pour outliers
+     cbDetrendValue <- tclVar("0")
+     tkconfigure(cbDetrend,variable=cbDetrendValue)
+     tkgrid(tklabel(diagFrame, text="Use remainder for tests ?"), cbDetrend, sticky="w")                  # bouton pour tests avec remainders
+     
      rb17 <- tk2radiobutton(diagFrame)                                                                              # radio bouton du choix du diagnostic
      rb18 <- tk2radiobutton(diagFrame)
      rb19 <- tk2radiobutton(diagFrame)
@@ -872,7 +877,7 @@ TTAinterface <- function() {
           if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
-          else{ help.timestep <- "N0" }
+          else{ help.timestep <- "NO" }
           if (rb1Value=="auto"){ auto.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ auto.timestep <- "NO" }
@@ -886,11 +891,15 @@ TTAinterface <- function() {
                                   Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ help.aggreg <- "N0" }
+          else{ help.aggreg <- "NO" }
           if (rb2Value=="auto"){ auto.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ auto.aggreg <- "N0" }
+          else{ auto.aggreg <- "NO" }
 
+          cbDetrendValue <- as.character(tclvalue(cbDetrendValue))
+          if (cbDetrendValue=="1"){ test.on.remaider <- "YES" }
+          else { test.on.remaider <- "NO" }
+          
           rb5Val <- as.character(tclvalue(rb5Value))
 
           if (rb5Val=="1"){ spectrum <- "YES" }
@@ -909,7 +918,7 @@ TTAinterface <- function() {
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality,
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
-                 mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
+                 mix, outliers.re, na.replace, start, end, months, norm="NO", npsu, test.on.remaider,
                  autocorr, spectrum, anomaly, a.barplot, zsmooth, local.trend="NO", test="NO")  }
      OK3.but <- tk2button(LabeledFrame4, image=imgProcess, text="Run ", compound="right", command=OnOK3, width=6)
      tkpack(OK3.but, side="right")
@@ -998,7 +1007,7 @@ TTAinterface <- function() {
           if (rb1Value=="Daily"){ time.step <- "Daily" }
           if (rb1Value=="help"){ help.timestep <- "YES"
                                  time.step <- "NULL" }
-          else{ help.timestep <- "N0" }
+          else{ help.timestep <- "NO" }
           if (rb1Value=="auto"){ auto.timestep <- "YES"
                                  time.step <- "NULL" }
           else{ auto.timestep <- "NO" }
@@ -1012,14 +1021,18 @@ TTAinterface <- function() {
                                   Envir$fun.choice <- as.character(tclvalue(Fun.C))}
           if (rb2Value=="help"){ help.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ help.aggreg <- "N0" }
+          else{ help.aggreg <- "NO" }
           if (rb2Value=="auto"){ auto.aggreg <- "YES"
                                  aggreg <- "NULL" }
-          else{ auto.aggreg <- "N0" }
+          else{ auto.aggreg <- "NO" }
 
           cb10Value <- as.character(tclvalue(cb10Value))
           if (cb10Value=="1"){ local.trend <- "YES" }
            else { local.trend <- "NO" }
+          
+          cbDetrendValue <- as.character(tclvalue(cbDetrendValue))
+          if (cbDetrendValue=="1"){ test.on.remaider <- "YES" }
+          else { test.on.remaider <- "NO" }
 
           rb4Value <- as.character(tclvalue(rb4Value))                           # valeur de l'argument pris en fonction du bouton
           if (rb4Value=="seasonMann"){ test <- "SMK" }
@@ -1033,7 +1046,7 @@ TTAinterface <- function() {
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
-                 mix, outliers.re, na.replace, start, end, months, norm, npsu,
+                 mix, outliers.re, na.replace, start, end, months, norm, npsu, test.on.remaider,
                  autocorr = "NO", spectrum="NO",anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend, test)   }
 
      OK4.but <- tk2button(LabeledFrame5, image=imgProcess, text="Run ", compound="right", command=OnOK4, width=6)
@@ -1092,8 +1105,8 @@ TTAinterface <- function() {
     tkgrid(tklabel(AdviceFrame, text="Dates must be in  'yyyy-mm-dd' (ISO 8601 time format)"), sticky="w")
     tkgrid(tklabel(AdviceFrame, text=" Dates column -> Dates"), sticky="w")
     tkgrid(tklabel(AdviceFrame, text=" Categorical factors column (Taxa, Stations...) -> Category"), sticky="w")
-    tkgrid(tklabel(AdviceFrame, text=" Salinity column -> Salinity"), sticky="w")
-    tkgrid(tklabel(AdviceFrame, text=" Depth column -> Depth"), sticky="w")
+    tkgrid(tklabel(AdviceFrame, text=" Salinity column -> Salinity (optional)"), sticky="w")
+    tkgrid(tklabel(AdviceFrame, text=" Depth column -> Depth (optional)"), sticky="w")
     tkgrid(tklabel(AdviceFrame, text="If your parameters don't appear, select them as 'numeric' with 'Fix Data'"), sticky="w")
     Adv1 <- tklabel(AdviceFrame, text="You can use the 'Fix Data' button to change column labels and data category")
     tkconfigure(Adv1, foreground="red")

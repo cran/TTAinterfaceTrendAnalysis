@@ -1,5 +1,4 @@
 ### R code from vignette source 'TTAVignette.Rnw'
-### Encoding: ISO8859-1
 
 ###################################################
 ### code chunk number 1: somecode (eval = FALSE)

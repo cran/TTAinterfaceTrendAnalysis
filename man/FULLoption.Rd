@@ -9,15 +9,13 @@ This is the core function of the interface. It receive arguments from the
  , perform diagnostics and analyses.
 }
 \usage{
-FULLoption(param, depth=NULL, sal = NULL, site=NULL, rawdata="NO", select="NO"
-          , resume.reg="NO", test.normality="NO", plotB = "NO"
-          , selectBox="ByYears", log.trans="NO", plotZ="NO", datashow="NO"
-          , help.timestep = "NO", auto.timestep = "NO", time.step = NULL
-          , help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL, mix = "YES"
-          , outliers.re = "NO", na.replace="NO", start = NULL, end = NULL
-          , months = c(1:12), norm = "NO", npsu = 30, autocorr = "NO"
-          , spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO"
-          , local.trend = "NO", test= "MK")
+FULLoption(param, depth=NULL, sal = NULL, site=NULL, rawdata="NO", select="NO", 
+resume.reg="NO", test.normality="NO", plotB = "NO", selectBox="ByYears", log.trans="NO", 
+plotZ="NO", datashow="NO", help.timestep = "NO", auto.timestep = "NO", time.step = NULL, 
+help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL, mix = "YES", outliers.re = "NO",
+na.replace="NO", start = NULL, end = NULL, months = c(1:12), norm = "NO", npsu = 30, 
+test.on.remaider = "NO", autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO",
+zsmooth="NO", local.trend = "NO", test= "MK")
 }
 \arguments{
   \item{param}{
@@ -126,6 +124,11 @@ Compute normalised values of nutrients at the salinity npsu for each years,
 Compute normalised values of nutrients at the salinity npsu for each years,
  30 by default. 
 }
+
+  \item{test.on.remaider}{
+Extract the reminders from the data series using the stl package functions to 
+perform statistical analysis. 
+  }
   \item{autocorr}{
 Display the autocorrelation diagramme of the regularized time series using the acf
  function with arguments : lag.max = ((nrow(TimeSerie))/2), na.action = na.pass.
