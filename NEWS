@@ -77,3 +77,6 @@ Changes in version 1.5.4
 
 Changes in version 1.5.5
   o Minor bugs correction
+
+Changes in version 1.5.6
+  o Now using the package "stlplus" insteed of stl for decomposition that allow missing values

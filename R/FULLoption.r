@@ -24,15 +24,9 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 ##
 ################################################################################################################################################################
 ################################################################################################################################################################
-##  How to prepare your data base before importation :
-##  your datasheet must be in .txt file, if possible select only the interesting column before creation of the datasheet (parameters, Category names, dates...)
-##  name exactly the dates column "Dates", the station one "Category", the depth ones "Depth" and the salinity one "Salinity"
-##  date format must be as followed : YYYY-mm-dd  and decimal separator must be '.' (dote)
-################################################################################################################################################################
-################################################################################################################################################################
 
 {
-#____________________________________________________________________________________________________________Pour eviter des 'NOTES' supplementaire lors du check 
+#____________________________________________________________________________________________________________Pour eviter des 'NOTES' supplementaires lors du check 
  {
   YEARS <- NULL
   DayYears <-NULL
@@ -40,7 +34,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   Salinity <- NULL
   Depth <- NULL
  }
-#____________________________________________________________________________________________________________Stat descriptive sur les donnees de base
+#____________________________________________________________________________________________________________Stat descriptives sur les donnees brutes
  {
   if (rawdata == "YES") {                                                                                                                                         # appel la fonction si rawdata = YES
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ capture la sortie de summary(Envir$Data)
@@ -88,7 +82,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   if (any(colnames(Envir$Data) == "Salinity") & any(!is.na(Envir$Data$Salinity)) == TRUE) {                                               # effectue la commande si une colonne 'Salinity' existe
       if (max(sal) >= round(max(Ts$Salinity, na.rm=TRUE)*2,0)/2 & min(sal) <= round(min(Ts$Salinity, na.rm=TRUE)*2,0)/2 ) { }             # si toutes les salinites sont selectionnees (de min a max) alors toutes les salinites, NA inclus, seront pris en compte.
       else { Sal <- na.omit(Ts$Salinity[(Ts$Salinity >= min(sal)) &  (Ts$Salinity <= max(sal))])                                          # selection des donnees comprises entre les salinites indiquees, NA exclues
-             Ts <- subset(Ts, Salinity %in% Sal, drop = TRUE) } }                                                                                                                    # nouveau tableau avec les salinites selectionnees
+             Ts <- subset(Ts, Salinity %in% Sal, drop = TRUE) } }                                                                         # nouveau tableau avec les salinites selectionnees
   else{ }
 
   if (any(colnames(Envir$Data) == "Depth") & any(!is.na(Envir$Data$Depth)) == TRUE) {                                                     # effectue la commande si une colonne 'Depth' existe
@@ -642,7 +636,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 
   if (na.replace=="YES") {
      wx <- v[-1, ]
-     test.wx <- as.data.frame(wx)                                                                                                                                # evite les problemes de format "array" pour les frequences annuelle et monomensuelle
+     test.wx <- as.data.frame(wx)                                                                               # evite les problemes de format "array" pour les frequences annuelle et monomensuelle
      P.NA <- (length(test.wx[is.na(test.wx)])/(dim(test.wx)[1]*dim(test.wx)[2]))*100
      P.NA <- round(P.NA,2)
      
@@ -846,8 +840,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
      z1 <- z
      z2 <- z
       if (na.replace=="YES") {
-         #z <- interpNA(z, "linear")                                                              # interpolation des NAs restant en faisant une regression lineaire entre les valeur avant et apres
-         z <- interpTs(z, "linear")
+         z <- interpTs(z, "linear")                                                              # interpolation des NAs restant en faisant une regression lineaire entre les valeur avant et apres
          z <- ts(z, start = c(start.year), deltat = freq)                                        # dans cette version il reste les NAs du debut et de la fin qui ne doivent pas etre extrapoles
          z1 <- z                                                                                 # garde la serie avec NAs au debut et a la fin (z1) pour afficher le tableau (evite les problemes de longueur de colonne)
          z2 <- na.omit(z, method = c("ir"), interp = c("linear"))                                # supprime les NAs en debut et fin de serie temporelle
@@ -904,7 +897,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
      Name[1] <- param 
      colnames(Regularised.Data) <- Name
      #save(Regularised.Data, file="Regularised.Data.rda")
-     save(Regularised.data, file="Regularised.data.rda")
+     #save(Regularised.data, file="Regularised.data.rda")
  
  dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)                              # sauve le tableau
  save.regdata.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Regularised_data_", strsplit(param,"/")[[1]][1],".txt", sep = "") 
@@ -939,12 +932,11 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 {
  if (test.on.remaider == "YES") {
   if (time.step=="Daily" | time.step=="Monthly" | time.step=="Semi-fortnight" | time.step=="Fortnight") { 
-  if (length(z2[is.na(z2)])==0) {
-    z.stl <- stl(z2, s.window="periodic", t.window=(F*10), na.action=na.fail)
+    z.stlplus <- stlplus(z2, s.window="periodic", t.window=(F*10))
     ###construction du tableau a sauvegarder     
-    z <- z.stl$time.series[, 3]  
+    z.stlplus.rem <- remainder(z.stlplus)
+    z <- ts(z.stlplus.rem, start = c(start.year), deltat = freq)  
     remainder.text <- c("(loess-remainders)") } 
-  else {return(tkmessageBox(message="Cannot detrend with missing values", icon = "warning", type = "ok", title="!Warning!"))} } 
   else{return(tkmessageBox(message="Cannot detrend with annual or monthly-climato time steps", icon = "warning", type = "ok", title="!Warning!"))} } 
   else{ remainder.text <- c("") }
 }  
@@ -952,8 +944,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  { 
   if (test.normality == "YES") {
       dev.new()
-      qqnorm(z)                                                                                     # Q-Q plot
-      qqline(z)
+      qqnorm(z, pch = 1)                                                                 # Q-Q plot
+      qqline(z, col = "steelblue", lwd = 2)
       shap <- shapiro.test(z)                                                                  
       shap.p <- shap$p.value                                                             # extrait la valeur de p du test Shapiro et la comparer au niveau de significativite
       shap.stat <- round(shap$statistic, digits = 4)  
@@ -1136,23 +1128,21 @@ else{}
  {
   if (zsmooth=="YES")  {
    if (time.step=="Daily" | time.step=="Monthly" | time.step=="Semi-fortnight" | time.step=="Fortnight") {
-      if (length(z2[is.na(z2)])==0) {
-          z.stl <- stl(z2, s.window="periodic", t.window=(F*10), na.action=na.fail)
+          z.stlplus <- stlplus(z2, s.window="periodic", t.window=(F*10))
       ###construction du tableau a sauvegarder     
-          z.date <- as.character(time(z.stl$time.series[, 1])+0.00000001)
+          z.date <- as.character(z.stlplus$time+0.00000001)
           z.Years <- as.numeric(do.call("rbind", strsplit(z.date,"[.]")) [,1])
           z.Time <- round(((as.numeric(paste("0.", do.call("rbind", strsplit(z.date,"[.]")) [,2], sep=""))*F)+1), 0)
-          z.tbl <- cbind(z.Years, z.Time, z.stl$time.series[, 1], z.stl$time.series[, 2], z.stl$time.series[, 3])
+          z.tbl <- cbind(z.Years, z.Time, seasonal(z.stlplus), trend(z.stlplus), remainder(z.stlplus))
           colnames(z.tbl) <- c("Years", "Time", "Seasonal", "Trend", "Remainder")
       ###figure principale
           dev.new()
-          plot(z.stl)
-          title(main=paste("Seasonal Decomposition of Time Series by Loess", "\n\n"), cex.main=1)
+          plot.z.stlplus <- plot(z.stlplus, scales = list(y = list(relation = "free")), main=paste("Seasonal Decomposition of Time Series by Loess"), cex.main=1)
+          print(plot.z.stlplus)
       ###figure de la saisonalite
           dev.new()
-          z.tbl2 <- as.numeric(as.character(window(z.stl$time.series[, 1], c(min(Regularised.data$YEARS)+1, 1), c(min(Regularised.data$YEARS)+1, F))))
-          plot(z.tbl2, ylab=paste(param), xlab=paste(name.freq), main=paste("Seasonality of the Time Series by Loess", "\n\n"), cex.main=1, type="l")
-                     
+          plot(seasonal(z.stlplus)[1:F], type="l", ylab=paste(param), xlab=paste(name.freq), main=paste("Seasonality of the Time Series by Loess", "\n\n"), cex.main=1)
+                              
             dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
             save.stltbl.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Deseasonal_", strsplit(param,"/")[[1]][1],".txt", sep = "")
             write.table(z.tbl, sep="\t", row.names=FALSE, file=save.stltbl.path)
@@ -1160,14 +1150,12 @@ else{}
             save.stlgr2.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Seasonality_", strsplit(param,"/")[[1]][1],".png", sep = "")
             if (nchar(save.stlgr.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
             png(save.stlgr.path, width=1200, height=1000, res=160)
-            plot(z.stl)
-            title(main=paste("Seasonal Decomposition of Time Series by Loess", "\n\n"), cex.main=1)
+            print(plot.z.stlplus)
             dev.off() 
             png(save.stlgr2.path, width=1200, height=1000, res=160)
-            plot(z.tbl2, ylab=paste(param), xlab=paste(name.freq), main=paste("Seasonality of the Time Series by Loess", "\n\n"), cex.main=1, type="l")
+            plot(seasonal(z.stlplus)[1:F], type="l", ylab=paste(param), xlab=paste(name.freq), main=paste("Seasonality of the Time Series by Loess", "\n\n"), cex.main=1)
             dev.off() 
             }
-      else { return(tkmessageBox(message="Cannot detrend with missing values", icon = "warning", type = "ok", title="!Warning!")) } }
      else { return(tkmessageBox(message="Cannot detrend with annual or monthly-climato time steps", icon = "warning", type = "ok", title="!Warning!")) } }      
   else { } 
  } 
@@ -1175,12 +1163,11 @@ else{}
  {      
   if (local.trend == "YES") {
       if (test != "MK" & test!= "SMK") { return(tkmessageBox(message="Choose a Kendall family test", icon = "warning", type = "ok", title="!Warning!")) } 
-       #z <- interpNA(z, "linear")                                                # interpolation des NA restant en faisant une regression lineaire entre les valeur avant et apres
-       z <- interpTs(z, "linear")
+       z <- interpTs(z, "linear")                                                # interpolation des NA restant en faisant une regression lineaire entre les valeur avant et apres
        z <- ts(as.numeric(z), start = (start.year), deltat = freq)              
       Pna <- na.omit(z)
       dev.new()
-      w <- local.trend(Pna)                                                      ## local.trend = package 'pastecs' ##
+      w <- local.trend(Pna)                                                      ## local.trend = figure CUSUM du package 'pastecs' ##
       pos <- identify(w)
       ww <- pos$pos
       N <- length(ww)-1
@@ -1197,7 +1184,7 @@ else{}
       if (nchar(save.CUSUM.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
       write.table(W, sep="\t", row.names=FALSE, file=save.CUSUM.path)
       
-#_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Limite de detection des test Kendall (periodes de plus de 1 an minimum)
+#_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Limite de detection temporelle des test Kendall (periodes de plus de 1 an minimum)
     LimitD <- ww[2:length(ww)]-ww[1:N]
     if (any(LimitD<=F)) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {}
 
@@ -1215,8 +1202,7 @@ else{}
                     periods[i] <- list(ts(Regularised.data$param[(ww[i]):(ww[i+1])], start = c(Regularised.data$MONTHS[nrow=ww[i]]) , deltat = freq)) }}
                        else { if (time.step == "Daily") { for (i in 1:N) {
                           periods[i] <- list(ts(Regularised.data$param[(ww[i]):(ww[i+1])], start = c((Regularised.data$YEARS[nrow=ww[i]]), (Regularised.data$DayYears[nrow=ww[i]])) , deltat = freq)) }}}}}}}
- 
- 
+  
     if (test == "MK") { tkinsert(Envir$txt2,"end", paste("-Local trend results (global)-", "\n"))
                         tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
                         tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=10,weight="bold"))
@@ -1367,7 +1353,7 @@ if (time.step == "Annual"| time.step == "Mono-mensual") { mk <- mannKen(z)
                    
                    save.loess.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_LoessGlobalTrend_", strsplit(param,"/")[[1]][1],".txt", sep = "")
                    if (nchar(save.loess.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
-                   write.table(mk2, sep="\t", row.names=FALSE, file=save.loess.path)                                                                                       ## Kendall package ##
+                   write.table(mk2, sep="\t", row.names=FALSE, file=save.loess.path)
                    tkinsert(Envir$txt2,"end", paste("-Global trend results on LOESS-", "\n"))
                    tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
                    tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=10,weight="bold"))

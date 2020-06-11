@@ -1,8 +1,8 @@
 Package: TTAinterfaceTrendAnalysis
 Type: Package
 Title: Temporal Trend Analysis Graphical Interface
-Version: 1.5.5
-Date: 2019-11-22
+Version: 1.5.6
+Date: 2020-06-08
 Authors@R: c(person(given="David", family="DEVREKER", role = c("aut", "cre"), email =
         "David.Devreker@ifremer.fr" ), person(given="Alain", family="LEFEBVRE",
         role = c("aut"), email = "Alain.Lefebvre@ifremer.fr" ) )
@@ -16,13 +16,13 @@ Description: This interface was created to develop a standard procedure
 LazyData: true
 License: GPL (>= 2)
 Depends: R (>= 3.3.0), base, stats, grDevices
-Imports: pastecs, reshape, e1071, relimp, multcomp, rkt , nlme,
+Imports: pastecs, reshape, e1071, relimp, multcomp, rkt, stlplus, nlme,
         lubridate, tcltk, tcltk2, mvtnorm, zoo, methods
-URL: http://cran.at.r-project.org/package=TTAinterfaceTrendAnalysis
+URL: https://CRAN.R-project.org/package=TTAinterfaceTrendAnalysis
 NeedsCompilation: no
-Packaged: 2019-11-25 07:48:46 UTC; ddevreke
+Packaged: 2020-06-08 08:22:32 UTC; ddevreke
 Author: David DEVREKER [aut, cre],
   Alain LEFEBVRE [aut]
 Maintainer: David DEVREKER <David.Devreker@ifremer.fr>
 Repository: CRAN
-Date/Publication: 2019-11-25 09:30:05 UTC
+Date/Publication: 2020-06-11 10:30:02 UTC

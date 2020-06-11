@@ -803,7 +803,7 @@ TTAinterface <- function() {
      tkconfigure(diagFrame, borderwidth=0)
      tkpack(diagFrame, side="left")
      
-     cbDetrend <- tk2checkbutton(diagFrame)                                                                                                                               # check button pour outliers
+     cbDetrend <- tk2checkbutton(diagFrame)                                                               # check button pour outliers
      cbDetrendValue <- tclVar("0")
      tkconfigure(cbDetrend,variable=cbDetrendValue)
      tkgrid(tklabel(diagFrame, text="Use remainder for tests ?"), cbDetrend, sticky="w")                  # bouton pour tests avec remainders
@@ -937,7 +937,7 @@ TTAinterface <- function() {
      cb10 <- tk2checkbutton(testFrame)                                                        # check button pour cusum
      cb10Value <- tclVar("0")
      tkconfigure(cb10,variable=cb10Value)
-     tkgrid(tklabel(testFrame,text="Cumulative sum*"), column=0, row=1, sticky="w")
+     tkgrid(tklabel(testFrame,text="Cumulative sum (CUSUM)*"), column=0, row=1, sticky="w")
      tkgrid(cb10, column=1, row=1)
 
      rb12 <- tk2radiobutton(testFrame)                                                        # radio button du choix de l'analyse
