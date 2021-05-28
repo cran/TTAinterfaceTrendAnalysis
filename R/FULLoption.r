@@ -128,7 +128,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   TS$time <- c(1, round(cumsum(xx)))                                                                    # somme cumulee des ecarts et integration au tableau (TS$time) : donne une echelle temporelle a la serie de donnees
   TS$time[TS$time==0] <- 1                                                                    
  }
-#_____________________________________________________________________________________________Extraction des dates hors semaines (besoin du time step)
+#_______________________________________________________________________________________________________Extraction des dates hors semaines (besoin du time step)
  {
   if (is.numeric(TS$Dates) == TRUE) { TS$YEARS <- TS$Dates }
   else {  
@@ -288,13 +288,16 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   TS$days <- NULL                                                                    # suppression de la colonne days pour plus de clarete (plus besoin)
   TSs <- TS
  } }
-#_____________________________Valeurs normalisees en fonction de la salinite (npsu), pour les sels nutritifs. Effectue sur les donnees non regularisees
- {  
+#______________________________________________________Valeurs normalisees en fonction de la salinite (npsu), pour les sels nutritifs. Effectue sur les donnees non regularisees
+ {  print("1")
   if (norm == "YES") {
      if (any(colnames(Envir$Data) == "Salinity")) { 
       if (local.trend == "YES") { return(tkmessageBox(message="Work only for Seasonal and Global Trend", icon = "warning", type = "ok", title="Warning")) }
       TS <- subset(TS, MONTHS %in% months, drop = TRUE)                              # selection des mois a traiter
       dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", sep= ""), recursive = TRUE, showWarnings = FALSE)  # creation du repertoir de sauvegarde
+     print("2") 
+##normalise toutes les donnees mois par mois     
+     if (time.step == "Monthly") {    
       
       a <- min(TS$YEARS, na.rm=TRUE)
       b <- max(TS$YEARS, na.rm=TRUE)
@@ -313,25 +316,64 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
            NormNutri$Normalized[NormNutri$YEARS==i & NormNutri$MONTHS==j] <- NA }                                                 # si toute les conditions sont rempli (parametres present et salinites inferieures a la salinite de normalisation) :
            else { reg <- lm(nutrient~sal)                                                                                                                                #           on effectue la regression entre salinite et nutriment par annee
            NormNutri$Normalized[NormNutri$YEARS==i & NormNutri$MONTHS==j] <- (npsu * (reg$coefficients[2]))+(reg$coefficients[1])          #          et on calcule la valeur normalisee
-            
+           
             save.mixingdia.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-",end,"/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_MixingDiagram_", strsplit(param,"/")[[1]][1],"_",j,",",i,".png", sep="")                        # sauve chaque mixing diagram (par annee)
             if (nchar(save.mixingdia.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
             png(save.mixingdia.path)
             plot(nutrient~sal, xlab="Salinity", ylab=param, main=paste("Mixing diagram of ", param, " in ", j, "/", i, sep=""))
              if( !is.na(reg$coefficients[2]) ) { abline(lm(nutrient~sal)) }                                                        # ajoute la droite de regression si elle est realisable
              else{ }
-            dev.off() }}}        
-           
-           save.mixingreg.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-",end,"/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Normalized_", strsplit(param,"/")[[1]][1],"_at_",npsu,".txt", sep="")
-           if (nchar(save.mixingreg.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
-           write.table(NormNutri, sep="\t", row.names=FALSE, file=save.mixingreg.path)
- 
-           if (sum(NormNutri$Normalized, na.rm=TRUE)== 0 | max(TS$Salinity, na.rm=TRUE)<npsu ) {                                          # message d'avertissement si les conditions ne sont pas rempli
-           return(tkmessageBox(message=paste("No parameters available or all the salinities in your database are under the 'selected psu'"
-                               , "\n", "Try again by decreasing the 'selected psu' value", sep="")
-                               , icon = "warning", type = "ok", title="!Warning!")) }
+            dev.off() }}} 
       
-      z <- ts(NormNutri$Normalized, start = a, deltat=1/(length(months)))
+            z <- ts(NormNutri$Normalized, start = a, deltat=1/(length(months))) 
+            print(z) }     
+           
+##normalise toutes les donnees annee par annee        
+      if (time.step == "Annual") {
+        a <- min(TS$YEARS, na.rm=TRUE)
+        b <- max(TS$YEARS, na.rm=TRUE)  
+        c <- sort(a:b)
+        NormNutri <- matrix(c)
+        NormNutri <- data.frame(cbind(NormNutri, (rep(NA, length(c)))))
+        names(NormNutri) <- c("YEARS", "Normalized")
+        
+        for (i in a:b) { nutrient <- TS$param[TS$YEARS==i]
+        sal <- TS$Salinity[TS$YEARS==i]
+        if ( sum(nutrient*sal, na.rm=TRUE)== 0 | max(sal, na.rm=TRUE)<npsu ) { 
+          NormNutri$Normalized[NormNutri$YEARS==i] <- NA }                                                 # si toute les conditions sont rempli (parametres present et salinites inferieures a la salinite de normalisation) :
+        else { reg <- lm(nutrient~sal)                                                                                                                                #           on effectue la regression entre salinite et nutriment par annee
+        NormNutri$Normalized[NormNutri$YEARS==i] <- (npsu * (reg$coefficients[2]))+(reg$coefficients[1])  }  
+        
+        save.mixingdia.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-",end,"/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_MixingDiagram_", strsplit(param,"/")[[1]][1],"_",i,".png", sep="")                        # sauve chaque mixing diagram (par annee)
+        if (nchar(save.mixingdia.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
+        png(save.mixingdia.path)
+        plot(nutrient~sal, xlab="Salinity", ylab=param, main=paste("Mixing diagram of ", param, " in ", i, sep=""))
+        if( !is.na(reg$coefficients[2]) ) { abline(lm(nutrient~sal)) }  else{ }                                                    # ajoute la droite de regression si elle est realisable
+        dev.off() }
+        z <- ts(NormNutri$Normalized, start = a, deltat=1) 
+        print(z)}
+      
+##normalise toutes les donnees      
+      if (time.step == "Mono-mensual") {
+        nutrient <- TS$param
+        sal <- TS$Salinity
+        reg <- lm(nutrient~sal)
+        result.reg <- (npsu * (reg$coefficients[2]))+(reg$coefficients[1])
+        return() }
+     
+     if (time.step == "fortnight" | time.step == "semi-fortnight") {return()}
+         
+     print("3") 
+     save.mixingreg.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-",end,"/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Normalized_", strsplit(param,"/")[[1]][1],"_at_",npsu,".txt", sep="")
+     if (nchar(save.mixingreg.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
+     write.table(NormNutri, sep="\t", row.names=FALSE, file=save.mixingreg.path)
+ 
+     if (sum(NormNutri$Normalized, na.rm=TRUE)== 0 | max(TS$Salinity, na.rm=TRUE)<npsu ) {                                          # message d'avertissement si les conditions ne sont pas rempli
+     return(tkmessageBox(message=paste("No parameters available or all the salinities in your database are under the 'selected psu'"
+                         , "\n", "Try again by decreasing the 'selected psu' value", sep="")
+                         , icon = "warning", type = "ok", title="!Warning!")) }
+      
+      
       dev.new()
       plot(z, ylab="", xlab="", type = "o", pch = 20, col="aquamarine3", axes=FALSE, lwd=1.5, main=paste("Trend of", param,"at salinity", npsu))
       title(main=paste("\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8)
@@ -402,16 +444,16 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
      if (selectBox=="ByMonths") {
       save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Boxplot_byMonths_", strsplit(param,"/")[[1]][1],".png", sep = "") 
       if (nchar(save.boxplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
-      png(save.boxplot.path, width=1000, height=1000, res=150)
-      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param), main=paste("Boxplot of",param,"(o = outliers)"))        
-      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8)
+      png(save.boxplot.path, width=1600, height=1000, res=150)
+      boxplot(TS$param~reorder(month.abb[TS$MONTHS], TS$MONTHS), xlab="MONTHS", ylab=paste(param), axes=T, col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))        
+      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations, "   Years: ", start,"-", end), cex.main=0.8)
       dev.off()
       dev.new(width=8, height=5)
-      boxplot(TS$param~TS$MONTHS, xaxt="n", xlab="MONTHS", ylab=paste(param), axes=F, col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))                 # affiche la boite a moustache par mois
+      boxplot(TS$param~reorder(month.abb[TS$MONTHS], TS$MONTHS), xlab="MONTHS", ylab=paste(param), axes=T, col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))                 # affiche la boite a moustache par mois
       title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations, "   Years: ", start,"-", end), cex.main=0.8)
-      box(which = "plot")
-      axis(side=1, at =(1:12), labels = month.abb)
-      axis(side=2)
+      #box(which = "plot")
+      #axis(side=1, at =(1:12), labels = month.abb)
+      #axis(side=2)
       return() } }
   else{}
 

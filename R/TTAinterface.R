@@ -50,7 +50,7 @@ TTAinterface <- function() {
 
      Envir$Name <- tclvalue(tkgetOpenFile(filetypes="{{TXT Files} {.txt}}", initialdir =inipath))                         # le chemin du fichier est assigne a Name
      if (Envir$Name=="") { return() };                                                                                    # si on ne selectionne rien on revient a la paga d'origine
-     Envir$Data <- read.table(Envir$Name, sep="\t", na.strings="", dec=".", header=T, fill=TRUE, check.names=F)       # les donnees sont enregistre dans Data
+     Envir$Data <- read.table(Envir$Name, sep="\t", na.strings="", dec=".", header=T, fill=TRUE, check.names=F)           # les donnees sont enregistre dans Data
 
      Envir$Name.split <- data.frame(strsplit(Envir$Name, "/"))                                                            # morcelle le chemin du fichier (Name)
 
@@ -141,7 +141,7 @@ TTAinterface <- function() {
      Env$variables.selectionnees.temp <- integer()
 
      liste1 <- tklistbox(Envir$Select,selectmode="extended", activestyle="dotbox", height=10, width=27, background="white")       # cree la premiere liste
-                for (i in 1:length(Env$variables)) { tkinsert(liste1,"end",Env$variables[i]) }                                                                         # rempli la premiere liste avec le nom des SERIES
+                for (i in 1:length(Env$variables)) { tkinsert(liste1,"end",Env$variables[i]) }                                    # rempli la premiere liste avec le nom des SERIES
      liste2 <- tklistbox(Envir$Select,selectmode="extended", activestyle="dotbox", height=10, width=27, background="white")       # cree la deuxieme liste (de selection)
 
      imgArrowright <- tclVar()
