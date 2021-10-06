@@ -764,8 +764,8 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   Mois <- rbind(Ja,Fe,Ma,Av,My,Ju,Jl,Ao,Se,Oc,No,De,NA)
   Mois.leap <- rbind(Ja,Fe.leap,Ma,Av,My,Ju,Jl,Ao,Se,Oc,No,De)
 
-  for (i in yy)  {  if (leap_year(i) == TRUE ) {
-   TimeSerie$MONTHS [TimeSerie$YEARS ==i] <- Mois.leap }
+  for (i in yy)  {  if ( ( i %% 400 == 0 ) == TRUE  | ( i %% 4 == 0 & i %% 100 != 0 ) == TRUE ) {
+   TimeSerie$MONTHS [TimeSerie$YEARS==i] <- Mois.leap }
    else { TimeSerie$MONTHS [TimeSerie$YEARS==i]  <- Mois } }
   
   TimeSerie <- subset(TimeSerie, select=c(param, YEARS, MONTHS, DayYears, time)) } 
@@ -1268,7 +1268,7 @@ else{}
                                                   , "\n", "Relative Trend (sen.slope.pct): ", round(lc.mk[[i]]$sen.slope.rel, 4), "  percent of mean"
                                                   , "\n", "p.value: ", round(lc.mk[[i]]$p.value, 4)
                                                   , "\n", "p.value.corrected: ", round(lc.mk.detail.p[[i]], 4)
-                                                  , "\n", "Ref. value of the complete series: ",round(pos$k, 4), "   Mean trend compare to ref. value: ", round(pos$trends[i], 4),"\n\n", sep=""))
+                                                  , "\n", "Ref. value of the complete series (k): ",round(pos$k, 4), "   Mean trend compare to ref. value: ", round(pos$trends[i], 4),"\n\n", sep=""))
                                          tktag.add(Envir$txt2, "titre4", "end -8 lines linestart","end -8 lines lineend")
                                          tktag.configure(Envir$txt2, "titre4", font=tkfont.create(family="courier",size=10)) 
                                          if (lc.mk[[i]]$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -5 lines linestart","end -5 lines lineend") 

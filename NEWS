@@ -87,3 +87,7 @@ Changes in version 1.5.7
 
   o Boxplot by months labelling has been adjusted
   o Minor bugs correction
+
+Changes in version 1.5.8
+
+  o Dependency with the package 'lubridate' has been removed (package archived)

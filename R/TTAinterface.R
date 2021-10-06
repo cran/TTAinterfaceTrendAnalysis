@@ -177,7 +177,7 @@ TTAinterface <- function() {
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Liste des parametres
      ListParam <- NULL                                                                                                                    # cree une liste vide a remplir avec les parametres present dans le csv
      for (i in 1:ncol(Envir$Data)) {                                                                                                      # i entre 1 et le nbre de colonne
-     if (class(Envir$Data[ ,i]) == "numeric") {                                                                                           # pour les colonnes dans lesquelles les valeurs sont 'numeric'
+     if (class(Envir$Data[ ,i]) == "numeric" | class(Envir$Data[ ,i]) == "integer") {                                                                                           # pour les colonnes dans lesquelles les valeurs sont 'numeric'
      d <- names(Envir$Data[i])                                                                                                            # on garde le nom de ces colonnes
      ListParam <- as.character(c(ListParam, d)) } }                                                                                       #    et on en fait la liste des parametres
                                                                                                                                           # on cree les listes comme pour les SERIES

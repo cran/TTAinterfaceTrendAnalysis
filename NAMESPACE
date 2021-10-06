@@ -10,7 +10,6 @@ import(stlplus)
 importFrom(multcomp, glht)
 importFrom(multcomp, mcp)
 importFrom(mvtnorm, pmvt)
-importFrom(lubridate, leap_year)
 importFrom(e1071, impute)
 importFrom(zoo, na.approx)
 
