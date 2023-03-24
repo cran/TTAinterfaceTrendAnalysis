@@ -90,4 +90,10 @@ Changes in version 1.5.7
 
 Changes in version 1.5.8
 
-  o Dependency with the package 'lubridate' has been removed (package archived)
+  o Dependency with the package 'lubridate' has been removed
+
+Changes in version 1.5.9
+
+  o Allow batch analysis if more than one category has been selected
+  o Bug resolution when performing "Annual" analysis based on a selection of months
+ 

@@ -94,7 +94,7 @@ function ( )
      Env$variables.selectionnees.temp <- integer()
 
      liste1 <- tklistbox(Envir$Select,selectmode="extended", activestyle="dotbox", height=10, width=27, background="white")       # cree la premiere liste
-                for (i in 1:length(Env$variables)) { tkinsert(liste1,"end",Env$variables[i]) }                                                                         # rempli la premiere liste avec le nom des SERIES
+                for (i in 1:length(Env$variables)) { tkinsert(liste1,"end",Env$variables[i]) }                                    # rempli la premiere liste avec le nom des SERIES
      liste2 <- tklistbox(Envir$Select,selectmode="extended", activestyle="dotbox", height=10, width=27, background="white")       # cree la deuxieme liste (de selection)
 
      imgArrowright <- tclVar()
@@ -127,10 +127,19 @@ function ( )
      tkgrid(liste2,row=2,column=2,rowspan=2)
      tkgrid(tklabel(Envir$Select,text=" "), column=0, row=4)
 
+#_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Bouton Batch
+
+cbBatch <- tk2checkbutton(Envir$Select)                                                                                                                                # check button pour la transformation log
+         cbBatchValue <- tclVar("0")
+         tkconfigure(cbBatch,variable=cbBatchValue)
+         tkgrid(tklabel(Envir$Select,text="One by one"), column=0, row=4, sticky="e")
+         tkgrid(cbBatch, column=1, row=4, sticky="w")
+
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Liste des parametres
-     ListParam <- NULL                                                                                                                    # cree une liste vide a remplir avec les parametres present dans le csv
+     ListParam <- NULL
+                                                                                                                       # cree une liste vide a remplir avec les parametres present dans le csv
      for (i in 1:ncol(Envir$Data)) {                                                                                                      # i entre 1 et le nbre de colonne
-     if (class(Envir$Data[ ,i]) == "numeric") {                                                                                           # pour les colonnes dans lesquelles les valeurs sont 'numeric'
+     if (is.numeric(Envir$Data[ ,i]) | is.integer(Envir$Data[ ,i])) {                                                                                           # pour les colonnes dans lesquelles les valeurs sont 'numeric'
      d <- names(Envir$Data[i])                                                                                                            # on garde le nom de ces colonnes
      ListParam <- as.character(c(ListParam, d)) } }                                                                                       #    et on en fait la liste des parametres
                                                                                                                                           # on cree les listes comme pour les SERIES
@@ -161,7 +170,7 @@ function ( )
      tkgrid(tklabel(Envir$Select, text="      "), column=0, row=15)
      tkgrid(tklabel(Envir$Select, text="      "), column=2, row=15)
 
-     if (class(Env2$variables[1]) != "character")   {
+     if ( !is.character(Env2$variables[1]) )  {
          editPopupMenu <- tkmenu(liste3, tearoff = FALSE)
          tkadd(editPopupMenu, "command", label = "A parameter doesn't appear? -> Click and change the parameter(s) type to numeric", command= fixdata1)
 	       tkconfigure( editPopupMenu, foreground="steelblue4")
@@ -187,7 +196,7 @@ function ( )
 #_______________________________________________________________________________________________________________________Sliders salinite et profondeur
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Sliders pour les salinites
      if (any(colnames(Envir$Data) == "Salinity") & any(!is.na(Envir$Data$Salinity))== TRUE) {                                                     # si une colonne S est presente
-        if (class(Envir$Data$Salinity) == "numeric") {                                                                                                                                  #      et si c'est bien une valeur numerique  :
+        if ( is.numeric(Envir$Data$Salinity)) {                                                                                                                                  #      et si c'est bien une valeur numerique  :
           sal1 <- tclVar(min(Envir$Data$Salinity, na.rm=TRUE))                                                                                                                    # prend la valeur mini de la salinite
           slider1 <- tk2scale(Envir$Select, from=min(Envir$Data$Salinity, na.rm=TRUE), to=max(Envir$Data$Salinity, na.rm=TRUE),        # slider coulissant entre...
                      variable=sal1,  orientation="horizontal", command=function(...) {                                                                                              #    ...les valeurs min et max de la colonne S
@@ -230,7 +239,7 @@ function ( )
 
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Sliders pour les profondeurs
      if (any(colnames(Envir$Data) == "Depth") & any(!is.na(Envir$Data$Depth))==TRUE ) {
-       if (class(Envir$Data$Depth) == "numeric" ) {
+       if ( is.numeric(Envir$Data$Depth) ) {
           depth1 <- tclVar(min(Envir$Data$Depth, na.rm=TRUE))
           slider3 <- tk2scale(Envir$Select, from=min(Envir$Data$Depth, na.rm=TRUE), to=max(Envir$Data$Depth, na.rm=TRUE),
                      variable=depth1, orientation="horizontal", command=function(...) {
@@ -273,7 +282,7 @@ function ( )
             if (is.numeric(Envir$Data$Dates) == TRUE ) { years <- Envir$Data$Dates } else {
             d <- as.Date(Envir$Data$Dates, format="%Y-%m-%d")                                                                                      # formattage de la date
             years <- as.numeric(format(d, format = "%Y")) }                                                                                             # on recupere les annees
-        
+
             if ( anyNA(d) == FALSE ) {} else { return(tkmessageBox(message="Wrong date format: must be 'yyyy-mm-dd'"
                                                                    ,icon = "warning", type = "ok", title="!Warning!")) }
 
@@ -346,9 +355,9 @@ function ( )
 #_______________________________________________________________________________bouton d'appel de la fonction 'select' dans FULLoption
      STAT2 <- function () {                                                                                                                # on rentre tout les arguments precedemment selectionne dans la fonction STAT2
             param <- Env2$variables[unique(Env2$variables.selectionnees.temp)]               # les parametres
-            site <- Env$variables[unique(Env$variables.selectionnees.temp)]                     # les category (anciennement les SITES)
-            if (any(site == "-All-")) { site <- st  }                                                                        # si ALL est selectionnee
-            if (length(param)==0 | length(site)==0 )
+            Site <- Env$variables[unique(Env$variables.selectionnees.temp)]                     # les category (anciennement les SITES)
+            if (any(Site == "-All-")) { Site <- st  }                                                                        # si ALL est selectionnee
+            if (length(param)==0 | length(Site)==0 )
                { return(tkmessageBox(message="Please select a parameter and a category before to proceed"      # erreur si aucun argument n'est selectionnede
                                      , icon = "warning", type = "ok", title="!Warning!")) }
             else{}
@@ -368,11 +377,24 @@ function ( )
             end <- as.numeric(tclvalue(year2))                                                                                                                               # annee de fin
             if (is.numeric(Envir$Data$Dates) ==TRUE) { } else {
             months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) } }                                                                  # mois
-           else { tkmessageBox(message="No date selected!", icon = "warning", type = "ok", title="!Warning!")}        # erreur si pas de dates
+           else { tkmessageBox(message="No date selected!", icon = "warning", type = "ok", title="!Warning!")}                              # erreur si pas de dates
+
+           cbBatchValue <- as.character(tclvalue(cbBatchValue))
+           if (cbBatchValue=="1"){ Envir$batch <- "YES" }
+           else { Envir$batch <- "NO" }
+
+           OnOK4 <- "NO"
+
+           if (Envir$batch=="YES") { for (site in Site) { FULLoption(param, depth, sal, site, rawdata="NO", select="YES", resume.reg="NO", test.normality="NO",       # applique la fonction FULLoption...
+                     plotB="NO", selectBox, log.trans="NO", plotZ="NO", datashow="NO",                                                               #    ...avec les arguments
+                     help.timestep="NO", auto.timestep="NO", time.step="NULL", help.aggreg="NO", auto.aggreg="NO", aggreg="NULL",
+                     mix, outliers.re="NO", na.replace="NO", start, end, months, OnOK4) }}
+
+           else{ site <- Site
            FULLoption(param, depth, sal, site, rawdata="NO", select="YES", resume.reg="NO", test.normality="NO",       # applique la fonction FULLoption...
                      plotB="NO", selectBox, log.trans="NO", plotZ="NO", datashow="NO",                                                               #    ...avec les arguments
                      help.timestep="NO", auto.timestep="NO", time.step="NULL", help.aggreg="NO", auto.aggreg="NO", aggreg="NULL",
-                     mix, outliers.re="NO", na.replace="NO", start, end, months)   }
+                     mix, outliers.re="NO", na.replace="NO", start, end, months, OnOK4) }  }
      STAT2.but <- tk2button(Envir$Select, text="Summary",command=STAT2)                                                                           # bouton d'appel de la fonction STAT2
      tkgrid(STAT2.but, column=2, row=24)
 #_______________________________________________________________________________fin du bouton
@@ -418,9 +440,9 @@ function ( )
 #____________________________________________________________________________________________bouton d'appel de la boxplot (argument plotB)
      BoxPlot <- function()  {
             param <- Env2$variables[unique(Env2$variables.selectionnees.temp)]
-            site <- Env$variables[unique(Env$variables.selectionnees.temp)]
-            if (any(site == "-All-")) { site <- st  }
-            if (length(param)==0 | length(site)==0 )
+            Site <- Env$variables[unique(Env$variables.selectionnees.temp)]
+            if (any(Site == "-All-")) { Site <- st  }
+            if (length(param)==0 | length(Site)==0 )
                { return(tkmessageBox(message="Please select a parameter and a category before to proceed"
                                     , icon = "warning", type = "ok", title="!Warning!")) }
             else{}
@@ -444,10 +466,24 @@ function ( )
            rb20Value <- as.character(tclvalue(rb20Value))
            if (rb20Value=="ByYears"){ selectBox <- "ByYears" }
            if (rb20Value=="ByMonths"){ selectBox <- "ByMonths" }
+
+           cbBatchValue <- as.character(tclvalue(cbBatchValue))
+           if (cbBatchValue=="1"){ Envir$batch <- "YES" }
+           else { Envir$batch <- "NO" }
+
+           OnOK4 <- "NO"
+
+           if (Envir$batch=="YES") { for (site in Site) {FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
+                     plotB="YES", selectBox, log.trans="NO", plotZ="NO", datashow="NO",
+                     help.timestep="NO", auto.timestep="NO", time.step="NULL", help.aggreg="NO", auto.aggreg="NO", aggreg="NULL",
+                     mix, outliers.re="NO", na.replace="NO", start, end, months, OnOK4)}}
+
+           else{ site <- Site
            FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
                      plotB="YES", selectBox, log.trans="NO", plotZ="NO", datashow="NO",
                      help.timestep="NO", auto.timestep="NO", time.step="NULL", help.aggreg="NO", auto.aggreg="NO", aggreg="NULL",
-                     mix, outliers.re="NO", na.replace="NO", start, end, months)  }
+                     mix, outliers.re="NO", na.replace="NO", start, end, months,OnOK4)}  }
+
      BoxPlot.but <- tk2button(LabeledFrame1, text=" Show boxplot ",command=BoxPlot)
      tkgrid(BoxPlot.but, column=0, row=3, sticky="w")
 #_________________________________________________________________________________________________fin du bouton Boxplot
@@ -529,9 +565,9 @@ function ( )
 #_______________________________________________________________________________bouton d'appel de la figure de la serie regularisee (plotZ)
      OnOK <- function()  {
             param <- Env2$variables[unique(Env2$variables.selectionnees.temp)]
-            site <- Env$variables[unique(Env$variables.selectionnees.temp)]
-            if (any(site == "-All-")) { site <- st  }
-            if (length(param)==0 | length(site)==0 )
+            Site <- Env$variables[unique(Env$variables.selectionnees.temp)]
+            if (any(Site == "-All-")) { Site <- st  }
+            if (length(param)==0 | length(Site)==0 )
                { return(tkmessageBox(message="Please select a parameter and a category before to proceed"
                                     , icon = "warning", type = "ok", title="!Warning!")) }
             else{}
@@ -590,19 +626,33 @@ function ( )
           if (rb2Value=="auto"){ auto.aggreg <- "YES"
                                  aggreg <- "NULL" }
           else{ auto.aggreg <- "NO" }
+
+          cbBatchValue <- as.character(tclvalue(cbBatchValue))
+           if (cbBatchValue=="1"){ Envir$batch <- "YES" }
+           else { Envir$batch <- "NO" }
+
+          OnOK4 <- "NO"
+
+          if (Envir$batch=="YES") { for (site in Site) { FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
+                 plotB="NO", selectBox, log.trans, plotZ="YES", datashow="NO",
+                 help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
+                 mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
+                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }}
+
+          else{ site <- Site
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="YES", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO") }
+                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) } }
      OK.but <- tk2button(LabeledFrame7, text="  Plot  ",command=OnOK, width=9)
      tkgrid(OK.but, column=0, row=1, sticky="w")
 #______________________________________________________________________________________________bouton d'appel du tableau des donnees regularisees
      OnOK1 <- function()  {
             param <- Env2$variables[unique(Env2$variables.selectionnees.temp)]
-            site <- Env$variables[unique(Env$variables.selectionnees.temp)]
-            if (any(site == "-All-")) { site <- st  }
-            if (length(param)==0 | length(site)==0 )
+            Site <- Env$variables[unique(Env$variables.selectionnees.temp)]
+            if (any(Site == "-All-")) { Site <- st  }
+            if (length(param)==0 | length(Site)==0 )
                { return(tkmessageBox(message="Please select a parameter and a category before to proceed"
                                      , icon = "warning", type = "ok", title="!Warning!")) }
             else{}
@@ -661,20 +711,34 @@ function ( )
           if (rb2Value=="auto"){ auto.aggreg <- "YES"
                                  aggreg <- "NULL" }
           else{ auto.aggreg <- "NO" }
+
+          cbBatchValue <- as.character(tclvalue(cbBatchValue))
+           if (cbBatchValue=="1"){ Envir$batch <- "YES" }
+           else { Envir$batch <- "NO" }
+
+          OnOK4 <- "NO"
+
+          if (Envir$batch=="YES") { for (site in Site) { FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
+                 plotB="NO", selectBox, log.trans, plotZ="NO", datashow="YES",
+                 help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
+                 mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
+                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO" , OnOK4) }}
+
+          else{ site <- Site
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="YES",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO")  }
+                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO" , OnOK4) } }
      OK1.but <- tk2button(LabeledFrame7, text=" Table ",command=OnOK1, width=9)
      tkgrid(OK1.but, column=1, row=1, sticky="w")
 
 #______________________________________________________________________________________bouton d'appel des stats desciptives sur donnees regularisees
      OnOK2 <- function()  {
             param <- Env2$variables[unique(Env2$variables.selectionnees.temp)]
-            site <- Env$variables[unique(Env$variables.selectionnees.temp)]
-            if (any(site == "-All-")) { site <- st  }
-            if (length(param)==0 | length(site)==0 )
+            Site <- Env$variables[unique(Env$variables.selectionnees.temp)]
+            if (any(Site == "-All-")) { Site <- st  }
+            if (length(param)==0 | length(Site)==0 )
                { return(tkmessageBox(message="Please select a parameter and a category before to proceed"
                                     , icon = "warning", type = "ok", title="!Warning!")) }
             else{}
@@ -733,11 +797,25 @@ function ( )
           if (rb2Value=="auto"){ auto.aggreg <- "YES"
                                  aggreg <- "NULL" }
           else{ auto.aggreg <- "NO" }
+
+          cbBatchValue <- as.character(tclvalue(cbBatchValue))
+           if (cbBatchValue=="1"){ Envir$batch <- "YES" }
+           else { Envir$batch <- "NO" }
+
+          OnOK4 <- "NO"
+
+          if (Envir$batch=="YES") { for (site in Site) { FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="YES", test.normality="NO",
+                 plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
+                 help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
+                 mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
+                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }}
+
+          else{ site <- Site
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="YES", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO")   }
+                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }  }
      OK2.but <- tk2button(LabeledFrame7, text=" Summary ",command=OnOK2, width=9)
      tkgrid(OK2.but, column=2, row=1, sticky="w")
 #_____________________________________________________________________________________fin du bouton des stats descriptives
@@ -755,12 +833,12 @@ function ( )
      diagFrame <- tkwidget(LabeledFrame4,"labelframe",padx=0,pady=0)
      tkconfigure(diagFrame, borderwidth=0)
      tkpack(diagFrame, side="left")
-     
-     cbDetrend <- tk2checkbutton(diagFrame)                                                                                                                               # check button pour outliers
+
+     cbDetrend <- tk2checkbutton(diagFrame)                                                               # check button pour outliers
      cbDetrendValue <- tclVar("0")
      tkconfigure(cbDetrend,variable=cbDetrendValue)
      tkgrid(tklabel(diagFrame, text="Use remainder for tests ?"), cbDetrend, sticky="w")                  # bouton pour tests avec remainders
-     
+
      rb17 <- tk2radiobutton(diagFrame)                                                                              # radio bouton du choix du diagnostic
      rb18 <- tk2radiobutton(diagFrame)
      rb19 <- tk2radiobutton(diagFrame)
@@ -787,9 +865,9 @@ function ( )
 #_______________________________________________________________________________bouton de diagnostic
      OnOK3 <- function()  {
             param <- Env2$variables[unique(Env2$variables.selectionnees.temp)]
-            site <- Env$variables[unique(Env$variables.selectionnees.temp)]
-            if (any(site == "-All-")) { site <- st  }
-            if (length(param)==0 | length(site)==0 )
+            Site <- Env$variables[unique(Env$variables.selectionnees.temp)]
+            if (any(Site == "-All-")) { Site <- st  }
+            if (length(param)==0 | length(Site)==0 )
                { return(tkmessageBox(message="Please select a parameter and a category before to proceed"
                                     , icon = "warning", type = "ok", title="!Warning!")) }
             else{}
@@ -852,7 +930,7 @@ function ( )
           cbDetrendValue <- as.character(tclvalue(cbDetrendValue))
           if (cbDetrendValue=="1"){ test.on.remaider <- "YES" }
           else { test.on.remaider <- "NO" }
-          
+
           rb5Val <- as.character(tclvalue(rb5Value))
 
           if (rb5Val=="1"){ spectrum <- "YES" }
@@ -868,11 +946,24 @@ function ( )
           if (rb5Val=="5"){ zsmooth <- "YES" }
           else { zsmooth <- "NO" }
 
+          cbBatchValue <- as.character(tclvalue(cbBatchValue))
+           if (cbBatchValue=="1"){ Envir$batch <- "YES" }
+           else { Envir$batch <- "NO" }
+
+          OnOK4 <- "NO"
+
+          if (Envir$batch=="YES") { for (site in Site) {  FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality,
+                 plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
+                 help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
+                 mix, outliers.re, na.replace, start, end, months, norm="NO", npsu, test.on.remaider,
+                 autocorr, spectrum, anomaly, a.barplot, zsmooth, local.trend="NO", test="NO", OnOK4) }}
+
+          else{ site <- Site
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality,
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu, test.on.remaider,
-                 autocorr, spectrum, anomaly, a.barplot, zsmooth, local.trend="NO", test="NO")  }
+                 autocorr, spectrum, anomaly, a.barplot, zsmooth, local.trend="NO", test="NO", OnOK4)  } }
      OK3.but <- tk2button(LabeledFrame4, image=imgProcess, text="Run ", compound="right", command=OnOK3, width=6)
      tkpack(OK3.but, side="right")
 #_______________________________________________________________________________fin du bouton de diagnostic
@@ -890,7 +981,7 @@ function ( )
      cb10 <- tk2checkbutton(testFrame)                                                        # check button pour cusum
      cb10Value <- tclVar("0")
      tkconfigure(cb10,variable=cb10Value)
-     tkgrid(tklabel(testFrame,text="Cumulative sum*"), column=0, row=1, sticky="w")
+     tkgrid(tklabel(testFrame,text="Cumulative sum (CUSUM)*"), column=0, row=1, sticky="w")
      tkgrid(cb10, column=1, row=1)
 
      rb12 <- tk2radiobutton(testFrame)                                                        # radio button du choix de l'analyse
@@ -917,9 +1008,9 @@ function ( )
 #_______________________________________________________________________________bouton d'appel de l'analyse temporelle
      OnOK4 <- function()  {
             param <- Env2$variables[unique(Env2$variables.selectionnees.temp)]
-            site <- Env$variables[unique(Env$variables.selectionnees.temp)]
-            if (any(site == "-All-")) { site <- st  }
-            if (length(param)==0 | length(site)==0 )
+            Site <- Env$variables[unique(Env$variables.selectionnees.temp)]
+            if (any(Site == "-All-")) { Site <- st  }
+            if (length(param)==0 | length(Site)==0 )
                { return(tkmessageBox(message="Please select a parameter and a category before to proceed"
                                      , icon = "warning", type = "ok", title="!Warning!")) }
             else{}
@@ -950,6 +1041,9 @@ function ( )
           cb3Value <- as.character(tclvalue(cb3Value))
           if (cb3Value=="1"){ outliers.re <- "YES" }
            else { outliers.re <- "NO" }
+          cbBatchValue <- as.character(tclvalue(cbBatchValue))
+          if (cbBatchValue=="1"){ Envir$batch <- "YES" }
+           else { Envir$batch <- "NO" }
 
           rb1Value <- as.character(tclvalue(rb1Value))
           if (rb1Value=="Annual"){ time.step <- "Annual" }
@@ -982,7 +1076,7 @@ function ( )
           cb10Value <- as.character(tclvalue(cb10Value))
           if (cb10Value=="1"){ local.trend <- "YES" }
            else { local.trend <- "NO" }
-          
+
           cbDetrendValue <- as.character(tclvalue(cbDetrendValue))
           if (cbDetrendValue=="1"){ test.on.remaider <- "YES" }
           else { test.on.remaider <- "NO" }
@@ -996,11 +1090,22 @@ function ( )
                                           test <- "NO" }
           else {  norm <- "NULL" }
           npsu <- as.numeric(tclvalue(Npsu))
+
+          OnOK4 <- "YES"
+
+          if (Envir$batch=="YES") { for (site in Site) {
+
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm, npsu, test.on.remaider,
-                 autocorr = "NO", spectrum="NO",anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend, test)   }
+                 autocorr = "NO", spectrum="NO",anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend, test, OnOK4) } }
+                    else{ site <- Site
+                          FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
+                 plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
+                 help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
+                 mix, outliers.re, na.replace, start, end, months, norm, npsu, test.on.remaider,
+                 autocorr = "NO", spectrum="NO",anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend, test)}  }
 
      OK4.but <- tk2button(LabeledFrame5, image=imgProcess, text="Run ", compound="right", command=OnOK4, width=6)
      tkpack(OK4.but, side="right")
@@ -1011,4 +1116,4 @@ function ( )
 
      HELP4.but <- tk2button(Envir$trend, image=Envir$imgHelp, text=" Help ", compound="right", command=function() {  Aide4() })      # bouton d'aide 4
      tkgrid(HELP4.but, column=0, row=7, sticky="w")
-}
+   }

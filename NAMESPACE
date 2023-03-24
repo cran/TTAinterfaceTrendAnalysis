@@ -12,6 +12,7 @@ importFrom(multcomp, mcp)
 importFrom(mvtnorm, pmvt)
 importFrom(e1071, impute)
 importFrom(zoo, na.approx)
+importFrom(data.table, fread)
 
 importFrom("grDevices", "colorRampPalette", "dev.new", "dev.off", "png")
 importFrom("graphics", "abline", "axis", "barplot", "boxplot", "filled.contour", "identify", "legend", "lines", "title")

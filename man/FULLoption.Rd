@@ -15,7 +15,7 @@ plotZ="NO", datashow="NO", help.timestep = "NO", auto.timestep = "NO", time.step
 help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL, mix = "YES", outliers.re = "NO",
 na.replace="NO", start = NULL, end = NULL, months = c(1:12), norm = "NO", npsu = 30, 
 test.on.remaider = "NO", autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO",
-zsmooth="NO", local.trend = "NO", test= "MK")
+zsmooth="NO", local.trend = "NO", test= "MK", OnOK4=NULL)
 }
 \arguments{
   \item{param}{
@@ -162,6 +162,10 @@ Perform a test to evaluate the presence and the magnitude of a temporal trend on
  Can be "MK" for Seasonal Mann-Kendall test (the default), "SMK" for the same test with detail for
  each time step, "LOESS" that fit a polynomial surface determined by one or more numerical predictors, 
  using local fitting; a MK is perform on this fitting.
+}
+
+  \item{OnOK4}{
+button to call temporal analysis functions
 }
  
 }

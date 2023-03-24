@@ -2,7 +2,7 @@ FULLoption <- function (param, depth=NULL, sal = NULL, site=NULL, rawdata="NO", 
 test.normality="NO", plotB = "NO", selectBox="ByYears", log.trans="NO", plotZ="NO", datashow="NO",
 help.timestep = "NO", auto.timestep = "NO", time.step = NULL, help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL ,
 mix = "YES", outliers.re = "NO", na.replace="NO", start = NULL, end = NULL, months = c(1:12), norm = "NO", npsu = 30, test.on.remaider = "NO",
-autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend = "NO", test= "MK")
+autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend = "NO", test= "MK", OnOK4=NULL)
 
 ################################################################################################################################################################
 ################################################################# FULLoption arguments #########################################################################
@@ -74,10 +74,12 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   else{}
  }
 #________________________________________________________________________________________preparation du tableau de donnees (TS) par station(s) et parametre
- {                                                          
+ {
   if (any(colnames(Envir$Data) == "Category")) {                                                                                          # effectue la commande si une colonne 'Category' existe
       Ts <- subset(Envir$Data, Category %in% site, drop =TRUE) }                                                                          # nouveau tableau avec les Category selectionnees
-  else { tkmessageBox(message=paste("No Category column in your dataset")  ,icon = "warning", type = "ok", title="!Warning!") }                                                                           
+  else { tkmessageBox(message=paste("No Category column in your dataset")  ,icon = "warning", type = "ok", title="!Warning!") }
+
+if(Envir$batch =="YES") { if (nrow(as.data.frame(Ts)) < 14 ) { return(cat("No enough data to perform analysis in ", site,"\n")) }else{cat("Analyse",test, "on", site, "\n")} }else{}
   
   if (any(colnames(Envir$Data) == "Salinity") & any(!is.na(Envir$Data$Salinity)) == TRUE) {                                               # effectue la commande si une colonne 'Salinity' existe
       if (max(sal) >= round(max(Ts$Salinity, na.rm=TRUE)*2,0)/2 & min(sal) <= round(min(Ts$Salinity, na.rm=TRUE)*2,0)/2 ) { }             # si toutes les salinites sont selectionnees (de min a max) alors toutes les salinites, NA inclus, seront pris en compte.
@@ -143,7 +145,11 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   if (is.null(end)) {                                                                                   # selection de l'annee de fin de la serie a analyser
       end <- max(TS$YEARS) } else {} 
   TS <- TS[(TS$YEARS >= start & TS$YEARS <= end),]                                                      # tableau avec les donnees comprises entre les annees de debut et de fin
- }  
+ }
+
+if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No enough data to perform analysis in ", site,"\n")) }else{cat("Analyse",test, "on", site, "\n")} }else{}
+
+
 #______________________________________ Etabli la liste des Category pour les inclure dans les resultats sous forme de texte (3 category maxi ensuite '...') 
 {
  if (length(site)==1) liste.stations <- site[1]
@@ -289,7 +295,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
   TSs <- TS
  } }
 #______________________________________________________Valeurs normalisees en fonction de la salinite (npsu), pour les sels nutritifs. Effectue sur les donnees non regularisees
- {  print("1")
+ {
   if (norm == "YES") {
      if (any(colnames(Envir$Data) == "Salinity")) { 
       if (local.trend == "YES") { return(tkmessageBox(message="Work only for Seasonal and Global Trend", icon = "warning", type = "ok", title="Warning")) }
@@ -572,6 +578,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
                    QU <- paste0("tapply(TS$param, list(TS$YEARS, TS$MONTHS), ", Envir$fun.choice, ", na.rm=TRUE)")
                  Other <- eval(parse(text=QU))     }
          else { if (time.step=="Annual") {   name.freq <- c("Years")
+                        TS <- subset(TS, MONTHS %in% months, drop = TRUE)                                            #position la plus amont pour selectionner les mois pour un traitement "annuel"
                         Mean <- tapply(TS$param, list(TS$YEARS), mean, na.rm=TRUE)
                         Quantile <- tapply(TS$param, list(TS$YEARS), quantile, probs = (0.9), na.rm=TRUE)
                         Median <- tapply(TS$param, list(TS$YEARS), median, na.rm=TRUE)
@@ -860,6 +867,9 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
       TimeSerie <- subset(TimeSerie, MONTHS %in% months, drop = TRUE) }                                                         # on extrait les mois voulu
   else{}
  }
+
+ if(Envir$batch =="YES") { if (length(na.omit(unique(TimeSerie$YEARS))) < 7 ) { return(cat("No enough data to perform analysis in ", site,"\n")) }else{cat("Analyse",test, "on", site, "\n")} } else{}
+
 #__________________________________________________________________________________________________________________Creation de la serie temporelle 'z'
  {          
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ choix de la frequence en fonction du time.step et des mois selectionnes
@@ -946,7 +956,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
  if (nchar(save.regdata.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
  write.table(Regularised.Data, sep="\t", row.names=FALSE, file=save.regdata.path)
      
- if (datashow=="YES") { showData(Regularised.Data) } else {}   # affiche le tableau      
+ if (datashow=="YES") { showData(Regularised.Data, title=paste0("Regularised data for ", liste.stations)) } else {}   # affiche le tableau
  }
 #______________________________________________________________________________________________________Statistique desciptive sur la serie regularisee
  {  
@@ -988,6 +998,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
       dev.new()
       qqnorm(z, pch = 1)                                                                 # Q-Q plot
       qqline(z, col = "steelblue", lwd = 2)
+      title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
       shap <- shapiro.test(z)                                                                  
       shap.p <- shap$p.value                                                             # extrait la valeur de p du test Shapiro et la comparer au niveau de significativite
       shap.stat <- round(shap$statistic, digits = 4)  
@@ -1002,7 +1013,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
           tkinsert(Envir$txt2, "end", paste("W =", shap.stat, "  p-value =",shap.p, "\n\n"))
           tksee (Envir$txt2,"end") 
           
-          tkmessageBox (title="Shapiro-Wilk normailty test result",
+          tkmessageBox (title=paste0("Shapiro-Wilk normailty test result for ", liste.stations),
                   icon = "info" ,
                   message = "Normality of the distribution is rejected",
                   detail = paste("W =", shap.stat, "p-value =",round(shap.p, 4)) ,
@@ -1018,7 +1029,7 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
           tkinsert(Envir$txt2, "end", paste("W =", shap.stat, "  p-value =",shap.p, "\n\n"))
           tksee (Envir$txt2,"end") 
           
-          tkmessageBox (title="Shapiro-Wilk normailty test result",
+          tkmessageBox (title=paste0("Shapiro-Wilk normailty test result for ", liste.stations),
                   icon = "info" ,
                   message = "Normality of the distribution cannot be rejected",
                   detail = paste("W =", shap.stat, "p-value =",round(shap.p, 4)) ,
@@ -1081,10 +1092,10 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
                  plot(1/Spec$freq, Spec$spec, type="l", log="x", lwd=2, main=paste("Spectral density of", param, remainder.text, "regularised Time Series", "\n\n"), ylab="Spectral density", xlab="Frequency = Months / 12")
                  title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)  
                  dev.off()    }
-         else { return(tkmessageBox(message="Cannot detrend with missing values", icon = "warning", type = "ok", title="!Warning!")) } }         
+         else { return(tkmessageBox(message="Cannot perform with missing values", icon = "warning", type = "ok", title="!Warning!")) } }
   else{}
  }
-#_________________________________________________________________________________________________________Montre un color plot des anomalies par annee  
+#_________________________________________________________________________________________________________Montre un color plot des anomalies
  {
   if (anomaly=="YES") {
           if (time.step == "Monthly") {
@@ -1133,14 +1144,16 @@ autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", loca
 if (a.barplot=="YES") { 
 
  if (time.step=="Annual") { median.annual <- median(Regularised.data$param, na.rm=TRUE)
-                            Median.annual <- rep(median.annual,length(Regularised.data$param)) 
-                            hist.anomaly <- Regularised.data$param-Median.annual }
+                            Median.annual <- rep(median.annual,length(Regularised.data$param))
+                            Regularised.data$Median.annual <- Median.annual
+                            Regularised.data$hist.anomaly <- Regularised.data$param-Regularised.data$Median.annual }
                           
- if (time.step=="Monthly") { m.median <- NULL                           
-                             for (i in months) { m.Median <- median(Regularised.data$param[Regularised.data$MONTHS==i], na.rm=TRUE) 
-                             m.median <- rbind(m.median,m.Median) }
-                             Median.mensual <- rep(m.median, (max(Regularised.data$YEARS)-min(Regularised.data$YEARS))+1)
-                             hist.anomaly <- Regularised.data$param-Median.mensual  }
+   if (time.step=="Monthly") { m.median <- NULL
+                               for (i in months) { m.Median <- median(Regularised.data$param[Regularised.data$MONTHS==i], na.rm=TRUE)
+                               m.median <- rbind(m.median,m.Median) }
+                               Median.mensual <- rep(m.median, (max(Regularised.data$YEARS)-min(Regularised.data$YEARS))+1)
+                               Regularised.data$Median.mensual <- Median.mensual
+                               Regularised.data$hist.anomaly <- Regularised.data$param-Regularised.data$Median.mensual  }
 
  if (time.step=="Fortnight" | time.step =="Semi-fortnight" ) { m.median <- NULL                           
                               for (i in 1:F) { m.Median <- median(Regularised.data$param[Regularised.data$week.year==i], na.rm=TRUE) 
@@ -1151,18 +1164,24 @@ if (a.barplot=="YES") {
 if (time.step=="Mono-mensual" | time.step =="Daily" ) { return(tkmessageBox(message="Cannot perform anomaly barplot with Monthly-Climato and Daily time step", icon = "warning", type = "ok", title="!Warning!"))   }
                                                         
  dev.new()
- bp <- barplot(hist.anomaly, ylab= paste(param, remainder.text, " anomalies"), xlab="Time", col=c("blue","red")[as.numeric(hist.anomaly>=0)+1], main=paste("Time series anomaly of" , param, remainder.text, "\n\n"))
+ bp <- barplot(Regularised.data$hist.anomaly, ylab= paste(param, remainder.text, " anomalies"), xlab="Time", col=c("blue","red")[as.numeric(Regularised.data$hist.anomaly>=0)+1], main=paste("Time series anomaly of" , param, remainder.text, "\n\n"))
  title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
  axis(1, at=bp, labels=Regularised.data$YEARS)
- 
+
+
  dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
             save.barplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Anomaly BarPlot_", strsplit(param,"/")[[1]][1],".png", sep = "")
+            save.barplottxt.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Anomaly BarPlot_", strsplit(param,"/")[[1]][1],".txt", sep = "")
             if (nchar(save.barplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
             png(save.barplot.path, width=1300, height=700, res=135)
-            bp <- barplot(hist.anomaly, ylab= paste(param," anomalies"), xlab="Time", col=c("blue","red")[as.numeric(hist.anomaly>=0)+1], main=paste("Time series anomaly of" , param, remainder.text, "\n\n"))
+            bp <- barplot(Regularised.data$hist.anomaly, ylab= paste(param," anomalies"), xlab="Time", col=c("blue","red")[as.numeric(Regularised.data$hist.anomaly>=0)+1], main=paste("Time series anomaly of" , param, remainder.text, "\n\n"))
             title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
             axis(1, at=bp, labels=Regularised.data$YEARS)
-            dev.off() 
+            dev.off()
+
+ write.table(Regularised.data,  sep="\t", row.names=FALSE, file=save.barplottxt.path )
+ Regularised.data$Median.mensual <- NULL
+ Regularised.data$hist.anomaly <- NULL
  }
 else{}
 } 
