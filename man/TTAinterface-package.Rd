@@ -1,6 +1,6 @@
 \name{TTAinterface-package}
-\alias{TTAinterface-package}
 \alias{Temporal Trend Analysis interface package}
+\alias{TTAinterfaceTrendAnalysis-package}
 \docType{package}
 \title{
 Interface Package for Temporal Trend Analysis
@@ -13,8 +13,8 @@ Just follow the successive step from the data frmatting to the results sorting.
 \tabular{ll}{
 Package: \tab TTAinterface\cr
 Type: \tab Package\cr
-Version: \tab 1.5.9\cr
-Date: \tab 2021-05-27\cr
+Version: \tab 1.5.10\cr
+Date: \tab 2024-01-23\cr
 License: \tab GPL (>=2)\cr
  }
 }

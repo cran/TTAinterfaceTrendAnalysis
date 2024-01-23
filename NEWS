@@ -96,4 +96,8 @@ Changes in version 1.5.9
 
   o Allow batch analysis if more than one category has been selected
   o Bug resolution when performing "Annual" analysis based on a selection of months
+
+Changes in version 1.5.10
+
+  o Minor bugs correction
  

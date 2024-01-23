@@ -177,7 +177,7 @@ Results are return as .png figures or .txt files
  of the interface.
  
  Savepath can be choose using the option 'Select directory'
- (see the function {selectdirectory} more more informations)
+ (see the function <selectdirectory> more more informations)
  
  Name of saved filed follow the nomenclature :
  Original.file.name_analysis.name_parameter.txt/.png

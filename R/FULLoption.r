@@ -1046,7 +1046,13 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
 
     
     
-}  
+}
+#___________________________________________________________________________________Tests de cassure de serie temporelle de Pettitt (wql : Pett)
+#{
+#if(tests.pett == "YES"){
+#pett(z)
+# } else{}
+#}
 #_________________________________________________________________________________________________________________________________Affichage du diagramme d'autocorrelation
  { 
   if (autocorr == "YES") { 

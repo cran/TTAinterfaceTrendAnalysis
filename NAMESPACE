@@ -22,13 +22,8 @@ importFrom("utils", "browseURL", "capture.output", "fix", "read.table", "write.t
 importFrom("graphics", "box", "grid", "mtext", "par", "plot")
 importFrom("methods", "is")
 importFrom("stats", "cycle", "end", "frequency", "is.ts", "pnorm", "start", "tsp")
+importFrom("wql", "seaKen", "mannKen", "seasonTrend", "interpTs", "pett")
 
 export(TTAinterface)
-export(seasonTrend)
-export(seaKen)
-export(mannKen)
-export(seaKen)
-export(mannKen)
 export(about)
-export(interpTs)
-export(seasonTrend)
+

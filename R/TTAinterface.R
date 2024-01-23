@@ -1229,7 +1229,7 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
     imgUserguide <- tclVar()
     tcl("image","create","photo",imgUserguide,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgUserguide.gif",fsep=.Platform$file.sep))
     HELP5.but <- tk2button(Envir$HelpFrame, image=imgUserguide, text=" User Guide ", compound="right",command=function() {             # bouton d'appel du guide utilisateur
-    browseURL(file.path(path.package("TTAinterfaceTrendAnalysis"), "doc", "UserGuide.pdf",fsep=.Platform$file.sep)) })
+    browseURL(file.path(path.package("TTAinterfaceTrendAnalysis"), "aide", "UserGuide.pdf",fsep=.Platform$file.sep)) })
     tkgrid(HELP5.but, column=0, row=1, sticky="nw")
     Envir$imgHelp <- tclVar()
     tcl("image","create","photo",Envir$imgHelp,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgHelp.gif",fsep=.Platform$file.sep))

@@ -1,8 +1,8 @@
 Package: TTAinterfaceTrendAnalysis
 Type: Package
 Title: Temporal Trend Analysis Graphical Interface
-Version: 1.5.9
-Date: 2023-03-24
+Version: 1.5.10
+Date: 2024-01-23
 Authors@R: c(person(given="David", family="DEVREKER", role = c("aut", "cre"), email =
         "David.Devreker@ifremer.fr" ), person(given="Alain", family="LEFEBVRE",
         role = c("aut"), email = "Alain.Lefebvre@ifremer.fr" ) )
@@ -14,15 +14,16 @@ Description: This interface was created to develop a standard procedure
  Statistical analysis call other package function such as Kendall tests
  or cusum() function.
 License: GPL (>= 2)
-Depends: R (>= 3.3.0), base, stats, grDevices
+Depends: R (>= 4.0), base, stats, grDevices
 Imports: pastecs, reshape, e1071, relimp, multcomp, rkt, stlplus, nlme,
-        tcltk, tcltk2, mvtnorm, zoo, methods, data.table
+        tcltk, tcltk2, mvtnorm, zoo, methods, data.table, wql
 URL: https://CRAN.R-project.org/package=TTAinterfaceTrendAnalysis
 LazyLoad: yes
+RoxygenNote: 7.3.0
 NeedsCompilation: no
-Packaged: 2023-03-24 10:17:30 UTC; ddevreke
+Packaged: 2024-01-23 07:59:14 UTC; ddevreke
 Author: David DEVREKER [aut, cre],
   Alain LEFEBVRE [aut]
 Maintainer: David DEVREKER <David.Devreker@ifremer.fr>
 Repository: CRAN
-Date/Publication: 2023-03-24 11:10:06 UTC
+Date/Publication: 2024-01-23 08:32:58 UTC
