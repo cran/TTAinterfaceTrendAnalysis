@@ -24,9 +24,3 @@ Results are saved in .txt files or .png figures in the desire directory (see sel
 David Devreker
 }
 
-
-\seealso{
-\code{\link{FULLoption}}
-\code{\link{fixdata}}
-\code{\link{selectdirectory}}
-}

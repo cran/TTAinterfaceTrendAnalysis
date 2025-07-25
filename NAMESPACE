@@ -13,11 +13,12 @@ importFrom(mvtnorm, pmvt)
 importFrom(e1071, impute)
 importFrom(zoo, na.approx)
 importFrom(data.table, fread)
+importFrom(BreakPoints, pettit)
 
 importFrom("grDevices", "colorRampPalette", "dev.new", "dev.off", "png")
 importFrom("graphics", "abline", "axis", "barplot", "boxplot", "filled.contour", "identify", "legend", "lines", "title")
 importFrom("stats", "acf", "aov", "lm", "loess", "loess.control", "median", "na.exclude", "na.fail", "na.omit", "na.pass", 
-           "predict", "qqline", "qqnorm", "quantile", "reshape", "shapiro.test", "stl", "time", "ts", "window")
+           "predict", "qqline", "qqnorm", "quantile", "reshape", "shapiro.test", "stl", "time", "ts", "window", "spectrum")
 importFrom("utils", "browseURL", "capture.output", "fix", "read.table", "write.table")
 importFrom("graphics", "box", "grid", "mtext", "par", "plot")
 importFrom("methods", "is")

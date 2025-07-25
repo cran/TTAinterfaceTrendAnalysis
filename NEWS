@@ -100,4 +100,4 @@ Changes in version 1.5.9
 Changes in version 1.5.10
 
   o Minor bugs correction
- 
+  o Outliers are calculated from the entire time series and not by years, the time series without outliers is now visible in the boxplot

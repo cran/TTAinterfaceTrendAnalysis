@@ -16,12 +16,11 @@ The edited database that is automaticaly read by the interface to replace former
 
 \note{
 fixdata() call the function fix() that act on the rawdata base. The fix() function itself call the function edit() from the package <utils>
-
 }
 
 \seealso{
-\code{\link{fix}}
-\code{\link{edit}}
+\code{\link[utils]{fix}}
+\code{\link[utils]{edit}}
 }
 
 

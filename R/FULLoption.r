@@ -1,8 +1,8 @@
 FULLoption <- function (param, depth=NULL, sal = NULL, site=NULL, rawdata="NO", select="NO", resume.reg="NO",
 test.normality="NO", plotB = "NO", selectBox="ByYears", log.trans="NO", plotZ="NO", datashow="NO",
 help.timestep = "NO", auto.timestep = "NO", time.step = NULL, help.aggreg = "NO", auto.aggreg = "NO", aggreg = NULL ,
-mix = "YES", outliers.re = "NO", na.replace="NO", start = NULL, end = NULL, months = c(1:12), norm = "NO", npsu = 30, test.on.remaider = "NO",
-autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend = "NO", test= "MK", OnOK4=NULL)
+mix = "YES", outliers.re = "NO", na.replace="NO", start = NULL, end = NULL, months = c(1:12), norm = "NO", npsu = 30, test.on.remaider = "NO", 
+autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", test.pettitt="NO", local.trend = "NO", test= "MK", OnOK4=NULL)
 
 ################################################################################################################################################################
 ################################################################# FULLoption arguments #########################################################################
@@ -182,6 +182,93 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
     }
   else{}
  }
+ 
+ #_____________________________________________________________Boxplot et Extraction des outliers : pas necessaire pour un test Mann-Kendall
+ {
+  if (outliers.re == "YES") {
+#      a <- min(TS$YEARS)                                                              # pose les arguments qui seront utilises
+#      b <- max(TS$YEARS)
+#      Tf <- NULL
+#      Text <- NULL
+
+#      for (i in a:b) {                                                                # extraction des donnees tous les ans de la premiere (a) a la derniere (b)
+#           T <- TS$param[TS$YEARS==i]                                                 # extrait les donnees a traite pour l'annee i
+#           EXT <- TS$param[TS$YEARS==i]   
+           T <- TS$param   
+           EXT <- TS$param                                    
+           Q3 <- quantile (T, 0.75, na.rm=TRUE)                                       # calcul le 3eme quantile
+           Q1 <- quantile (T, 0.25, na.rm=TRUE)                                       # calcul le 1er quantile
+           Q <- Q3-Q1                                                                 # inter-quartiles
+           h <- Q3+(Q*1.5)                                                            # limite haute des outliers
+           l <- Q1-(Q*1.5)                                                            # limite basse des outliers
+           T[T>h]<-NA                                                                 # suppression des donnees au dessus de la limite haute
+           T[T<l]<-NA                                                                 # suppression des donnees en dessous de la limite basse
+           EXT[EXT<=h & EXT>=l]<-NA                                                   # conserve les donnees supprimees dans EXT
+
+           #t <- list(T)                                                                    
+           #Tf <- rbind.data.frame(Tf, t)                                              # construit le tableau (Tf) annee par annee (donnees avec outliers supprimes)
+           #ext <- list(EXT)                                                                 
+           #Text <- rbind.data.frame(Text, ext)                                        # construit le tableau (Text) des donnees supprimees annee apres annee
+#		   }                                      
+
+#quartiles <- quantile(TS$param, probs=c(.25, .75), na.rm = T)
+#IQR <- IQR(TS$param)
+#Lower <- quartiles[1] - 1.5*IQR
+#Upper <- quartiles[2] + 1.5*IQR 
+#data_no_outlier <- subset(TS, TS$param > Lower & TS$param < Upper)
+
+#outliers <- boxplot(TS$param, plot = FALSE)$out
+#TS[TS$param %in% outliers, "Value1"] = c(NA)
+ 
+                                                                                 
+      #tf <- Tf[ ,1]
+      names(T) <- c("param")
+      TS$param <- T                                                                  # remplace les donnees brute du tableau TS par les donnees (Tf) avec outliers retires
+      Outliers <- data.frame(TS$Category, EXT, TS$Dates)
+      names(Outliers) <- c("Category", "Outliers", "Dates")
+      save.outl.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name, "_Outliers_", strsplit(param,"/")[[1]][1],".txt", sep = "")
+      if (nchar(save.outl.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
+      dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", sep = ""), recursive = TRUE, showWarnings = FALSE)
+      write.table(Outliers, sep="\t", row.names=FALSE, file=save.outl.path) }         # sauve les donnees supprimees dans un fichier csv
+         
+  else{}
+  
+  if (plotB == "YES") {
+  print(outliers.re)
+      if (is.numeric(TS$Dates) == TRUE) { } else {
+      TS <- subset(TS, MONTHS %in% months, drop = TRUE) }
+      dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
+     if (selectBox=="ByYears") {
+      save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Boxplot_byYears_", strsplit(param,"/")[[1]][1],".png", sep = "") 
+      if (nchar(save.boxplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
+      png(save.boxplot.path, width=1000, height=1000, res=150)
+      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param) , main=paste("Boxplot of",param,"(o = outliers)"))
+      grid(lwd=0.3, lty="dotted")
+      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8) 
+      dev.off()
+      dev.new(width=8, height=5)
+      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param), col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))                                     # affiche la boite a moustache par annees
+      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8)
+      return() }
+     if (selectBox=="ByMonths") {
+      save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Boxplot_byMonths_", strsplit(param,"/")[[1]][1],".png", sep = "") 
+      if (nchar(save.boxplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
+      png(save.boxplot.path, width=1600, height=1000, res=150)
+      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param), col="grey90", main=paste("Boxplot of",param,"(o = outliers)")) 
+      #boxplot(TS$param~reorder(month.abb[TS$MONTHS], TS$MONTHS), xlab="MONTHS", ylab=paste(param), col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))           
+	  title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations, "   Years: ", start,"-", end), cex.main=0.8)
+      dev.off()
+      dev.new(width=8, height=5)
+      boxplot(TS$param~TS$MONTHS, xlab="MONTHS", ylab=paste(param), col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))                 # affiche la boite a moustache par mois
+      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations, "   Years: ", start,"-", end), cex.main=0.8)
+      #box(which = "plot")
+      #axis(side=1, at =(1:12), labels = month.abb)
+      #axis(side=2)
+      return() } }
+  else{}
+
+ }
+
 #_________________________________________________________________________Aide pour trouver le bon time.step (option : help.timestep et auto.timestep)
  {
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Calcul de l'ecart moyen, en jours, entre 2 mesures successives (les mesures prise le meme jour sont considerees comme 1 seule)
@@ -204,15 +291,15 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
   
   if (time.step != "NULL") {                                                          # affiche la proposition mais effectue l'aggregation avec la methode choisi par l'utilisateur
     
-    if (mt<=5) {                                                                      # si l'ecart moyen est inferieur a 5 jours
+    if (mt<=2) {                                                                      # si l'ecart moyen est inferieur a 5 jours
         T <- "Use daily frequency" }                                                                
-     else { if (mt>5 & mt<=10) {                                                      # si l'ecart moyen est entre 5 et 10 jours
+     else { if (mt>2 & mt<=8) {                                                      # si l'ecart moyen est entre 5 et 10 jours
           T <- "Use semi-fortnightly frequency"}
-      else { if (mt>10 & mt<=24) {                                                    # si l'ecart moyen est entre 10 jours et 24 jours
+      else { if (mt>8 & mt<=16) {                                                    # si l'ecart moyen est entre 10 jours et 24 jours
                  T <- "Use fortnightly frequency" }
-             else { if (mt>24 & mt<=60) {                                             # si l'ecart moyen est entre 24 jours et 60 jours
+             else { if (mt>16 & mt<=32) {                                             # si l'ecart moyen est entre 24 jours et 60 jours
                         T <- "Use monthly frequency" }
-                    else { if (mt>60) {                                               # si l'ecart moyen est superieur a 60 jours
+                    else { if (mt>32) {                                               # si l'ecart moyen est superieur a 60 jours
                                T <- "Use yearly frequency" }
                            else { return(print("No solution! Should be a problem somewhere...")) }}}}}           
       time.step <- time.step                                               
@@ -232,15 +319,15 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
             names(Data.range) <- "T"
             Help.timestep <- rbind(Mean.time, Data.range)
  
-       if (mt<=5) {
+       if (mt<=2) {
            T <- as.character("-> Use daily frequency             ") }
-           else { if (mt>5 & mt<=10) {
+           else { if (mt>2 & mt<=8) {
                 T <- as.character("-> Use semi-fortnightly frequency             ") }
-            else { if (mt>10 & mt<=24) {
+            else { if (mt>8 & mt<=16) {
                        T <- as.character("-> Use fortnightly frequency       ") }
-                   else { if (mt>24 & mt<=60) {
+                   else { if (mt>16 & mt<=32) {
                               T <- as.character("-> Use monthly frequency       ") }
-                          else { if (mt>60) {
+                          else { if (mt>32) {
                                      T <- as.character("-> Use yearly frequency           ") }
                                  else {return(print("No solution! Should be a problem somewhere..."))}}}}}
             
@@ -253,19 +340,19 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
  
 ###_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _Selection auto du time step (option : auto.timestep)
   else { if (auto.timestep == "YES")  {
-          if (mt<=5) {
+          if (mt<=2) {
              Time.step <- "Daily frequency automatically use"
              time.step <- "Daily" }
-          else { if (mt>5 & mt<=10) {
+          else { if (mt>2 & mt<=8) {
                   Time.step <- "Semi-fortnight frequency automatically use"
                   time.step <- "Semi-fortnight" }
-             else { if (mt>10 & mt<=24) {
+             else { if (mt>8 & mt<=16) {
                         Time.step <- "Fortnight frequency automatically use" 
                         time.step <- "Fortnight" }
-                    else { if (mt>24 & mt<=60) {
+                    else { if (mt>16 & mt<=32) {
                                Time.step <- "Monthly frequency automatically use"
                                time.step <- "Monthly" }
-                           else { if (mt>60) {
+                           else { if (mt>32) {
                                       Time.step <- "Annual frequency automatically use"
                                       time.step <- "Annual" }
                                   else {return(print("No solution! Should be a problem somewhere..."))}}}}}                
@@ -428,75 +515,6 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
  { 
  if(any(colnames(TS) == "Salinity")) { TS$Salinity <- NULL }
  else { }                                   
- }
-#_____________________________________________________________Boxplot et Extraction des outliers par annee: pas necessaire pour un test Mann-Kendall
- {   
-  if (plotB == "YES") {
-      if (is.numeric(TS$Dates) == TRUE) { } else {
-      TS <- subset(TS, MONTHS %in% months, drop = TRUE) }
-      dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
-     if (selectBox=="ByYears") {
-      save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Boxplot_byYears_", strsplit(param,"/")[[1]][1],".png", sep = "") 
-      if (nchar(save.boxplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
-      png(save.boxplot.path, width=1000, height=1000, res=150)
-      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param) , main=paste("Boxplot of",param,"(o = outliers)"))
-      grid(lwd=0.3, lty="dotted")
-      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8) 
-      dev.off()
-      dev.new(width=8, height=5)
-      boxplot(TS$param~TS$YEARS, xlab="YEARS", ylab=paste(param), col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))                                     # affiche la boite a moustache par annees
-      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations), cex.main=0.8)
-      return() }
-     if (selectBox=="ByMonths") {
-      save.boxplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name,"_Boxplot_byMonths_", strsplit(param,"/")[[1]][1],".png", sep = "") 
-      if (nchar(save.boxplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
-      png(save.boxplot.path, width=1600, height=1000, res=150)
-      boxplot(TS$param~reorder(month.abb[TS$MONTHS], TS$MONTHS), xlab="MONTHS", ylab=paste(param), axes=T, col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))        
-      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations, "   Years: ", start,"-", end), cex.main=0.8)
-      dev.off()
-      dev.new(width=8, height=5)
-      boxplot(TS$param~reorder(month.abb[TS$MONTHS], TS$MONTHS), xlab="MONTHS", ylab=paste(param), axes=T, col="grey90", main=paste("Boxplot of",param,"(o = outliers)"))                 # affiche la boite a moustache par mois
-      title(main=paste("\n\n\n", "Categorical factor(s): ", liste.stations, "   Years: ", start,"-", end), cex.main=0.8)
-      #box(which = "plot")
-      #axis(side=1, at =(1:12), labels = month.abb)
-      #axis(side=2)
-      return() } }
-  else{}
-
-  if (outliers.re == "YES") {
-      a <- min(TS$YEARS)                                                              # pose les arguments qui seront utilises
-      b <- max(TS$YEARS)
-      Tf <- NULL
-      Text <- NULL
-
-      for (i in a:b) {                                                                # extraction des donnees tous les ans de la premiere (a) a la derniere (b)
-           T <- TS$param[TS$YEARS==i]                                                 # extrait les donnees a traite pour l'annee i
-           EXT <- TS$param[TS$YEARS==i]                                          
-           Q3 <- quantile (T, 0.75, na.rm=TRUE)                                       # calcul le 3eme quantile
-           Q1 <- quantile (T, 0.25, na.rm=TRUE)                                       # calcul le 1er quantile
-           Q <- Q3-Q1
-           h <- Q3+(Q*1.5)                                                            # limite haute des outliers
-           l <- Q1-(Q*1.5)                                                            # limite basse des outliers
-           T[T>h]<-NA                                                                 # suppression des donnees au dessus de la limite haute
-           T[T<l]<-NA                                                                 # suppression des donnees en dessous de la limite basse
-           EXT[EXT<=h & EXT>=l]<-NA                                                   # conserve les donnees supprimees dans EXT
-
-           t <- list(T)                                                                    
-           Tf <- rbind.data.frame(Tf, t)                                              # construit le tableau (Tf) annee par annee (donnees avec outliers supprimes)
-           ext <- list(EXT)                                                                 
-           Text <- rbind.data.frame(Text, ext) }                                      # construit le tableau (Text) des donnees supprimees annee apres annee
-                                                                                 
-      tf <- Tf[ ,1]
-      names(tf) <- c("param")
-      TS$param <- tf                                                                  # remplace les donnees brute du tableau TS par les donnees (Tf) avec outliers retires
-      Outliers <- data.frame(TS$Category, Text[ ,1], TS$Dates)
-      names(Outliers) <- c("Category", "Outliers", "Dates")
-      save.outl.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", Envir$File.Name, "_Outliers_", strsplit(param,"/")[[1]][1],".txt", sep = "")
-      if (nchar(save.outl.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
-      dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", sep = ""), recursive = TRUE, showWarnings = FALSE)
-      write.table(Outliers, sep="\t", row.names=FALSE, file=save.outl.path) }         # sauve les donnees supprimees dans un fichier csv
-         
-  else{}
  }
 #____________________________________________________________________________________________Supprime la colonne TS$DATES dans TS pour plus de clarete 
  {
@@ -870,6 +888,7 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
 
  if(Envir$batch =="YES") { if (length(na.omit(unique(TimeSerie$YEARS))) < 7 ) { return(cat("No enough data to perform analysis in ", site,"\n")) }else{cat("Analyse",test, "on", site, "\n")} } else{}
 
+
 #__________________________________________________________________________________________________________________Creation de la serie temporelle 'z'
  {          
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ choix de la frequence en fonction du time.step et des mois selectionnes
@@ -1047,12 +1066,29 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
     
     
 }
-#___________________________________________________________________________________Tests de cassure de serie temporelle de Pettitt (wql : Pett)
-#{
-#if(tests.pett == "YES"){
-#pett(z)
-# } else{}
-#}
+#___________________________________________________________________________________Tests de cassure de serie temporelle de Pettitt (BreakPoints package)
+{ 
+if(test.pettitt == "YES"){
+if (time.step=="Mono-mensual") {return(tkmessageBox(message="Cannot perform Pettitt test with monthly-climato time steps", icon = "warning", type = "ok", title="!Warning!"))} else{}
+pettitt.res <- pettit(z)
+break.year <- Regularised.data$YEARS[pettitt.res$breaks]
+if("MONTHS" %in% colnames(Regularised.data)){ break.month <- Regularised.data$MONTHS[pettitt.res$breaks] } else{}
+if("week.month" %in% colnames(Regularised.data)){ break.weak <- Regularised.data$week.month[pettitt.res$breaks] } else{}
+
+tkinsert(Envir$txt2,"end", paste("-Pettitt test results-", "\n"))
+                        tktag.add(Envir$txt2, "titre", "end -2 lines linestart","end -2 lines lineend")
+                        tktag.configure(Envir$txt2, "titre", font=tkfont.create(family="courier",size=10,weight="bold"))
+                        tkinsert(Envir$txt2, "end", paste( "Parameter: ", param , remainder.text, "\n", "Categorical factor(s): ", liste.stations, "\n"
+                                                    , "Outliers.removed: ", outliers.re, "   NA.replaced: ", na.replace, "\n"
+                                                    , "Time.step: ", time.step, "   Method: ", aggreg, sep="" , "\n\n")) 
+                        tkinsert(Envir$txt2,"end", paste("Break point in ", break.year, "\n", sep=""))
+                        tkinsert(Envir$txt2,"end", paste("p.value : ", round(pettitt.res$p.value,4),  "\n\n", sep="")) 						
+                        tksee (Envir$txt2,"end")
+					if (pettitt.res$p.value <= 0.05) { tktag.add(Envir$txt2, "titre3", "end -3 lines linestart","end -3 lines lineend") 
+                    tktag.configure(Envir$txt2, "titre3", font=tkfont.create(family="courier",size=10,weight="bold"))} else {}
+
+ } else{}
+}
 #_________________________________________________________________________________________________________________________________Affichage du diagramme d'autocorrelation
  { 
   if (autocorr == "YES") { 
@@ -1113,13 +1149,13 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
               x <- (min(Regularised.data$YEARS):max(Regularised.data$YEARS))
               y <- (1:length(months))
               dev.new()
-              filled.contour(x,y,cc, nlevels= 64, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="MONTHS", main = paste("Time series anomaly of", param,"\n\n"), key.title=title(main="Param.\nunit"))
+              filled.contour(x,y,cc, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="MONTHS", main = paste("Time series anomaly of", param,"\n\n"), key.title=title(main="Param.\nunit"))
               mtext(paste("Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg, "\n",""), line = 0, cex=0.8)
                dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
                save.colorplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_ColorPlot_", strsplit(param,"/")[[1]][1],".png", sep = "")
                if (nchar(save.colorplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
                png(save.colorplot.path, width=1300, height=1000, res=150)
-               filled.contour(x,y,cc, nlevels= 64, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="MONTHS", main=paste("Time series anomaly of", param, remainder.text, "\n\n"))
+               filled.contour(x,y,cc, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="MONTHS", main=paste("Time series anomaly of", param, remainder.text, "\n\n"))
                title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
                dev.off() }
               
@@ -1133,13 +1169,13 @@ if(Envir$batch =="YES") { if (nrow(as.data.frame(TS)) < 14 ) { return(cat("No en
               x <- (min(Regularised.data$YEARS):max(Regularised.data$YEARS))
               y <- (1:length(levels(as.factor(Regularised.data$week.year))))                                     
               dev.new()
-              filled.contour(x,y,cc, nlevels= 64, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="WEEKS", main=paste("\n","Time series anomaly of" , param, "\n\n"))
+              filled.contour(x,y,cc, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="WEEKS", main=paste("\n","Time series anomaly of" , param, "\n\n"))
               title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8) 
               dir.create(paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", sep= ""), recursive = TRUE, showWarnings = FALSE)
               save.colorplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Anomaly ColorPlot_", strsplit(param,"/")[[1]][1],".png", sep = "")
               if (nchar(save.colorplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
               png(save.colorplot.path, width=1300, height=1000, res=150)
-              filled.contour(x,y,cc, nlevels= 64, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="WEEKS", main=paste("\n","Time series anomaly of" , param, remainder.text, "\n\n"))
+              filled.contour(x,y,cc, color.palette = colorRampPalette(c("blue","cyan", "green","yellow","orange","red")) , xlab="YEARS", ylab="WEEKS", main=paste("\n","Time series anomaly of" , param, remainder.text, "\n\n"))
               title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)
               dev.off() } 
               else { return(tkmessageBox(message="Cannot perform anomaly color.plot with Monthly-Climato, Yearly or Daily time step", icon = "warning", type = "ok", title="!Warning!")) } }  }
@@ -1252,7 +1288,8 @@ else{}
       write.table(W, sep="\t", row.names=FALSE, file=save.CUSUM.path)
       
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Limite de detection temporelle des test Kendall (periodes de plus de 1 an minimum)
-    LimitD <- ww[2:length(ww)]-ww[1:N]
+    
+	LimitD <- ww[2:length(ww)]-ww[1:N]
     if (any(LimitD<=F)) { return(tkmessageBox(message="Selected periods should be longer than 1 year", icon = "warning", type = "ok", title="!Warning!")) } else {}
 
 #_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ Suivi du test de detection de la tendance effectue sur chaque portion de la serie temporelle idenitfiee avec cusum (option : test)
@@ -1284,6 +1321,7 @@ else{}
                         dim.block <- as.vector(round(((as.numeric(time(periods[[i]])) - as.numeric(trunc(time(periods[[i]]))))+1)*100))
                         lc.mk.detail <- rkt(date = dim.temps, y = dim.data, block = dim.block, correct = F, rep="e") 
                         lc.mk.detail.p[i] <- lc.mk.detail$sl.corrected }
+						print(lc.mk.detail.p)
                                          save.localMK.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_Local_Global Trend_", strsplit(param,"/")[[1]][1],"_"
                                                                     , start(periods[[i]])[1], ",", start(periods[[i]])[2], "-", end(periods[[i]])[1], ",", end(periods[[i]])[2], ".txt", sep = "")
                                          if (nchar(save.localMK.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
@@ -1354,7 +1392,7 @@ if (time.step == "Annual"| time.step == "Mono-mensual") { mk <- mannKen(z)
        dim.data <- as.vector(z)
        dim.block <- as.vector(round(((as.numeric(time(z)) - as.numeric(trunc(time(z))))+1)*100))
        p.value <- rkt(date = dim.temps, y = dim.data, block = dim.block, correct = F, rep="e") } #si le time.step est choisi manuellement cette fonction ne fonctionne qu'avec l'argument correct = F, il donne quand meme la P.value corrige...
-      
+
       tkinsert(Envir$txt2,"end", paste("Trend (sen.slope): ", round(mk$sen.slope, 4), "  original units per year"
                                         , "\n", "Relative Trend (sen.slope.pct): ", round(mk$sen.slope.rel, 4), "  percent of mean", "\n"
                                         , "p.value: ", round(mk$p.value, 4), "\n"
@@ -1398,7 +1436,10 @@ if (time.step == "Annual"| time.step == "Mono-mensual") { mk <- mannKen(z)
                    Loess <- loess(param ~ time, Regularised.data, family="gaussian", span=0.25, control = loess.control(surface = "direct"), na.action=na.exclude)
                    tsLoess <- ts(predict(Loess), start=(min(Regularised.data$YEARS)), deltat=freq)
                    save.loessplot.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_LOESSplot_", strsplit(param,"/")[[1]][1],".png", sep = "")
-                 if (nchar(save.loessplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
+                   save.loessdata.path <- paste(Envir$save.WD,"/",Envir$File.Name,"/", liste.stations, "/", start,"-", end, "/", strsplit(param,"/")[[1]][1], "/", "na.", na.replace, "-", "out.", outliers.re, "/", time.step, "-", aggreg, "/", Envir$File.Name, "_LOESSdata_", strsplit(param,"/")[[1]][1],".txt", sep = "")
+				   TSLOESS <- cbind(Regularised.Data,tsLoess)				   
+				   write.table(TSLOESS, sep="\t", row.names=FALSE, file=save.loessdata.path) 
+				 if (nchar(save.loessplot.path)>259) { return(tkmessageBox(message= paste("The save path is too long (NTFS system limit)", "\n", "Your results cannot be saved properly", "\n", "Please consider shorter parameter and/or station name", sep=""), icon = "warning", type = "ok", title="!Warning!")) } else { }
                   png(save.loessplot.path)
                    plot(z, xlab="Years", ylab=paste(param, "concentration"), main=paste("Trend of", param, "based on LOESS", "\n"))
                    title(main=paste("\n\n", "Categorical factor(s): ", liste.stations, "\n", "Time step: ", time.step, "   Method of aggregation: ", aggreg), cex.main=0.8)

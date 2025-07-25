@@ -514,6 +514,17 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
             if (is.numeric(Envir$Data$Dates) ==TRUE) { } else {
             months <- as.numeric(unlist(strsplit((tclvalue(mois)),"\\ "))) }  }
            else { tkmessageBox(message="no date selected", icon = "warning", type = "ok", title="!Warning!")}
+		   
+		   cb7Value <- as.character(tclvalue(cb7Value))                           # valeur de l'argument log transform
+          if (cb7Value=="1"){ log.trans <- "YES" }
+           else { log.trans <- "NO" }
+          cb2Value <- as.character(tclvalue(cb2Value))                           # valeur de l'argument na.replace
+          if (cb2Value=="1"){ na.replace <- "YES" }
+           else { na.replace <- "NO" }
+          cb3Value <- as.character(tclvalue(cb3Value))                           # valeur de l'argument outliers.re
+          if (cb3Value=="1"){ outliers.re <- "YES" }
+           else { outliers.re <- "NO" }
+		   
            rb20Value <- as.character(tclvalue(rb20Value))
            if (rb20Value=="ByYears"){ selectBox <- "ByYears" }
            if (rb20Value=="ByMonths"){ selectBox <- "ByMonths" }
@@ -525,15 +536,15 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
            OnOK4 <- "NO"
 
            if (Envir$batch=="YES") { for (site in Site) {FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
-                     plotB="YES", selectBox, log.trans="NO", plotZ="NO", datashow="NO",
+                     plotB="YES", selectBox, log.trans, plotZ="NO", datashow="NO",
                      help.timestep="NO", auto.timestep="NO", time.step="NULL", help.aggreg="NO", auto.aggreg="NO", aggreg="NULL",
-                     mix, outliers.re="NO", na.replace="NO", start, end, months, OnOK4)}}
+                     mix, outliers.re, na.replace, start, end, months, OnOK4)}}
 
            else{ site <- Site
            FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
-                     plotB="YES", selectBox, log.trans="NO", plotZ="NO", datashow="NO",
+                     plotB="YES", selectBox, log.trans, plotZ="NO", datashow="NO",
                      help.timestep="NO", auto.timestep="NO", time.step="NULL", help.aggreg="NO", auto.aggreg="NO", aggreg="NULL",
-                     mix, outliers.re="NO", na.replace="NO", start, end, months,OnOK4)}  }
+                     mix, outliers.re, na.replace, start, end, months, OnOK4)}  }
 
      BoxPlot.but <- tk2button(LabeledFrame1, text=" Show boxplot ",command=BoxPlot)
      tkgrid(BoxPlot.but, column=0, row=3, sticky="w")
@@ -688,14 +699,14 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
                  plotB="NO", selectBox, log.trans, plotZ="YES", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }}
+                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", test.pettitt="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }}
 
           else{ site <- Site
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="YES", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) } }
+                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", test.pettitt="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) } }
      OK.but <- tk2button(LabeledFrame7, text="  Plot  ",command=OnOK, width=9)
      tkgrid(OK.but, column=0, row=1, sticky="w")
 #______________________________________________________________________________________________bouton d'appel du tableau des donnees regularisees
@@ -773,14 +784,14 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="YES",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO" , OnOK4) }}
+                 autocorr = "NO", spectrum="NO", anomaly="NO", test.pettitt="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO" , OnOK4) }}
 
           else{ site <- Site
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="YES",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO" , OnOK4) } }
+                 autocorr = "NO", spectrum="NO", anomaly="NO", test.pettitt="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO" , OnOK4) } }
      OK1.but <- tk2button(LabeledFrame7, text=" Table ",command=OnOK1, width=9)
      tkgrid(OK1.but, column=1, row=1, sticky="w")
 
@@ -859,14 +870,14 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }}
+                 autocorr = "NO", spectrum="NO", test.pettitt="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }}
 
           else{ site <- Site
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="YES", test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu,
-                 autocorr = "NO", spectrum="NO", anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }  }
+                 autocorr = "NO", spectrum="NO", anomaly="NO", test.pettitt="NO", a.barplot="NO", zsmooth="NO", local.trend="NO", test="NO", OnOK4) }  }
      OK2.but <- tk2button(LabeledFrame7, text=" Summary ",command=OnOK2, width=9)
      tkgrid(OK2.but, column=2, row=1, sticky="w")
 #_____________________________________________________________________________________fin du bouton des stats descriptives
@@ -896,6 +907,7 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
      rb20 <- tk2radiobutton(diagFrame)
      rb21 <- tk2radiobutton(diagFrame)
      rb22 <- tk2radiobutton(diagFrame)
+	 rb30 <- tk2radiobutton(diagFrame)
      rb5Value <- tclVar("2")
      tkconfigure(rb17,variable=rb5Value,value="1")                                                    # valeur donnee a chaque bouton
      tkconfigure(rb18,variable=rb5Value,value="2")
@@ -903,12 +915,14 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
      tkconfigure(rb20,variable=rb5Value,value="4")
      tkconfigure(rb22,variable=rb5Value,value="6")
      tkconfigure(rb21,variable=rb5Value,value="5")
+	 tkconfigure(rb30,variable=rb5Value,value="7")                                                #pettitt test 
      tkgrid(tklabel(diagFrame,text="Spectrum analysis*    "),rb17, sticky="w")                    # texte afficher avec chaque bouton
      tkgrid(tklabel(diagFrame,text="Autocorrelation    "),rb18, sticky="w")
      tkgrid(tklabel(diagFrame,text="Shapiro normality test    "),rb19, sticky="w")
      tkgrid(tklabel(diagFrame,text="Anomaly (color.plot)    "),rb20, sticky="w")
      tkgrid(tklabel(diagFrame,text="Anomaly (barplot)    "),rb22, sticky="w")
      tkgrid(tklabel(diagFrame,text="Seasonal decomposition*  "),rb21, sticky="w")
+	 tkgrid(tklabel(diagFrame,text="Pettitt test (rupture)  "),rb30, sticky="w")
 
      imgProcess <- tclVar()
      tcl("image","create","photo",imgProcess,file=file.path(path.package("TTAinterfaceTrendAnalysis"),"aide","imgProcess.gif",fsep=.Platform$file.sep))
@@ -996,6 +1010,8 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
           else { a.barplot <- "NO" }
           if (rb5Val=="5"){ zsmooth <- "YES" }
           else { zsmooth <- "NO" }
+		  if (rb5Val=="7"){ test.pettitt <- "YES" }
+          else { test.pettitt <- "NO" }
 
           cbBatchValue <- as.character(tclvalue(cbBatchValue))
            if (cbBatchValue=="1"){ Envir$batch <- "YES" }
@@ -1007,14 +1023,14 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu, test.on.remaider,
-                 autocorr, spectrum, anomaly, a.barplot, zsmooth, local.trend="NO", test="NO", OnOK4) }}
+                 autocorr, spectrum, anomaly, a.barplot, zsmooth, test.pettitt, local.trend="NO", test="NO", OnOK4) }}
 
           else{ site <- Site
           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality,
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm="NO", npsu, test.on.remaider,
-                 autocorr, spectrum, anomaly, a.barplot, zsmooth, local.trend="NO", test="NO", OnOK4)  } }
+                 autocorr, spectrum, anomaly, a.barplot, zsmooth, test.pettitt, local.trend="NO", test="NO", OnOK4)  } }
      OK3.but <- tk2button(LabeledFrame4, image=imgProcess, text="Run ", compound="right", command=OnOK3, width=6)
      tkpack(OK3.but, side="right")
 #_______________________________________________________________________________fin du bouton de diagnostic
@@ -1150,13 +1166,13 @@ cbBatch <- tk2checkbutton(Envir$Select)                                         
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm, npsu, test.on.remaider,
-                 autocorr = "NO", spectrum="NO",anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend, test, OnOK4) } }
+                 autocorr = "NO", spectrum="NO",anomaly="NO", test.pettitt="NO", a.barplot="NO", zsmooth="NO", local.trend, test, OnOK4) } }
                     else{ site <- Site
                           FULLoption(param, depth, sal, site, rawdata="NO", select="NO", resume.reg="NO",test.normality="NO",
                  plotB="NO", selectBox, log.trans, plotZ="NO", datashow="NO",
                  help.timestep, auto.timestep, time.step, help.aggreg, auto.aggreg, aggreg,
                  mix, outliers.re, na.replace, start, end, months, norm, npsu, test.on.remaider,
-                 autocorr = "NO", spectrum="NO",anomaly="NO", a.barplot="NO", zsmooth="NO", local.trend, test)}  }
+                 autocorr = "NO", spectrum="NO",anomaly="NO", test.pettitt="NO", a.barplot="NO", zsmooth="NO", local.trend, test)}  }
 
      OK4.but <- tk2button(LabeledFrame5, image=imgProcess, text="Run ", compound="right", command=OnOK4, width=6)
      tkpack(OK4.but, side="right")

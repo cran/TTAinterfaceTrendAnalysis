@@ -20,7 +20,7 @@ tkinsert(AIDE3, "end", paste("This is the third panel of the interface." ,"\n\n"
 "     missing values can create aberrant values and modify to much the original data series." ,"\n\n",
 
 "     You can also remove the outliers present in you data, the 'Show boxplot' button display"   ,"\n",
-"     box and whiskers by years with outliers as open circle. Outliers are calculated as"         ,"\n",
+"     box and whiskers by years with outliers as open circle or by month. Outliers are calculated as"   ,"\n",
 "     [quantile 0.75 + 1.5(quantile 0.75 - quantile 0.25)] and" ,"\n",
 "     [quantile 0.25 - 1.5(quantile 0.75 - quantile 0.25)]"    ,"\n",
 "     Be careful, if years are missed in your database, they will not appear in the boxplot." ,"\n\n",
